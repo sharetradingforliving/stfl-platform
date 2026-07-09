@@ -2,7 +2,7 @@ import Image from "next/image";
 import { marketTickerData } from "../data/marketTicker";
 export default function Home() {
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main id="top" className="min-h-screen bg-slate-950 text-white">
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-950/95">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
@@ -20,16 +20,16 @@ export default function Home() {
 
           {/* Navigation */}
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-300 lg:flex">
-            <a href="#" className="text-emerald-400">
+            <a href="#top" className="text-emerald-400">
               Home
             </a>
-            <a href="#" className="transition hover:text-emerald-400">
+            <a href="#markets" className="transition hover:text-emerald-400">
               Markets
             </a>
-            <a href="#" className="transition hover:text-emerald-400">
+            <a href="#stock-research" className="transition hover:text-emerald-400">
               Stock Research
             </a>
-            <a href="#" className="transition hover:text-emerald-400">
+            <a href="#technical-analysis" className="transition hover:text-emerald-400">
               Technical Analysis
             </a>
             <a href="#" className="transition hover:text-emerald-400">
@@ -38,12 +38,12 @@ export default function Home() {
             <a href="#" className="transition hover:text-emerald-400">
               Mutual Funds
             </a>
-            <a href="#" className="transition hover:text-emerald-400">
+            <a href="#acadmeys" className="transition hover:text-emerald-400">
               Academy
             </a>
             <a href="#" className="transition hover:text-emerald-400">
-              Blog
-            </a>
+  Blog
+</a>
           </nav>
 
           {/* Login and Premium */}
@@ -52,9 +52,12 @@ export default function Home() {
               Login
             </button>
 
-            <button className="rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-emerald-400">
-              Premium
-            </button>
+            <a
+  href="#premium"
+  className="rounded-lg bg-emerald-500 px-5 py-2.5 font-semibold text-slate-950 transition hover:bg-emerald-400"
+>
+  Premium
+</a>
           </div>
         </div>
       </header>
@@ -131,7 +134,7 @@ export default function Home() {
       </section>
      {/* Dashboard Preview */}
 {/* Market Overview Dashboard */}
-<section className="bg-slate-950 px-6 py-20">
+<section id="markets" className="scroll-mt-28 bg-slate-950 px-6 py-20">
   <div className="mx-auto max-w-7xl">
     <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
@@ -255,9 +258,7 @@ export default function Home() {
     </div>
   </div>
 </section>  
-
-<section className="border-t border-slate-800 bg-slate-900/50 px-6 py-20">
-  <div className="mx-auto max-w-7xl">
+<section id="technical-analysis" className="scroll-mt-28 border-t border-slate-800 bg-slate-900/50 px-6 py-20">  <div className="mx-auto max-w-7xl">
     <div className="mb-12 text-center">
       <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
         STFL Market Intelligence
@@ -328,7 +329,10 @@ export default function Home() {
   </div>
 </section>
 {/* Featured Research */}
-<section className="border-t border-slate-800 bg-slate-950 px-6 py-20">
+<section
+  id="stock-research"
+  className="scroll-mt-28 border-t border-slate-800 bg-slate-950 px-6 py-20"
+>
   <div className="mx-auto max-w-7xl">
     <div className="mb-12">
       <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
@@ -518,7 +522,10 @@ export default function Home() {
   </div>
 </section>
 {/* STFL Academy */}
-<section className="border-t border-slate-800 bg-slate-950 px-6 py-20">
+<section
+  id="academy"
+  className="scroll-mt-28 border-t border-slate-800 ..."
+>
   <div className="mx-auto max-w-7xl">
     <div className="mb-12 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
       <div>
@@ -633,7 +640,10 @@ export default function Home() {
   </div>
 </section>
 {/* Premium Membership CTA */}
-<section className="border-t border-slate-800 bg-slate-900 px-6 py-20">
+<section
+  id="premium"
+  className="scroll-mt-28 border-t border-slate-800 ..."
+>
   <div className="mx-auto max-w-7xl">
     <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-slate-950 px-8 py-14 md:px-14 lg:py-16">
       
