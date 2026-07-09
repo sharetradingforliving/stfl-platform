@@ -341,6 +341,107 @@ export default function Home() {
     </div>
   </div>
 </section>
+{/* Featured Research */}
+<section className="border-t border-slate-800 bg-slate-950 px-6 py-20">
+  <div className="mx-auto max-w-7xl">
+    <div className="mb-12">
+      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+        Featured Research
+      </p>
+
+      <h2 className="mt-4 text-3xl font-bold md:text-5xl">
+        Research Ideas for Smarter Investing
+      </h2>
+
+      <p className="mt-5 max-w-2xl text-slate-400">
+        Explore investment opportunities, market-moving stocks, mutual fund
+        ideas and upcoming IPO research in one place.
+      </p>
+    </div>
+
+    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      {/* Long-Term Picks */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:-translate-y-1 hover:border-emerald-500">
+        <div className="text-3xl">🎯</div>
+
+        <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+          Investment Ideas
+        </p>
+
+        <h3 className="mt-3 text-xl font-bold">Long-Term Picks</h3>
+
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Discover fundamentally strong companies selected for long-term
+          wealth creation.
+        </p>
+
+        <button className="mt-6 font-semibold text-emerald-400">
+          View Long-Term Picks →
+        </button>
+      </div>
+
+      {/* Stocks on the Move */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:-translate-y-1 hover:border-emerald-500">
+        <div className="text-3xl">🚀</div>
+
+        <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+          Market Momentum
+        </p>
+
+        <h3 className="mt-3 text-xl font-bold">Stocks on the Move</h3>
+
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Track stocks showing strong price action, volume activity and
+          emerging momentum.
+        </p>
+
+        <button className="mt-6 font-semibold text-emerald-400">
+          Discover Opportunities →
+        </button>
+      </div>
+
+      {/* Mutual Fund Ideas */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:-translate-y-1 hover:border-emerald-500">
+        <div className="text-3xl">📊</div>
+
+        <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+          Portfolio Building
+        </p>
+
+        <h3 className="mt-3 text-xl font-bold">Mutual Fund Ideas</h3>
+
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Explore mutual fund categories and portfolio ideas aligned with
+          different investment goals.
+        </p>
+
+        <button className="mt-6 font-semibold text-emerald-400">
+          Explore Mutual Funds →
+        </button>
+      </div>
+
+      {/* IPO Research */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:-translate-y-1 hover:border-emerald-500">
+        <div className="text-3xl">🔔</div>
+
+        <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+          New Listings
+        </p>
+
+        <h3 className="mt-3 text-xl font-bold">IPO Research</h3>
+
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Study upcoming IPOs, company fundamentals, issue details and key
+          investment considerations.
+        </p>
+
+        <button className="mt-6 font-semibold text-emerald-400">
+          View IPO Research →
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
 
          </main>
   );
