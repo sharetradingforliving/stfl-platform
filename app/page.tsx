@@ -646,7 +646,76 @@ export default function Home() {
     </div>
   </div>
 </section>
+{/* Premium Membership CTA */}
+<section className="border-t border-slate-800 bg-slate-900 px-6 py-20">
+  <div className="mx-auto max-w-7xl">
+    <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-slate-950 px-8 py-14 md:px-14 lg:py-16">
+      
+      {/* Decorative Glow */}
+      <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl"></div>
 
+      <div className="relative grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+        
+        {/* Left Content */}
+        <div>
+          <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-emerald-400">
+            STFL Premium
+          </span>
+
+          <h2 className="mt-6 max-w-3xl text-3xl font-bold leading-tight md:text-5xl">
+            Go Beyond Market Noise.
+            <span className="text-emerald-400">
+              {" "}Research with Greater Clarity.
+            </span>
+          </h2>
+
+          <p className="mt-6 max-w-2xl leading-7 text-slate-400">
+            Unlock premium research, curated investment ideas, advanced
+            market insights and powerful tools designed to support more
+            informed investment decisions.
+          </p>
+        </div>
+
+        {/* Right Content */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-7">
+          <h3 className="text-xl font-bold">
+            Premium Access Includes
+          </h3>
+
+          <div className="mt-6 space-y-4 text-sm text-slate-300">
+            <div className="flex gap-3">
+              <span className="font-bold text-emerald-400">✓</span>
+              <span>Curated long-term investment research</span>
+            </div>
+
+            <div className="flex gap-3">
+              <span className="font-bold text-emerald-400">✓</span>
+              <span>Stocks on the Move insights</span>
+            </div>
+
+            <div className="flex gap-3">
+              <span className="font-bold text-emerald-400">✓</span>
+              <span>Advanced fundamental and technical tools</span>
+            </div>
+
+            <div className="flex gap-3">
+              <span className="font-bold text-emerald-400">✓</span>
+              <span>Premium research reports and market commentary</span>
+            </div>
+          </div>
+
+          <button className="mt-8 w-full rounded-xl bg-emerald-500 px-6 py-4 font-bold text-slate-950 transition hover:bg-emerald-400">
+            Explore Premium Membership →
+          </button>
+
+          <p className="mt-4 text-center text-xs text-slate-500">
+            Educational and research content. Market risks apply.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
          </main>
   );
