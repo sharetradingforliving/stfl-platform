@@ -156,7 +156,7 @@ export default function Home() {
 
     <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
       {/* Market Breadth */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10">
         <h3 className="text-lg font-bold">Market Breadth</h3>
 
         <div className="mt-6 space-y-4">
@@ -183,7 +183,7 @@ export default function Home() {
       </div>
 
       {/* Top Gainers */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10">
         <h3 className="text-lg font-bold">Top Gainers</h3>
 
         <div className="mt-6 space-y-5">
@@ -205,7 +205,7 @@ export default function Home() {
       </div>
 
       {/* Top Losers */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10">
         <h3 className="text-lg font-bold">Top Losers</h3>
 
         <div className="mt-6 space-y-5">
@@ -227,7 +227,7 @@ export default function Home() {
       </div>
 
       {/* FII DII Activity */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10">
         <h3 className="text-lg font-bold">FII / DII Activity</h3>
 
         <div className="mt-6 space-y-6">
@@ -347,7 +347,7 @@ export default function Home() {
 
     <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
       {/* Long-Term Picks */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:-translate-y-1 hover:border-emerald-500">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 transition hover:-translate-y-1 hover:border-emerald-500">
         <div className="text-3xl">🎯</div>
 
         <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-emerald-400">
@@ -367,7 +367,7 @@ export default function Home() {
       </div>
 
       {/* Stocks on the Move */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:-translate-y-1 hover:border-emerald-500">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 transition hover:-translate-y-1 hover:border-emerald-500">
         <div className="text-3xl">🚀</div>
 
         <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-emerald-400">
@@ -387,7 +387,7 @@ export default function Home() {
       </div>
 
       {/* Mutual Fund Ideas */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:-translate-y-1 hover:border-emerald-500">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 transition hover:-translate-y-1 hover:border-emerald-500">
         <div className="text-3xl">📊</div>
 
         <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-emerald-400">
@@ -407,7 +407,7 @@ export default function Home() {
       </div>
 
       {/* IPO Research */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:-translate-y-1 hover:border-emerald-500">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 transition hover:-translate-y-1 hover:border-emerald-500">
         <div className="text-3xl">🔔</div>
 
         <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-emerald-400">
