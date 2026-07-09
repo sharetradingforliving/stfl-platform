@@ -1,6 +1,20 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { marketTickerData } from "../data/marketTicker";
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+  const handleSearch = () => {
+  if (!searchQuery.trim()) {
+    alert("Please enter a stock name or symbol.");
+    return;
+  }
+
+  router.push(`/company/${searchQuery.trim().toLowerCase()}`);
+};
   return (
     <main id="top" className="min-h-screen bg-slate-950 text-white">
       {/* Header */}
@@ -114,10 +128,15 @@ export default function Home() {
   <input
     type="text"
     placeholder="Search stocks, indices, IPOs or mutual funds..."
+    value={searchQuery}
+onChange={(e) => setSearchQuery(e.target.value)}
     className="w-full bg-transparent px-4 py-3 text-white outline-none placeholder:text-slate-500"
   />
 
-  <button className="rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-slate-950 transition hover:bg-emerald-400">
+  <button
+  onClick={handleSearch}
+  className="rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-slate-950 transition hover:bg-emerald-400"
+>
     Search
   </button>
 </div>
