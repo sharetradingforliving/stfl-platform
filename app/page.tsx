@@ -290,13 +290,12 @@ export default function Home() {
       {/* Card 2 */}
       <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 transition hover:-translate-y-1 hover:border-emerald-500">
         <div className="text-3xl">🚀</div>
-        <h3 className="mt-5 text-xl font-bold">Stocks on the Move</h3>
+        <h3 className="mt-5 text-xl font-bold">Market Screener</h3>
         <p className="mt-3 text-sm leading-6 text-slate-400">
-          Discover stocks showing strong price action, volume activity and
-          market momentum.
-        </p>
+  Filter stocks using price, volume, valuation, momentum and technical indicators.
+</p>
         <button className="mt-6 font-semibold text-emerald-400">
-          Explore Stocks →
+          Open Screener →
         </button>
       </div>
 
