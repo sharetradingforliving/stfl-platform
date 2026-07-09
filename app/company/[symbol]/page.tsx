@@ -564,6 +564,175 @@ export default async function CompanyPage({
     </p>
   </div>
 </section>
+{/* News & Corporate Announcements */}
+<section className="border-b border-slate-800 bg-slate-900/40">
+  <div className="mx-auto max-w-7xl px-6 py-16">
+    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+          News & Announcements
+        </p>
+
+        <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+          Latest Company Developments
+        </h2>
+
+        <p className="mt-3 text-slate-400">
+          Track important company news, exchange filings, results and
+          corporate actions in one place.
+        </p>
+      </div>
+
+      <span className="w-fit rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-400">
+        DEMO CONTENT
+      </span>
+    </div>
+
+    <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      {/* Latest News */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-950 p-7">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-bold">Recent Company News</h3>
+
+          <button className="text-sm font-semibold text-emerald-400">
+            View All →
+          </button>
+        </div>
+
+        <div className="mt-6 divide-y divide-slate-800">
+          <article className="py-5 first:pt-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+                BUSINESS UPDATE
+              </span>
+
+              <span className="text-xs text-slate-500">
+                Demo date
+              </span>
+            </div>
+
+            <h4 className="mt-3 text-lg font-semibold">
+              Company reports progress across key business segments
+            </h4>
+
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              A concise summary of the latest business development will
+              appear here after live news integration.
+            </p>
+          </article>
+
+          <article className="py-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-400">
+                RESULTS
+              </span>
+
+              <span className="text-xs text-slate-500">
+                Demo date
+              </span>
+            </div>
+
+            <h4 className="mt-3 text-lg font-semibold">
+              Quarterly financial performance and management commentary
+            </h4>
+
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Revenue, profitability, segment performance and management
+              guidance will be summarized here.
+            </p>
+          </article>
+
+          <article className="py-5 pb-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-400">
+                CORPORATE ACTION
+              </span>
+
+              <span className="text-xs text-slate-500">
+                Demo date
+              </span>
+            </div>
+
+            <h4 className="mt-3 text-lg font-semibold">
+              Dividend, bonus, split and other corporate-action updates
+            </h4>
+
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Important record dates, ex-dates and shareholder updates
+              will be displayed here.
+            </p>
+          </article>
+        </div>
+      </div>
+
+      {/* Exchange Announcements */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-950 p-7">
+        <h3 className="text-xl font-bold">
+          Exchange Announcements
+        </h3>
+
+        <p className="mt-2 text-sm leading-6 text-slate-400">
+          Latest regulatory filings and disclosures submitted to the stock
+          exchanges.
+        </p>
+
+        <div className="mt-7 space-y-4">
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+              Financial Results
+            </p>
+
+            <p className="mt-2 font-semibold">
+              Quarterly results and investor presentation
+            </p>
+
+            <p className="mt-2 text-xs text-slate-500">
+              Demo filing
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+              Board Meeting
+            </p>
+
+            <p className="mt-2 font-semibold">
+              Board-meeting outcome and key decisions
+            </p>
+
+            <p className="mt-2 text-xs text-slate-500">
+              Demo filing
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+              Corporate Disclosure
+            </p>
+
+            <p className="mt-2 font-semibold">
+              Material event and regulatory disclosure
+            </p>
+
+            <p className="mt-2 text-xs text-slate-500">
+              Demo filing
+            </p>
+          </div>
+        </div>
+
+        <button className="mt-6 w-full rounded-xl border border-emerald-500 px-5 py-3 font-semibold text-emerald-400 transition hover:bg-emerald-500 hover:text-slate-950">
+          View All Exchange Filings →
+        </button>
+      </div>
+    </div>
+
+    <p className="mt-6 text-xs leading-5 text-slate-500">
+      News and announcements shown above are placeholders. Live company news,
+      exchange filings and corporate-action data will be connected during the
+      data-integration phase.
+    </p>
+  </div>
+</section>
   </main>
 );
 }
