@@ -716,6 +716,129 @@ export default function Home() {
     </div>
   </div>
 </section>
+{/* Footer */}
+<footer className="border-t border-slate-800 bg-slate-950 px-6 pt-16">
+  <div className="mx-auto max-w-7xl">
+    <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
+
+      {/* Brand */}
+      <div className="lg:col-span-2">
+        <Image
+          src="/sharetradingforlivingwithoutbg.png"
+          alt="Share Trading For Living"
+          width={170}
+          height={100}
+          className="h-20 w-auto"
+        />
+
+        <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
+          STFL brings stock research, market intelligence, investment
+          education and analytical tools together to help investors make
+          more informed decisions.
+        </p>
+
+        <p className="mt-5 text-sm font-semibold text-emerald-400">
+          Research Smarter. Trade Smarter. Invest Better.
+        </p>
+      </div>
+
+      {/* Research */}
+      <div>
+        <h3 className="font-bold text-white">Research</h3>
+
+        <div className="mt-5 space-y-3 text-sm text-slate-400">
+          <a href="#" className="block transition hover:text-emerald-400">
+            Stock Research
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            Long-Term Picks
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            Stocks on the Move
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            IPO Research
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            Mutual Funds
+          </a>
+        </div>
+      </div>
+
+      {/* Learn */}
+      <div>
+        <h3 className="font-bold text-white">Learn</h3>
+
+        <div className="mt-5 space-y-3 text-sm text-slate-400">
+          <a href="#" className="block transition hover:text-emerald-400">
+            Trading Basics
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            Technical Analysis
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            Fundamental Analysis
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            Options Trading
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            STFL Academy
+          </a>
+        </div>
+      </div>
+
+      {/* Company */}
+      <div>
+        <h3 className="font-bold text-white">Company</h3>
+
+        <div className="mt-5 space-y-3 text-sm text-slate-400">
+          <a href="#" className="block transition hover:text-emerald-400">
+            About STFL
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            Blog
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            Contact
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            Privacy Policy
+          </a>
+          <a href="#" className="block transition hover:text-emerald-400">
+            Terms & Conditions
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {/* Disclaimer */}
+    <div className="mt-14 border-t border-slate-800 py-8">
+      <p className="text-xs leading-6 text-slate-500">
+        <span className="font-semibold text-slate-400">
+          Market Risk Disclaimer:
+        </span>{" "}
+        Investments in securities markets are subject to market risks.
+        Please read all related documents carefully before investing.
+        Information provided on STFL is intended for educational and
+        research purposes and should not be considered a guarantee of
+        returns. Investors should conduct their own research and consult a
+        qualified financial adviser where appropriate.
+      </p>
+    </div>
+
+    {/* Copyright */}
+    <div className="flex flex-col gap-3 border-t border-slate-800 py-6 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
+      <p>
+        © 2026 Share Trading For Living. All rights reserved.
+      </p>
+
+      <p>
+        Built for smarter market research.
+      </p>
+    </div>
+  </div>
+</footer>
 
          </main>
   );
