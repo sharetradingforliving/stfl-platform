@@ -72,8 +72,64 @@ export default async function CompanyPage({
         </div>
       </div>
     </section>
+    {/* Sticky Dashboard Navigation */}
+<nav className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur">
+  <div className="mx-auto flex max-w-7xl gap-7 overflow-x-auto px-6 py-4 text-sm font-semibold text-slate-400">
+    <a
+      href="#overview"
+      className="whitespace-nowrap transition hover:text-emerald-400"
+    >
+      Overview
+    </a>
+
+    <a
+      href="#financials"
+      className="whitespace-nowrap transition hover:text-emerald-400"
+    >
+      Financials
+    </a>
+
+    <a
+      href="#valuation"
+      className="whitespace-nowrap transition hover:text-emerald-400"
+    >
+      Valuation
+    </a>
+
+    <a
+      href="#technical"
+      className="whitespace-nowrap transition hover:text-emerald-400"
+    >
+      Technical
+    </a>
+
+    <a
+      href="#shareholding"
+      className="whitespace-nowrap transition hover:text-emerald-400"
+    >
+      Shareholding
+    </a>
+
+    <a
+      href="#news"
+      className="whitespace-nowrap transition hover:text-emerald-400"
+    >
+      News
+    </a>
+
+    <a
+      href="#ai-research"
+      className="whitespace-nowrap transition hover:text-emerald-400"
+    >
+      AI Research
+    </a>
+  </div>
+</nav>
     {/* Company Snapshot */}
-<section className="border-b border-slate-800 bg-slate-950">
+<section
+  id="overview"
+  className="scroll-mt-32 border-b border-slate-800 bg-slate-950"
+>
   <div className="mx-auto max-w-7xl px-6 py-16">
     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
@@ -129,7 +185,10 @@ export default async function CompanyPage({
   </div>
 </section>
 {/* Financial Performance */}
-<section className="border-b border-slate-800 bg-slate-900/40">
+<section
+  id="financials"
+  className="scroll-mt-32 border-b border-slate-800 bg-slate-900/40"
+>
   <div className="mx-auto max-w-7xl px-6 py-16">
     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
@@ -209,7 +268,10 @@ export default async function CompanyPage({
   </div>
 </section>
 {/* Valuation Analysis */}
-<section className="border-b border-slate-800 bg-slate-950">
+<section
+  id="valuation"
+  className="scroll-mt-32 border-b border-slate-800 bg-slate-950"
+>
   <div className="mx-auto max-w-7xl px-6 py-16">
     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
@@ -295,7 +357,11 @@ export default async function CompanyPage({
   </div>
 </section>
 {/* Technical Analysis */}
-<section className="border-b border-slate-800 bg-slate-900/40">
+{/* Technical Analysis */}
+<section
+  id="technical"
+  className="scroll-mt-32 border-b border-slate-800 bg-slate-900/40"
+>
   <div className="mx-auto max-w-7xl px-6 py-16">
     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
@@ -443,7 +509,11 @@ export default async function CompanyPage({
   </div>
 </section>
 {/* Shareholding Pattern */}
-<section className="border-b border-slate-800 bg-slate-950">
+{/* Shareholding Pattern */}
+<section
+  id="shareholding"
+  className="scroll-mt-32 border-b border-slate-800 bg-slate-950"
+>
   <div className="mx-auto max-w-7xl px-6 py-16">
     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
@@ -565,7 +635,11 @@ export default async function CompanyPage({
   </div>
 </section>
 {/* News & Corporate Announcements */}
-<section className="border-b border-slate-800 bg-slate-900/40">
+{/* News & Corporate Announcements */}
+<section
+  id="news"
+  className="scroll-mt-32 border-b border-slate-800 bg-slate-900/40"
+>
   <div className="mx-auto max-w-7xl px-6 py-16">
     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
@@ -734,7 +808,11 @@ export default async function CompanyPage({
   </div>
 </section>
 {/* STFL AI Research Summary */}
-<section className="border-b border-slate-800 bg-slate-950">
+{/* STFL AI Research Summary */}
+<section
+  id="ai-research"
+  className="scroll-mt-32 border-b border-slate-800 bg-slate-950"
+>
   <div className="mx-auto max-w-7xl px-6 py-16">
     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
