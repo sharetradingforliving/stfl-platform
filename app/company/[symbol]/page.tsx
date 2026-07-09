@@ -294,6 +294,154 @@ export default async function CompanyPage({
     </p>
   </div>
 </section>
+{/* Technical Analysis */}
+<section className="border-b border-slate-800 bg-slate-900/40">
+  <div className="mx-auto max-w-7xl px-6 py-16">
+    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+          Technical Analysis
+        </p>
+
+        <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+          Trend, Momentum & Key Price Levels
+        </h2>
+
+        <p className="mt-3 text-slate-400">
+          Review technical indicators, moving averages and important support
+          and resistance levels.
+        </p>
+      </div>
+
+      <span className="w-fit rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-400">
+        DEMO DATA
+      </span>
+    </div>
+
+    <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Trend */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+        <p className="text-sm text-slate-400">Overall Trend</p>
+
+        <p className="mt-3 text-2xl font-bold text-emerald-400">
+          Bullish
+        </p>
+
+        <p className="mt-2 text-sm text-slate-500">
+          Price is trading above major moving averages.
+        </p>
+      </div>
+
+      {/* RSI */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+        <p className="text-sm text-slate-400">RSI (14)</p>
+
+        <p className="mt-3 text-2xl font-bold">
+          61.40
+        </p>
+
+        <p className="mt-2 text-sm font-semibold text-emerald-400">
+          Positive Momentum
+        </p>
+      </div>
+
+      {/* MACD */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+        <p className="text-sm text-slate-400">MACD</p>
+
+        <p className="mt-3 text-2xl font-bold text-emerald-400">
+          Bullish Crossover
+        </p>
+
+        <p className="mt-2 text-sm text-slate-500">
+          MACD is trading above its signal line.
+        </p>
+      </div>
+
+      {/* Moving Averages */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+        <p className="text-sm text-slate-400">
+          Moving-Average Signal
+        </p>
+
+        <p className="mt-3 text-2xl font-bold text-emerald-400">
+          Buy
+        </p>
+
+        <p className="mt-2 text-sm text-slate-500">
+          Price is above the 20-day, 50-day and 200-day averages.
+        </p>
+      </div>
+
+      {/* Support */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+        <p className="text-sm text-slate-400">
+          Key Support
+        </p>
+
+        <p className="mt-3 text-2xl font-bold">
+          ₹1,485
+        </p>
+
+        <p className="mt-2 text-sm text-slate-500">
+          Important demand area based on recent price action.
+        </p>
+      </div>
+
+      {/* Resistance */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+        <p className="text-sm text-slate-400">
+          Key Resistance
+        </p>
+
+        <p className="mt-3 text-2xl font-bold">
+          ₹1,610
+        </p>
+
+        <p className="mt-2 text-sm text-slate-500">
+          Important supply zone and potential breakout level.
+        </p>
+      </div>
+    </div>
+
+    {/* Technical Signal Summary */}
+    <div className="mt-6 rounded-2xl border border-emerald-500/50 bg-emerald-500/10 p-7">
+      <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
+        <div>
+          <p className="text-sm font-semibold text-emerald-300">
+            STFL Technical Signal
+          </p>
+
+          <h3 className="mt-2 text-3xl font-bold text-emerald-400">
+            Moderately Bullish
+          </h3>
+
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
+            Momentum and moving-average indicators are positive. The stock
+            remains above key support, while a sustained move above resistance
+            may strengthen the bullish trend.
+          </p>
+        </div>
+
+        <div className="shrink-0 rounded-xl border border-emerald-500/30 bg-slate-950/60 px-6 py-4 text-center">
+          <p className="text-xs uppercase tracking-widest text-slate-500">
+            Signal Score
+          </p>
+
+          <p className="mt-2 text-3xl font-bold text-emerald-400">
+            7.5 / 10
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <p className="mt-6 text-xs leading-5 text-slate-500">
+      Technical indicators and price levels are illustrative placeholders,
+      not trading recommendations. Live historical prices and dynamically
+      calculated indicators will be connected during the market-data phase.
+    </p>
+  </div>
+</section>
   </main>
 );
 }
