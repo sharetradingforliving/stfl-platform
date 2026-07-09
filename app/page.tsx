@@ -442,6 +442,96 @@ export default function Home() {
     </div>
   </div>
 </section>
+{/* Why Choose STFL */}
+<section className="border-t border-slate-800 bg-slate-900/50 px-6 py-20">
+  <div className="mx-auto max-w-7xl">
+    <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+      
+      {/* Left Content */}
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+          Why Choose STFL
+        </p>
+
+        <h2 className="mt-4 text-3xl font-bold leading-tight md:text-5xl">
+          Research Built for
+          <span className="text-emerald-400"> Smarter Decisions</span>
+        </h2>
+
+        <p className="mt-6 max-w-xl leading-7 text-slate-400">
+          STFL brings market data, fundamental research and technical
+          insights together to help investors study opportunities with
+          greater clarity and confidence.
+        </p>
+
+        <button className="mt-8 rounded-xl bg-emerald-500 px-7 py-3.5 font-semibold text-slate-950 transition hover:bg-emerald-400">
+          Explore STFL Research →
+        </button>
+      </div>
+
+      {/* Right Features */}
+      <div className="grid gap-5 sm:grid-cols-2">
+        
+        {/* Feature 1 */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+          <div className="text-3xl">📊</div>
+
+          <h3 className="mt-5 text-lg font-bold">
+            Data-Driven Research
+          </h3>
+
+          <p className="mt-3 text-sm leading-6 text-slate-400">
+            Study market trends, company performance and investment
+            opportunities using structured data and meaningful insights.
+          </p>
+        </div>
+
+        {/* Feature 2 */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+          <div className="text-3xl">🔍</div>
+
+          <h3 className="mt-5 text-lg font-bold">
+            Fundamental + Technical
+          </h3>
+
+          <p className="mt-3 text-sm leading-6 text-slate-400">
+            Combine business fundamentals with technical indicators to
+            develop a more complete view of every stock.
+          </p>
+        </div>
+
+        {/* Feature 3 */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+          <div className="text-3xl">🇮🇳</div>
+
+          <h3 className="mt-5 text-lg font-bold">
+            Indian Market Focus
+          </h3>
+
+          <p className="mt-3 text-sm leading-6 text-slate-400">
+            Research designed around Indian stocks, indices, IPOs, mutual
+            funds and the needs of Indian market participants.
+          </p>
+        </div>
+
+        {/* Feature 4 */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+          <div className="text-3xl">💡</div>
+
+          <h3 className="mt-5 text-lg font-bold">
+            Clear & Transparent Insights
+          </h3>
+
+          <p className="mt-3 text-sm leading-6 text-slate-400">
+            Understand the reasoning, opportunities and risks behind each
+            research idea instead of relying only on market noise.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 
          </main>
   );
