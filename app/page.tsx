@@ -122,7 +122,12 @@ export default function Home() {
             investment decisions with STFL.
           </p>
 {/* Universal Search */}
-<div className="mx-auto mt-10 flex max-w-2xl items-center rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-lg">
+<form
+onSubmit={(e) => {
+  e.preventDefault();
+  handleSearch();
+}}
+ className="mx-auto mt-10 flex max-w-2xl items-center rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-lg">
   <span className="pl-4 text-xl">⌕</span>
 
   <input
@@ -134,12 +139,13 @@ onChange={(e) => setSearchQuery(e.target.value)}
   />
 
   <button
+  type="submit"
   onClick={handleSearch}
   className="rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-slate-950 transition hover:bg-emerald-400"
 >
     Search
   </button>
-</div>
+</form>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <button className="rounded-xl bg-emerald-500 px-8 py-4 font-semibold text-slate-950 transition hover:bg-emerald-400">
               Start Research
