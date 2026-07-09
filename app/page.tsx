@@ -142,7 +142,133 @@ export default function Home() {
           </div>
         </div>
       </section>
-      {/* Dashboard Preview */}
+     {/* Dashboard Preview */}
+{/* Market Overview Dashboard */}
+<section className="bg-slate-950 px-6 py-20">
+  <div className="mx-auto max-w-7xl">
+    <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+          Market Overview
+        </p>
+
+        <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+          Today&apos;s Market Snapshot
+        </h2>
+
+        <p className="mt-3 text-slate-400">
+          A quick view of market breadth, leading stocks and institutional
+          activity.
+        </p>
+      </div>
+
+      <span className="w-fit rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-300">
+        DEMO DATA
+      </span>
+    </div>
+
+    <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
+      {/* Market Breadth */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <h3 className="text-lg font-bold">Market Breadth</h3>
+
+        <div className="mt-6 space-y-4">
+          <div className="flex justify-between">
+            <span className="text-slate-400">Advances</span>
+            <span className="font-bold text-emerald-400">1,428</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="text-slate-400">Declines</span>
+            <span className="font-bold text-red-400">986</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="text-slate-400">Unchanged</span>
+            <span className="font-bold">112</span>
+          </div>
+        </div>
+
+        <div className="mt-6 flex h-2 overflow-hidden rounded-full bg-slate-800">
+          <div className="w-[59%] bg-emerald-500"></div>
+          <div className="w-[41%] bg-red-500"></div>
+        </div>
+      </div>
+
+      {/* Top Gainers */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <h3 className="text-lg font-bold">Top Gainers</h3>
+
+        <div className="mt-6 space-y-5">
+          <div className="flex justify-between">
+            <span>RELIANCE</span>
+            <span className="font-semibold text-emerald-400">+2.84%</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span>ICICIBANK</span>
+            <span className="font-semibold text-emerald-400">+2.15%</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span>LT</span>
+            <span className="font-semibold text-emerald-400">+1.92%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Losers */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <h3 className="text-lg font-bold">Top Losers</h3>
+
+        <div className="mt-6 space-y-5">
+          <div className="flex justify-between">
+            <span>INFY</span>
+            <span className="font-semibold text-red-400">-1.76%</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span>WIPRO</span>
+            <span className="font-semibold text-red-400">-1.32%</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span>TECHM</span>
+            <span className="font-semibold text-red-400">-1.08%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* FII DII Activity */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <h3 className="text-lg font-bold">FII / DII Activity</h3>
+
+        <div className="mt-6 space-y-6">
+          <div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">FII Net</span>
+              <span className="font-bold text-red-400">-₹1,245 Cr</span>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">
+              Net institutional selling
+            </p>
+          </div>
+
+          <div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">DII Net</span>
+              <span className="font-bold text-emerald-400">+₹1,860 Cr</span>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">
+              Net domestic buying
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>  
+
 <section className="border-t border-slate-800 bg-slate-900/50 px-6 py-20">
   <div className="mx-auto max-w-7xl">
     <div className="mb-12 text-center">
@@ -215,6 +341,7 @@ export default function Home() {
     </div>
   </div>
 </section>
-    </main>
+
+         </main>
   );
 }
