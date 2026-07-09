@@ -24,3 +24,42 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+@keyframes marketTicker {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+/* Continuous Market Ticker */
+
+@keyframes marketTicker {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.market-ticker-track {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  width: max-content;
+  white-space: nowrap;
+  animation: marketTicker 75s linear infinite;
+  will-change: transform;
+}
+
+.market-ticker-track > div {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.market-ticker-track:hover {
+  animation-play-state: paused;
+}

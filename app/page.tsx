@@ -14,7 +14,7 @@ export default function Home() {
               width={150}
               height={90}
               priority
-              className="h-16 w-auto"
+              className="h-20 w-auto scale-125"
             />
           </div>
 
@@ -58,48 +58,77 @@ export default function Home() {
           </div>
         </div>
       </header>
-{/* Market Snapshot Ribbon */}
-<section className="border-b border-slate-800 bg-slate-900">
-  <div className="mx-auto flex max-w-7xl items-center justify-between gap-8 overflow-x-auto px-6 py-3 text-sm whitespace-nowrap">
-    <div>
-      <span className="text-slate-400">NIFTY 50</span>
-      <span className="ml-2 font-semibold text-white">25,480.65</span>
-      <span className="ml-2 text-emerald-400">▲ 0.42%</span>
-    </div>
+{/* Continuous Market Ticker */}
+<section className="overflow-hidden border-y border-slate-800 bg-slate-900">
+  <div className="market-ticker-track py-4 text-sm">
 
-    <div>
-      <span className="text-slate-400">BANK NIFTY</span>
-      <span className="ml-2 font-semibold text-white">57,820.30</span>
-      <span className="ml-2 text-emerald-400">▲ 0.35%</span>
-    </div>
+    {[
+      ["NIFTY 50", "25,480.65", "▲ 0.42%", true],
+      ["BANK NIFTY", "57,820.30", "▲ 0.35%", true],
+      ["SENSEX", "83,210.50", "▲ 0.38%", true],
+      ["INDIA VIX", "12.45", "▼ 1.20%", false],
+      ["RELIANCE", "1,528.40", "▲ 1.24%", true],
+      ["HDFCBANK", "2,012.60", "▲ 0.48%", true],
+      ["ICICIBANK", "1,468.20", "▲ 0.72%", true],
+      ["BHARTIARTL", "2,048.50", "▼ 0.31%", false],
+      ["TCS", "3,428.70", "▲ 0.56%", true],
+      ["INFY", "1,612.30", "▼ 0.86%", false],
+      ["SBIN", "812.40", "▲ 1.05%", true],
+      ["LT", "3,674.80", "▲ 0.64%", true],
+      ["ITC", "421.35", "▼ 0.22%", false],
+      ["AXISBANK", "1,186.60", "▲ 0.45%", true],
+      ["KOTAKBANK", "2,142.75", "▼ 0.38%", false],
+      ["HINDUNILVR", "2,518.20", "▲ 0.27%", true],
+      ["MARUTI", "12,684.50", "▲ 0.81%", true],
+      ["M&M", "3,198.40", "▼ 0.44%", false],
+      ["SUNPHARMA", "1,724.30", "▲ 0.63%", true],
+      ["BAJFINANCE", "941.80", "▲ 1.12%", true],
 
-    <div>
-      <span className="text-slate-400">SENSEX</span>
-      <span className="ml-2 font-semibold text-white">83,210.50</span>
-      <span className="ml-2 text-emerald-400">▲ 0.38%</span>
-    </div>
+      /* Duplicate items create a seamless continuous loop */
+      ["NIFTY 50", "25,480.65", "▲ 0.42%", true],
+      ["BANK NIFTY", "57,820.30", "▲ 0.35%", true],
+      ["SENSEX", "83,210.50", "▲ 0.38%", true],
+      ["INDIA VIX", "12.45", "▼ 1.20%", false],
+      ["RELIANCE", "1,528.40", "▲ 1.24%", true],
+      ["HDFCBANK", "2,012.60", "▲ 0.48%", true],
+      ["ICICIBANK", "1,468.20", "▲ 0.72%", true],
+      ["BHARTIARTL", "2,048.50", "▼ 0.31%", false],
+      ["TCS", "3,428.70", "▲ 0.56%", true],
+      ["INFY", "1,612.30", "▼ 0.86%", false],
+      ["SBIN", "812.40", "▲ 1.05%", true],
+      ["LT", "3,674.80", "▲ 0.64%", true],
+      ["ITC", "421.35", "▼ 0.22%", false],
+      ["AXISBANK", "1,186.60", "▲ 0.45%", true],
+      ["KOTAKBANK", "2,142.75", "▼ 0.38%", false],
+      ["HINDUNILVR", "2,518.20", "▲ 0.27%", true],
+      ["MARUTI", "12,684.50", "▲ 0.81%", true],
+      ["M&M", "3,198.40", "▼ 0.44%", false],
+      ["SUNPHARMA", "1,724.30", "▲ 0.63%", true],
+      ["BAJFINANCE", "941.80", "▲ 1.12%", true],
+    ].map(([name, price, change, isUp], index) => (
+      <div
+        key={index}
+        className="flex shrink-0 items-center whitespace-nowrap border-r border-slate-700 px-7"
+      >
+        <span className="text-slate-400">{name}</span>
 
-    <div>
-      <span className="text-slate-400">INDIA VIX</span>
-      <span className="ml-2 font-semibold text-white">12.45</span>
-      <span className="ml-2 text-red-400">▼ 1.20%</span>
-    </div>
+        <span className="ml-2 font-bold text-white">
+          {price}
+        </span>
 
-    <div>
-      <span className="text-slate-400">GOLD</span>
-      <span className="ml-2 font-semibold text-white">₹98,420</span>
-      <span className="ml-2 text-emerald-400">▲ 0.26%</span>
-    </div>
-
-    <div>
-      <span className="text-slate-400">USD/INR</span>
-      <span className="ml-2 font-semibold text-white">85.74</span>
-      <span className="ml-2 text-red-400">▼ 0.08%</span>
-    </div>
+        <span
+          className={`ml-2 font-semibold ${
+            isUp ? "text-emerald-400" : "text-red-400"
+          }`}
+        >
+          {change}
+        </span>
+      </div>
+    ))}
   </div>
 </section>
       {/* Hero Section */}
-      <section className="flex min-h-[calc(100vh-89px)] items-center justify-center px-6 py-20">
+      <section className="flex min-h-[620px] items-center justify-center px-6 py-24">
         <div className="max-w-4xl text-center">
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-emerald-400">
             Share Trading For Living
