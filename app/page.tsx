@@ -1,5 +1,5 @@
 import Image from "next/image";
-
+import { marketTickerData } from "../data/marketTicker";
 export default function Home() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -62,51 +62,8 @@ export default function Home() {
 <section className="overflow-hidden border-y border-slate-800 bg-slate-900">
   <div className="market-ticker-track py-4 text-sm">
 
-    {[
-      ["NIFTY 50", "25,480.65", "▲ 0.42%", true],
-      ["BANK NIFTY", "57,820.30", "▲ 0.35%", true],
-      ["SENSEX", "83,210.50", "▲ 0.38%", true],
-      ["INDIA VIX", "12.45", "▼ 1.20%", false],
-      ["RELIANCE", "1,528.40", "▲ 1.24%", true],
-      ["HDFCBANK", "2,012.60", "▲ 0.48%", true],
-      ["ICICIBANK", "1,468.20", "▲ 0.72%", true],
-      ["BHARTIARTL", "2,048.50", "▼ 0.31%", false],
-      ["TCS", "3,428.70", "▲ 0.56%", true],
-      ["INFY", "1,612.30", "▼ 0.86%", false],
-      ["SBIN", "812.40", "▲ 1.05%", true],
-      ["LT", "3,674.80", "▲ 0.64%", true],
-      ["ITC", "421.35", "▼ 0.22%", false],
-      ["AXISBANK", "1,186.60", "▲ 0.45%", true],
-      ["KOTAKBANK", "2,142.75", "▼ 0.38%", false],
-      ["HINDUNILVR", "2,518.20", "▲ 0.27%", true],
-      ["MARUTI", "12,684.50", "▲ 0.81%", true],
-      ["M&M", "3,198.40", "▼ 0.44%", false],
-      ["SUNPHARMA", "1,724.30", "▲ 0.63%", true],
-      ["BAJFINANCE", "941.80", "▲ 1.12%", true],
-
-      /* Duplicate items create a seamless continuous loop */
-      ["NIFTY 50", "25,480.65", "▲ 0.42%", true],
-      ["BANK NIFTY", "57,820.30", "▲ 0.35%", true],
-      ["SENSEX", "83,210.50", "▲ 0.38%", true],
-      ["INDIA VIX", "12.45", "▼ 1.20%", false],
-      ["RELIANCE", "1,528.40", "▲ 1.24%", true],
-      ["HDFCBANK", "2,012.60", "▲ 0.48%", true],
-      ["ICICIBANK", "1,468.20", "▲ 0.72%", true],
-      ["BHARTIARTL", "2,048.50", "▼ 0.31%", false],
-      ["TCS", "3,428.70", "▲ 0.56%", true],
-      ["INFY", "1,612.30", "▼ 0.86%", false],
-      ["SBIN", "812.40", "▲ 1.05%", true],
-      ["LT", "3,674.80", "▲ 0.64%", true],
-      ["ITC", "421.35", "▼ 0.22%", false],
-      ["AXISBANK", "1,186.60", "▲ 0.45%", true],
-      ["KOTAKBANK", "2,142.75", "▼ 0.38%", false],
-      ["HINDUNILVR", "2,518.20", "▲ 0.27%", true],
-      ["MARUTI", "12,684.50", "▲ 0.81%", true],
-      ["M&M", "3,198.40", "▼ 0.44%", false],
-      ["SUNPHARMA", "1,724.30", "▲ 0.63%", true],
-      ["BAJFINANCE", "941.80", "▲ 1.12%", true],
-    ].map(([name, price, change, isUp], index) => (
-      <div
+    {[...marketTickerData, ...marketTickerData].map(
+  ({ name, price, change, isUp }, index) => (      <div
         key={index}
         className="flex shrink-0 items-center whitespace-nowrap border-r border-slate-700 px-7"
       >
@@ -123,8 +80,9 @@ export default function Home() {
         >
           {change}
         </span>
-      </div>
-    ))}
+          </div>
+  )
+)}
   </div>
 </section>
       {/* Hero Section */}
