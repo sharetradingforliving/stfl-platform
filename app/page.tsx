@@ -531,6 +531,121 @@ export default function Home() {
     </div>
   </div>
 </section>
+{/* STFL Academy */}
+<section className="border-t border-slate-800 bg-slate-950 px-6 py-20">
+  <div className="mx-auto max-w-7xl">
+    <div className="mb-12 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+          STFL Academy
+        </p>
+
+        <h2 className="mt-4 text-3xl font-bold md:text-5xl">
+          Learn the Market. Build Your Skills.
+        </h2>
+
+        <p className="mt-5 max-w-2xl leading-7 text-slate-400">
+          Build practical knowledge through structured learning modules
+          designed for investors and traders at every stage.
+        </p>
+      </div>
+
+      <button className="w-fit rounded-xl border border-emerald-500 px-6 py-3 font-semibold text-emerald-400 transition hover:bg-emerald-500 hover:text-slate-950">
+        Explore STFL Academy →
+      </button>
+    </div>
+
+    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      {/* Trading Basics */}
+      <div className="group rounded-2xl border border-slate-800 bg-slate-900 p-7 transition hover:-translate-y-1 hover:border-emerald-500">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-2xl">
+          📚
+        </div>
+
+        <p className="mt-6 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+          Beginner
+        </p>
+
+        <h3 className="mt-3 text-xl font-bold">Trading Basics</h3>
+
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Understand stock markets, order types, trading terminology, risk
+          management and the foundations of investing.
+        </p>
+
+        <button className="mt-7 font-semibold text-emerald-400">
+          Start Learning →
+        </button>
+      </div>
+
+      {/* Technical Analysis */}
+      <div className="group rounded-2xl border border-slate-800 bg-slate-900 p-7 transition hover:-translate-y-1 hover:border-emerald-500">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-2xl">
+          📈
+        </div>
+
+        <p className="mt-6 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+          Intermediate
+        </p>
+
+        <h3 className="mt-3 text-xl font-bold">Technical Analysis</h3>
+
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Learn candlestick patterns, trends, support and resistance,
+          indicators and practical chart analysis.
+        </p>
+
+        <button className="mt-7 font-semibold text-emerald-400">
+          Study Charts →
+        </button>
+      </div>
+
+      {/* Fundamental Analysis */}
+      <div className="group rounded-2xl border border-slate-800 bg-slate-900 p-7 transition hover:-translate-y-1 hover:border-emerald-500">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-2xl">
+          🔎
+        </div>
+
+        <p className="mt-6 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+          Investor
+        </p>
+
+        <h3 className="mt-3 text-xl font-bold">Fundamental Analysis</h3>
+
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Study financial statements, business quality, valuation ratios,
+          growth, profitability and company fundamentals.
+        </p>
+
+        <button className="mt-7 font-semibold text-emerald-400">
+          Analyse Companies →
+        </button>
+      </div>
+
+      {/* Options Trading */}
+      <div className="group rounded-2xl border border-slate-800 bg-slate-900 p-7 transition hover:-translate-y-1 hover:border-emerald-500">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-2xl">
+          ⚡
+        </div>
+
+        <p className="mt-6 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+          Advanced
+        </p>
+
+        <h3 className="mt-3 text-xl font-bold">Options Trading</h3>
+
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          Learn option concepts, Greeks, strategies, position management
+          and disciplined approaches to trading risk.
+        </p>
+
+        <button className="mt-7 font-semibold text-emerald-400">
+          Explore Options →
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
 
 
          </main>
