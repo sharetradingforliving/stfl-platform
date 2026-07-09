@@ -86,7 +86,7 @@ export default function Home() {
   </div>
 </section>
       {/* Hero Section */}
-      <section className="flex min-h-[620px] items-center justify-center px-6 py-24">
+      <section className="flex min-h-[650px] items-center justify-center px-6 py-16">
         <div className="max-w-4xl text-center">
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-emerald-400">
             Share Trading For Living
