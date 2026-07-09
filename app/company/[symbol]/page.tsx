@@ -442,6 +442,128 @@ export default async function CompanyPage({
     </p>
   </div>
 </section>
+{/* Shareholding Pattern */}
+<section className="border-b border-slate-800 bg-slate-950">
+  <div className="mx-auto max-w-7xl px-6 py-16">
+    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+          Shareholding Pattern
+        </p>
+
+        <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+          Who Owns the Company?
+        </h2>
+
+        <p className="mt-3 text-slate-400">
+          Review promoter, institutional and public ownership along with
+          quarterly changes in shareholding.
+        </p>
+      </div>
+
+      <span className="w-fit rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-400">
+        DEMO DATA
+      </span>
+    </div>
+
+    <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+      {/* Shareholding Cards */}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm text-slate-400">Promoter Holding</p>
+
+          <p className="mt-3 text-3xl font-bold">
+            50.11%
+          </p>
+
+          <p className="mt-3 text-sm font-semibold text-slate-400">
+            No change QoQ
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm text-slate-400">
+            Foreign Institutional Investors
+          </p>
+
+          <p className="mt-3 text-3xl font-bold">
+            21.72%
+          </p>
+
+          <p className="mt-3 text-sm font-semibold text-red-400">
+            ▼ 0.18% QoQ
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm text-slate-400">
+            Domestic Institutional Investors
+          </p>
+
+          <p className="mt-3 text-3xl font-bold">
+            18.34%
+          </p>
+
+          <p className="mt-3 text-sm font-semibold text-emerald-400">
+            ▲ 0.24% QoQ
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm text-slate-400">
+            Public & Other Shareholders
+          </p>
+
+          <p className="mt-3 text-3xl font-bold">
+            9.83%
+          </p>
+
+          <p className="mt-3 text-sm font-semibold text-slate-400">
+            ▼ 0.06% QoQ
+          </p>
+        </div>
+      </div>
+
+      {/* Chart Placeholder */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-7">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row">
+          <div>
+            <h3 className="text-xl font-bold">
+              Ownership Distribution
+            </h3>
+
+            <p className="mt-2 text-sm text-slate-400">
+              Latest quarterly ownership mix and historical holding trends.
+            </p>
+          </div>
+
+          <span className="h-fit rounded-lg bg-slate-950 px-4 py-2 text-xs font-semibold text-slate-400">
+            CHART PLACEHOLDER
+          </span>
+        </div>
+
+        <div className="mt-8 flex min-h-72 items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-950/60">
+          <div className="text-center">
+            <p className="text-lg font-semibold text-slate-400">
+              Shareholding Chart
+            </p>
+
+            <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
+              An interactive ownership chart and quarterly trend will appear
+              here after the shareholding-data integration.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p className="mt-6 text-xs leading-5 text-slate-500">
+      Shareholding figures are illustrative placeholders. Live quarterly
+      shareholding disclosures will be connected during the data-integration
+      phase.
+    </p>
+  </div>
+</section>
   </main>
 );
 }
