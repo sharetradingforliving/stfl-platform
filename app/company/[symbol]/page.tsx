@@ -733,6 +733,204 @@ export default async function CompanyPage({
     </p>
   </div>
 </section>
+{/* STFL AI Research Summary */}
+<section className="border-b border-slate-800 bg-slate-950">
+  <div className="mx-auto max-w-7xl px-6 py-16">
+    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+          STFL AI Research
+        </p>
+
+        <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+          Research Summary & Investment Outlook
+        </h2>
+
+        <p className="mt-3 max-w-3xl text-slate-400">
+          A structured view of business quality, growth drivers, risks,
+          valuation and technical momentum.
+        </p>
+      </div>
+
+      <span className="w-fit rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-400">
+        DEMO AI ANALYSIS
+      </span>
+    </div>
+
+    <div className="mt-10 grid gap-6 lg:grid-cols-3">
+      {/* Business Strengths */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-7">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-2xl">
+          ✓
+        </div>
+
+        <h3 className="mt-5 text-xl font-bold">
+          Business Strengths
+        </h3>
+
+        <ul className="mt-5 space-y-4 text-sm leading-6 text-slate-400">
+          <li className="flex gap-3">
+            <span className="text-emerald-400">•</span>
+            Diversified business portfolio with leadership across key sectors.
+          </li>
+
+          <li className="flex gap-3">
+            <span className="text-emerald-400">•</span>
+            Strong scale, brand presence and long-term growth opportunities.
+          </li>
+
+          <li className="flex gap-3">
+            <span className="text-emerald-400">•</span>
+            Healthy cash-generation potential across major business segments.
+          </li>
+        </ul>
+      </div>
+
+      {/* Growth Drivers */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-7">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-2xl">
+          ↗
+        </div>
+
+        <h3 className="mt-5 text-xl font-bold">
+          Key Growth Drivers
+        </h3>
+
+        <ul className="mt-5 space-y-4 text-sm leading-6 text-slate-400">
+          <li className="flex gap-3">
+            <span className="text-blue-400">•</span>
+            Expansion in consumer, digital and new-growth businesses.
+          </li>
+
+          <li className="flex gap-3">
+            <span className="text-blue-400">•</span>
+            Capacity additions and improving operating efficiency.
+          </li>
+
+          <li className="flex gap-3">
+            <span className="text-blue-400">•</span>
+            Long-term opportunities from technology and energy transition.
+          </li>
+        </ul>
+      </div>
+
+      {/* Key Risks */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-7">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/10 text-2xl">
+          !
+        </div>
+
+        <h3 className="mt-5 text-xl font-bold">
+          Key Risks
+        </h3>
+
+        <ul className="mt-5 space-y-4 text-sm leading-6 text-slate-400">
+          <li className="flex gap-3">
+            <span className="text-red-400">•</span>
+            Large capital-expenditure requirements may affect cash flows.
+          </li>
+
+          <li className="flex gap-3">
+            <span className="text-red-400">•</span>
+            Commodity cycles and regulatory changes may affect profitability.
+          </li>
+
+          <li className="flex gap-3">
+            <span className="text-red-400">•</span>
+            Execution risk across multiple large growth initiatives.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    {/* Research Views */}
+    <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <p className="text-sm text-slate-400">
+          Fundamental View
+        </p>
+
+        <p className="mt-3 text-2xl font-bold text-emerald-400">
+          Positive
+        </p>
+
+        <p className="mt-3 text-sm leading-6 text-slate-500">
+          Business scale and long-term growth drivers support the fundamental
+          outlook.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <p className="text-sm text-slate-400">
+          Valuation View
+        </p>
+
+        <p className="mt-3 text-2xl font-bold text-amber-400">
+          Fairly Valued
+        </p>
+
+        <p className="mt-3 text-sm leading-6 text-slate-500">
+          Current valuation appears reasonable relative to illustrative
+          industry and intrinsic-value estimates.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <p className="text-sm text-slate-400">
+          Technical View
+        </p>
+
+        <p className="mt-3 text-2xl font-bold text-emerald-400">
+          Moderately Bullish
+        </p>
+
+        <p className="mt-3 text-sm leading-6 text-slate-500">
+          Momentum and moving-average indicators remain constructive above
+          key support.
+        </p>
+      </div>
+    </div>
+
+    {/* Overall Outlook */}
+    <div className="mt-6 overflow-hidden rounded-2xl border border-emerald-500/50 bg-emerald-500/10">
+      <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
+            Overall STFL Research Outlook
+          </p>
+
+          <h3 className="mt-3 text-3xl font-bold text-emerald-400">
+            Positive with a Long-Term Perspective
+          </h3>
+
+          <p className="mt-4 max-w-4xl text-sm leading-7 text-slate-300">
+            The illustrative research view reflects strong business scale,
+            diversified growth opportunities and constructive technical
+            momentum. Investors should continue to monitor valuation,
+            execution progress, cash flows and business-specific risks.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-emerald-500/30 bg-slate-950/70 px-8 py-6 text-center">
+          <p className="text-xs uppercase tracking-widest text-slate-500">
+            Research Score
+          </p>
+
+          <p className="mt-2 text-4xl font-bold text-emerald-400">
+            8.0 / 10
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <p className="mt-6 text-xs leading-5 text-slate-500">
+      This is illustrative demo analysis and not an investment recommendation.
+      The final AI research summary will be generated using company financials,
+      exchange filings, valuation models, news and technical indicators after
+      live-data integration.
+    </p>
+  </div>
+</section>
   </main>
 );
 }
