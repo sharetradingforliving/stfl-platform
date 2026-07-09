@@ -1009,6 +1009,56 @@ export default async function CompanyPage({
     </p>
   </div>
 </section>
+{/* Dashboard Footer */}
+<footer className="border-t border-slate-800 bg-slate-950">
+  <div className="mx-auto max-w-7xl px-6 py-12">
+    <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-start">
+      <div>
+        <p className="text-lg font-bold text-white">
+          Share Trading For Living
+        </p>
+
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+          Research Indian stocks, study market trends and make informed
+          investment decisions with STFL.
+        </p>
+      </div>
+
+      <a
+        href="/"
+        className="w-fit rounded-xl border border-slate-700 px-5 py-3 text-sm font-semibold text-slate-300 transition hover:border-emerald-500 hover:text-emerald-400"
+      >
+        ← Back to Homepage
+      </a>
+    </div>
+
+    <div className="mt-10 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6">
+      <p className="text-sm font-bold text-amber-400">
+        Important Research Disclaimer
+      </p>
+
+      <p className="mt-3 text-xs leading-6 text-slate-400">
+        Information, market data, financial metrics, valuation estimates,
+        technical indicators, scores and research views displayed on this
+        dashboard are for educational and informational purposes only. They
+        should not be considered investment advice, a stock recommendation,
+        or an offer to buy or sell securities. Investors should conduct their
+        own research and consult a SEBI-registered investment adviser before
+        making investment decisions.
+      </p>
+    </div>
+
+    <div className="mt-8 flex flex-col gap-3 border-t border-slate-800 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+      <p>
+        © 2026 Share Trading For Living. All rights reserved.
+      </p>
+
+      <p>
+        Demo dashboard • Live-data integration pending
+      </p>
+    </div>
+  </div>
+</footer>
   </main>
 );
 }
