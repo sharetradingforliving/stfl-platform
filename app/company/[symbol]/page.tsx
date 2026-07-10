@@ -193,32 +193,48 @@ export default async function CompanyPage({
     <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500">
         <p className="text-sm text-slate-400">Market Cap</p>
-        <p className="mt-3 text-2xl font-bold">₹20.68 Lakh Cr</p>
+        <p className="mt-3 text-2xl font-bold">
+  {company.marketCap}
+</p>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500">
         <p className="text-sm text-slate-400">P/E Ratio</p>
-        <p className="mt-3 text-2xl font-bold">24.85</p>
+        <p className="mt-3 text-2xl font-bold">
+  {company.peRatio.toFixed(2)}
+</p>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500">
         <p className="text-sm text-slate-400">Return on Equity</p>
-        <p className="mt-3 text-2xl font-bold">9.72%</p>
+        {/* Return on Equity */}
+<p className="mt-3 text-2xl font-bold">
+  {company.roe.toFixed(2)}%
+</p>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500">
         <p className="text-sm text-slate-400">Dividend Yield</p>
-        <p className="mt-3 text-2xl font-bold">0.36%</p>
+        {/* Dividend Yield */}
+<p className="mt-3 text-2xl font-bold">
+  {company.dividendYield.toFixed(2)}%
+</p>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500">
         <p className="text-sm text-slate-400">52-Week High</p>
-        <p className="mt-3 text-2xl font-bold">₹1,608.80</p>
+        {/* 52-Week High */}
+<p className="mt-3 text-2xl font-bold">
+  ₹{company.week52High.toLocaleString("en-IN")}
+</p>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500">
         <p className="text-sm text-slate-400">52-Week Low</p>
-        <p className="mt-3 text-2xl font-bold">₹1,114.85</p>
+        {/* 52-Week Low */}
+<p className="mt-3 text-2xl font-bold">
+  ₹{company.week52Low.toLocaleString("en-IN")}
+</p>
       </div>
     </div>
   </div>
