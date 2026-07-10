@@ -261,40 +261,40 @@ export default async function CompanyPage({
       </div>
 
       <span className="w-fit rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-400">
-        DEMO DATA
+        SAMPLE DATA • LIVE INTEGRATION PENDING
       </span>
     </div>
 
     <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
         <p className="text-sm text-slate-400">Revenue</p>
-        <p className="mt-3 text-2xl font-bold">₹10.72 Lakh Cr</p>
+        <p className="mt-3 text-2xl font-bold">{company.revenue}</p>
         <p className="mt-3 text-sm font-semibold text-emerald-400">
-          ▲ 7.1% YoY
+          ▲ {company.revenueGrowth.toFixed(1)}% YoY
         </p>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
         <p className="text-sm text-slate-400">EBITDA</p>
-        <p className="mt-3 text-2xl font-bold">₹1.83 Lakh Cr</p>
+        <p className="mt-3 text-2xl font-bold">{company.ebitda}</p>
         <p className="mt-3 text-sm font-semibold text-emerald-400">
-          ▲ 5.4% YoY
+          ▲ {company.ebitdaGrowth.toFixed(1)}% YoY
         </p>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
         <p className="text-sm text-slate-400">Net Profit</p>
-        <p className="mt-3 text-2xl font-bold">₹81,309 Cr</p>
+        <p className="mt-3 text-2xl font-bold">{company.netProfit}</p>
         <p className="mt-3 text-sm font-semibold text-emerald-400">
-          ▲ 2.9% YoY
+          ▲ {company.netProfitGrowth.toFixed(1)}% YoY
         </p>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
         <p className="text-sm text-slate-400">Earnings Per Share</p>
-        <p className="mt-3 text-2xl font-bold">₹60.12</p>
+        <p className="mt-3 text-2xl font-bold">₹{company.eps.toFixed(2)}</p>
         <p className="mt-3 text-sm font-semibold text-emerald-400">
-          ▲ 3.2% YoY
+           ▲ {company.epsGrowth.toFixed(1)}% YoY
         </p>
       </div>
     </div>

@@ -12,6 +12,14 @@ export type CompanyData = {
   dividendYield: number;
   week52High: number;
   week52Low: number;
+  revenue: string;
+revenueGrowth: number;
+ebitda: string;
+ebitdaGrowth: number;
+netProfit: string;
+netProfitGrowth: number;
+eps: number;
+epsGrowth: number;
 };
 export const companies: Record<string, CompanyData> = {
   RELIANCE: {
@@ -28,6 +36,14 @@ export const companies: Record<string, CompanyData> = {
     dividendYield: 0.36,
     week52High: 1608.8,
     week52Low: 1114.85,
+    revenue: "₹10.72 Lakh Cr",
+revenueGrowth: 7.1,
+ebitda: "₹1.83 Lakh Cr",
+ebitdaGrowth: 5.4,
+netProfit: "₹81,309 Cr",
+netProfitGrowth: 2.9,
+eps: 60.12,
+epsGrowth: 3.2,
   },
 
   TCS: {
@@ -44,6 +60,14 @@ export const companies: Record<string, CompanyData> = {
     dividendYield: 1.75,
     week52High: 4592.25,
     week52Low: 3056.05,
+    revenue: "₹2.55 Lakh Cr",
+revenueGrowth: 6.0,
+ebitda: "₹67,300 Cr",
+ebitdaGrowth: 5.8,
+netProfit: "₹48,553 Cr",
+netProfitGrowth: 5.8,
+eps: 134.19,
+epsGrowth: 6.1,
   },
 
   INFY: {
@@ -60,5 +84,13 @@ export const companies: Record<string, CompanyData> = {
     dividendYield: 2.65,
     week52High: 2006.8,
     week52Low: 1307.0,
+    revenue: "₹1.63 Lakh Cr",
+revenueGrowth: 6.1,
+ebitda: "₹39,100 Cr",
+ebitdaGrowth: 4.7,
+netProfit: "₹26,750 Cr",
+netProfitGrowth: 6.5,
+eps: 64.4,
+epsGrowth: 7.0,
   },
 };
