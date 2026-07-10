@@ -1,3 +1,4 @@
+import { companies } from "../../../data/companyData";
 type CompanyPageProps = {
   params: Promise<{
     symbol: string;
@@ -9,6 +10,35 @@ export default async function CompanyPage({
 }: CompanyPageProps) {
   const { symbol } = await params;
   const stockSymbol = symbol.toUpperCase();
+  const company = companies[stockSymbol];
+  if (!company) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">
+      <div className="max-w-xl text-center">
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+          STFL Company Research
+        </p>
+
+        <h1 className="mt-5 text-4xl font-bold">
+          Company Data Not Available
+        </h1>
+
+        <p className="mt-4 leading-7 text-slate-400">
+          We do not currently have company-specific data for{" "}
+          <span className="font-semibold text-white">{stockSymbol}</span>.
+          Please search for RELIANCE, TCS or INFY.
+        </p>
+
+        <a
+          href="/"
+          className="mt-8 inline-block rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-slate-950 transition hover:bg-emerald-400"
+        >
+          ← Back to Homepage
+        </a>
+      </div>
+    </main>
+  );
+}
 
   return (
   <main className="min-h-screen bg-slate-950 text-white">
@@ -51,18 +81,27 @@ export default async function CompanyPage({
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">Current Market Price</p>
+            <p className="text-sm text-slate-400">Sample Market Price</p>
 
             <div className="mt-2 flex flex-wrap items-end gap-4">
-              <p className="text-4xl font-bold">₹1,528.40</p>
+              <p className="text-4xl font-bold">
+  ₹{company.currentPrice.toLocaleString("en-IN")}
+</p>
 
-              <p className="pb-1 font-semibold text-emerald-400">
-                ▲ 1.24%
-              </p>
+              <p
+  className={`pb-1 font-semibold ${
+    company.changePercent >= 0
+      ? "text-emerald-400"
+      : "text-red-400"
+  }`}
+>
+  {company.changePercent >= 0 ? "▲" : "▼"}{" "}
+  {Math.abs(company.changePercent).toFixed(2)}%
+</p>
             </div>
 
             <p className="mt-2 text-sm text-slate-500">
-              Demo market data
+              {company.companyName} • {company.sector}
             </p>
 
             <button className="mt-5 w-full rounded-xl border border-emerald-500 px-5 py-3 font-semibold text-emerald-400 transition hover:bg-emerald-500 hover:text-slate-950">
