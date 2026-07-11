@@ -71,7 +71,7 @@ export async function GET(
 
     if (!upstoxResponse.ok) {
       console.error("Upstox quote error:", upstoxData);
-
+      
       return NextResponse.json(
         {
           error: "Unable to fetch Upstox market quote",
@@ -83,22 +83,61 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
-      symbol: stockSymbol,
-      instrumentKey,
-      source: "Upstox",
-      data: upstoxData.data,
-    });
-  } catch (error) {
-    console.error("Upstox quote route error:", error);
+   const quote = Object.values(
+  upstoxData.data ?? {}
+)[0] as any;
 
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
+if (!quote) {
+  return NextResponse.json(
+    {
+      error: "Quote data was not found in the Upstox response",
+    },
+    {
+      status: 404,
+    }
+  );
+}
+
+const currentPrice = quote.last_price ?? 0;
+const change = quote.net_change ?? 0;
+const previousClose = currentPrice - change;
+
+const changePercent =
+  previousClose !== 0
+    ? (change / previousClose) * 100
+    : 0;
+
+return NextResponse.json({
+  symbol: stockSymbol,
+  exchange: "NSE",
+  instrumentKey,
+
+  currentPrice,
+  previousClose,
+  change,
+  changePercent,
+
+  open: quote.ohlc?.open ?? null,
+  high: quote.ohlc?.high ?? null,
+  low: quote.ohlc?.low ?? null,
+
+  volume: quote.volume ?? null,
+  averagePrice: quote.average_price ?? null,
+
+  lastUpdated: quote.timestamp ?? null,
+  source: "Upstox",
+});
+
+} catch (error) {
+  console.error("Upstox quote route error:", error);
+
+  return NextResponse.json(
+    {
+      error: "Internal server error",
+    },
+    {
+      status: 500,
+    }
+  );
+}
 }
