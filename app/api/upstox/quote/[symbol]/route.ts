@@ -7,12 +7,6 @@ type RouteContext = {
   }>;
 };
 
-const instrumentKeys: Record<string, string> = {
-  RELIANCE: "NSE_EQ|INE002A01018",
-  TCS: "NSE_EQ|INE467B01029",
-  INFY: "NSE_EQ|INE009A01021",
-};
-
 export async function GET(
   request: Request,
   { params }: RouteContext
@@ -21,18 +15,51 @@ export async function GET(
     const { symbol } = await params;
     const stockSymbol = symbol.toUpperCase();
 
-    const instrumentKey = instrumentKeys[stockSymbol];
+    const searchResponse = await fetch(
+  `${new URL(request.url).origin}/api/upstox/instruments/search?q=${encodeURIComponent(
+    stockSymbol
+  )}`,
+  {
+    cache: "no-store",
+  }
+);
 
-    if (!instrumentKey) {
-      return NextResponse.json(
-        {
-          error: "Instrument is not configured",
-          supportedSymbols: Object.keys(instrumentKeys),
-        },
-        {
-          status: 404,
-        }
-      );
+if (!searchResponse.ok) {
+  return NextResponse.json(
+    {
+      error: "Unable to search the Upstox instrument master",
+    },
+    {
+      status: searchResponse.status,
+    }
+  );
+}
+
+const searchData = await searchResponse.json();
+
+const exactMatch = searchData.results?.find(
+  (instrument: {
+    symbol?: string;
+    exchange?: string;
+    instrumentKey?: string;
+  }) =>
+    instrument.symbol?.toUpperCase() === stockSymbol &&
+    instrument.exchange?.toUpperCase() === "NSE"
+);
+
+const instrumentKey = exactMatch?.instrumentKey;
+
+if (!instrumentKey) {
+  return NextResponse.json(
+    {
+      error: "NSE equity instrument was not found",
+      symbol: stockSymbol,
+    },
+    {
+      status: 404,
+    }
+  );
+
     }
 
     const cookieStore = await cookies();

@@ -99,6 +99,26 @@ export async function GET(request: Request) {
           shortName.includes(query)
         );
       })
+            .sort((a, b) => {
+        const symbolA =
+          a.trading_symbol?.toUpperCase() ?? "";
+
+        const symbolB =
+          b.trading_symbol?.toUpperCase() ?? "";
+
+        const aIsExact = symbolA === query;
+        const bIsExact = symbolB === query;
+
+        if (aIsExact && !bIsExact) {
+          return -1;
+        }
+
+        if (!aIsExact && bIsExact) {
+          return 1;
+        }
+
+        return symbolA.localeCompare(symbolB);
+      })
       .slice(0, 20)
       .map((instrument) => ({
         symbol: instrument.trading_symbol,
