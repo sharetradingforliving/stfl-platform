@@ -91,18 +91,24 @@ export default function LivePriceCard({
         </p>
 
         <p
-          className={`pb-1 font-semibold ${
-            isPositive
-              ? "text-emerald-400"
-              : "text-red-400"
-          }`}
-        >
-          {isPositive ? "▲" : "▼"}{" "}
-          {Math.abs(
-            marketData.changePercent
-          ).toFixed(2)}
-          %
-        </p>
+  className={`pb-1 font-semibold ${
+    isPositive
+      ? "text-emerald-400"
+      : "text-red-400"
+  }`}
+>
+  {isPositive ? "▲" : "▼"} ₹
+  {Math.abs(marketData.change).toLocaleString(
+    "en-IN",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }
+  )}{" "}
+  ({isPositive ? "+" : "-"}
+  {Math.abs(marketData.changePercent).toFixed(2)}
+  %)
+</p>
       </div>
 
       <p className="mt-3 text-sm text-slate-500">
