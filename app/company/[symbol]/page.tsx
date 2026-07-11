@@ -351,15 +351,17 @@ export default async function CompanyPage({
     <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
         <p className="text-sm text-slate-400">Stock P/E</p>
-        <p className="mt-3 text-2xl font-bold">24.85</p>
+        <p className="mt-3 text-2xl font-bold">{company.peRatio.toFixed(2)}</p>
         <p className="mt-2 text-sm text-slate-500">
-          Industry P/E: 27.40
+          Industry P/E: {company.industryPe.toFixed(2)}
         </p>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
         <p className="text-sm text-slate-400">Price-to-Book Ratio</p>
-        <p className="mt-3 text-2xl font-bold">2.18</p>
+        <p className="mt-3 text-2xl font-bold">
+  {company.priceToBook.toFixed(2)}
+</p>
         <p className="mt-2 text-sm text-slate-500">
           Measures price against book value
         </p>
@@ -367,7 +369,9 @@ export default async function CompanyPage({
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
         <p className="text-sm text-slate-400">EV / EBITDA</p>
-        <p className="mt-3 text-2xl font-bold">12.64</p>
+        <p className="mt-3 text-2xl font-bold">
+  {company.evToEbitda.toFixed(2)}
+</p>
         <p className="mt-2 text-sm text-slate-500">
           Enterprise-value valuation multiple
         </p>
@@ -375,7 +379,9 @@ export default async function CompanyPage({
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
         <p className="text-sm text-slate-400">PEG Ratio</p>
-        <p className="mt-3 text-2xl font-bold">1.42</p>
+        <p className="mt-3 text-2xl font-bold">
+  {company.pegRatio.toFixed(2)}
+</p>
         <p className="mt-2 text-sm text-slate-500">
           Valuation adjusted for earnings growth
         </p>
@@ -385,7 +391,9 @@ export default async function CompanyPage({
         <p className="text-sm text-slate-400">
           Estimated Intrinsic Value
         </p>
-        <p className="mt-3 text-2xl font-bold">₹1,640</p>
+        <p className="mt-3 text-2xl font-bold">
+  ₹{company.intrinsicValue.toLocaleString("en-IN")}
+</p>
         <p className="mt-2 text-sm font-semibold text-emerald-400">
           7.3% above current price
         </p>
@@ -396,7 +404,7 @@ export default async function CompanyPage({
           STFL Valuation Signal
         </p>
         <p className="mt-3 text-2xl font-bold text-emerald-400">
-          Fairly Valued
+          {company.valuationSignal}
         </p>
         <p className="mt-2 text-sm text-slate-400">
           Valuation appears reasonable relative to industry and estimated value.

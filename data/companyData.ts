@@ -20,6 +20,12 @@ netProfit: string;
 netProfitGrowth: number;
 eps: number;
 epsGrowth: number;
+industryPe: number;
+priceToBook: number;
+evToEbitda: number;
+pegRatio: number;
+intrinsicValue: number;
+valuationSignal: string;
 };
 export const companies: Record<string, CompanyData> = {
   RELIANCE: {
@@ -44,6 +50,12 @@ netProfit: "₹81,309 Cr",
 netProfitGrowth: 2.9,
 eps: 60.12,
 epsGrowth: 3.2,
+industryPe: 27.4,
+priceToBook: 2.18,
+evToEbitda: 12.64,
+pegRatio: 1.42,
+intrinsicValue: 1640,
+valuationSignal: "Fairly Valued",
   },
 
   TCS: {
@@ -68,6 +80,12 @@ netProfit: "₹48,553 Cr",
 netProfitGrowth: 5.8,
 eps: 134.19,
 epsGrowth: 6.1,
+industryPe: 26.8,
+priceToBook: 12.75,
+evToEbitda: 18.9,
+pegRatio: 2.15,
+intrinsicValue: 3200,
+valuationSignal: "Fairly Valued",
   },
 
   INFY: {
@@ -92,5 +110,11 @@ netProfit: "₹26,750 Cr",
 netProfitGrowth: 6.5,
 eps: 64.4,
 epsGrowth: 7.0,
+industryPe: 26.8,
+priceToBook: 7.15,
+evToEbitda: 16.4,
+pegRatio: 1.85,
+intrinsicValue: 1725,
+valuationSignal: "Fairly Valued",
   },
 };
