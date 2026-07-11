@@ -1,4 +1,6 @@
 import { companies } from "../../../data/companyData";
+import LivePriceCard from "./LivePriceCard";
+
 type CompanyPageProps = {
   params: Promise<{
     symbol: string;
@@ -11,7 +13,7 @@ export default async function CompanyPage({
   const { symbol } = await params;
   const stockSymbol = symbol.toUpperCase();
   const company = companies[stockSymbol];
-  if (!company) {
+    if (!company) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">
       <div className="max-w-xl text-center">
@@ -79,37 +81,16 @@ export default async function CompanyPage({
               Company overview • Financials • Valuation • Technical analysis • Research
             </p>
           </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">Sample Market Price</p>
-
-            <div className="mt-2 flex flex-wrap items-end gap-4">
-              <p className="text-4xl font-bold">
-  ₹{company.currentPrice.toLocaleString("en-IN")}
-</p>
-
-              <p
-  className={`pb-1 font-semibold ${
-    company.changePercent >= 0
-      ? "text-emerald-400"
-      : "text-red-400"
-  }`}
->
-  {company.changePercent >= 0 ? "▲" : "▼"}{" "}
-  {Math.abs(company.changePercent).toFixed(2)}%
-</p>
-            </div>
-
-            <p className="mt-2 text-sm text-slate-500">
-              {company.companyName} • {company.sector}
-            </p>
-
-            <button className="mt-5 w-full rounded-xl border border-emerald-500 px-5 py-3 font-semibold text-emerald-400 transition hover:bg-emerald-500 hover:text-slate-950">
-              + Add to Watchlist
-            </button>
-          </div>
-        </div>
-      </div>
+<LivePriceCard
+  symbol={stockSymbol}
+  companyName={company.companyName}
+  sector={company.sector}
+  fallbackPrice={company.currentPrice}
+  fallbackChange={company.change}
+  fallbackChangePercent={company.changePercent}
+/>
+</div>
+    </div>
     </section>
     {/* Sticky Dashboard Navigation */}
 <nav className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur">
