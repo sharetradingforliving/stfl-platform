@@ -1,5 +1,6 @@
 import { companies } from "../../../data/companyData";
 import LivePriceCard from "./LivePriceCard";
+import BasicCompanyDashboard from "./BasicCompanyDashboard";
 
 type CompanyPageProps = {
   params: Promise<{
@@ -15,30 +16,9 @@ export default async function CompanyPage({
   const company = companies[stockSymbol];
     if (!company) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">
-      <div className="max-w-xl text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
-          STFL Company Research
-        </p>
-
-        <h1 className="mt-5 text-4xl font-bold">
-          Company Data Not Available
-        </h1>
-
-        <p className="mt-4 leading-7 text-slate-400">
-          We do not currently have company-specific data for{" "}
-          <span className="font-semibold text-white">{stockSymbol}</span>.
-          Please search for RELIANCE, TCS or INFY.
-        </p>
-
-        <a
-          href="/"
-          className="mt-8 inline-block rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-slate-950 transition hover:bg-emerald-400"
-        >
-          ← Back to Homepage
-        </a>
-      </div>
-    </main>
+    <BasicCompanyDashboard
+      symbol={stockSymbol}
+    />
   );
 }
 
