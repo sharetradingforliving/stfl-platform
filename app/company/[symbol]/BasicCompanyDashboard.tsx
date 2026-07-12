@@ -8,6 +8,7 @@ type BasicCompanyDashboardProps = {
 
 type MarketData = {
   symbol: string;
+  companyName: string;
   exchange: string;
   instrumentKey: string;
   currentPrice: number;
@@ -165,9 +166,13 @@ export default function BasicCompanyDashboard({
               </span>
             </div>
 
-            <p className="mt-5 text-slate-400">
-              Live market overview powered by Upstox
-            </p>
+            <p className="mt-5 text-lg font-medium text-slate-300">
+  {marketData.companyName}
+</p>
+
+<p className="mt-2 text-slate-400">
+  Live market overview powered by Upstox
+</p>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 lg:min-w-96">

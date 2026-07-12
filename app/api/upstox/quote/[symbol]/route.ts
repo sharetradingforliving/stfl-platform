@@ -48,6 +48,8 @@ const exactMatch = searchData.results?.find(
 );
 
 const instrumentKey = exactMatch?.instrumentKey;
+const companyName =
+  exactMatch?.companyName ?? stockSymbol;
 
 if (!instrumentKey) {
   return NextResponse.json(
@@ -136,6 +138,7 @@ const changePercent =
 
 return NextResponse.json({
   symbol: stockSymbol,
+  companyName,
   exchange: "NSE",
   instrumentKey,
 
