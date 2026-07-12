@@ -60,13 +60,72 @@ const [isSearching, setIsSearching] = useState(false);
   };
 }, [searchQuery]);
 
-  const handleSearch = () => {
-  if (!searchQuery.trim()) {
+  const handleSearch = async () => {
+  const trimmedQuery = searchQuery.trim();
+
+  if (!trimmedQuery) {
     alert("Please enter a stock name or symbol.");
     return;
   }
 
-  router.push(`/company/${searchQuery.trim().toLowerCase()}`);
+  try {
+    let availableResults = searchResults;
+
+    if (availableResults.length === 0) {
+      setIsSearching(true);
+
+      const response = await fetch(
+        `/api/upstox/instruments/search?q=${encodeURIComponent(
+          trimmedQuery
+        )}`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Unable to search for the stock"
+        );
+      }
+
+      const data = await response.json();
+
+      availableResults = data.results ?? [];
+    }
+
+    const exactSymbolMatch =
+      availableResults.find(
+        (stock) =>
+          stock.symbol.toUpperCase() ===
+          trimmedQuery.toUpperCase()
+      );
+
+    const selectedStock =
+      exactSymbolMatch ?? availableResults[0];
+
+    if (!selectedStock) {
+      alert(
+        "No matching NSE or BSE stock was found."
+      );
+      return;
+    }
+
+    setSearchQuery(selectedStock.symbol);
+    setSearchResults([]);
+
+    router.push(
+      `/company/${selectedStock.symbol.toLowerCase()}`
+    );
+  } catch (error) {
+    console.error(
+      "Homepage stock search error:",
+      error
+    );
+
+    alert(
+      "Unable to search for this stock. Please try again."
+    );
+  } finally {
+    setIsSearching(false);
+  }
 };
   return (
     <main id="top" className="min-h-screen bg-slate-950 text-white">
@@ -198,7 +257,7 @@ onChange={(e) => setSearchQuery(e.target.value)}
 >
     Search
   </button>
-  
+
   {searchQuery.trim().length >= 2 && (
   <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-80 overflow-y-auto rounded-2xl border border-slate-700 bg-slate-950 shadow-2xl">
     {isSearching ? (
