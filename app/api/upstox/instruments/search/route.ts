@@ -69,16 +69,29 @@ export async function GET(request: Request) {
     const results = instruments
       .filter((instrument) => {
         const exchange =
-          instrument.exchange?.toUpperCase();
+  instrument.exchange?.toUpperCase() ?? "";
 
-        const instrumentType =
-          instrument.instrument_type?.toUpperCase();
+const segment =
+  instrument.segment?.toUpperCase() ?? "";
 
-        const isSupportedExchange =
-          exchange === "NSE" || exchange === "BSE";
+const instrumentType =
+  instrument.instrument_type?.toUpperCase() ?? "";
 
-        const isEquity =
-          instrumentType === "EQ";
+const isNseEquity =
+  exchange === "NSE" ||
+  segment === "NSE_EQ";
+
+const isBseEquity =
+  exchange === "BSE" ||
+  segment === "BSE_EQ";
+
+const isSupportedExchange =
+  isNseEquity || isBseEquity;
+
+const isEquity =
+  instrumentType === "EQ" ||
+  segment === "NSE_EQ" ||
+  segment === "BSE_EQ";
 
         if (!isSupportedExchange || !isEquity) {
           return false;
@@ -124,7 +137,12 @@ export async function GET(request: Request) {
         symbol: instrument.trading_symbol,
         companyName:
           instrument.name ?? instrument.short_name,
-        exchange: instrument.exchange,
+        exchange:
+  instrument.segment?.toUpperCase() === "BSE_EQ"
+    ? "BSE"
+    : instrument.segment?.toUpperCase() === "NSE_EQ"
+      ? "NSE"
+      : instrument.exchange,
         instrumentKey: instrument.instrument_key,
         isin: instrument.isin,
       }));
