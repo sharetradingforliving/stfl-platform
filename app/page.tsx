@@ -18,6 +18,8 @@ const [searchResults, setSearchResults] = useState<
 >([]);
 
 const [isSearching, setIsSearching] = useState(false);
+const [selectedExchange, setSelectedExchange] =
+  useState<"NSE" | "BSE">("NSE");
   const router = useRouter(); 
   useEffect(() => {
   const trimmedQuery = searchQuery.trim();
@@ -46,7 +48,14 @@ const [isSearching, setIsSearching] = useState(false);
 
       const data = await response.json();
 
-      setSearchResults(data.results ?? []);
+      const exchangeResults = (
+  data.results ?? []
+).filter(
+  (stock: StockSearchResult) =>
+    stock.exchange === selectedExchange
+);
+
+setSearchResults(exchangeResults);
     } catch (error) {
       console.error("Stock search error:", error);
       setSearchResults([]);
@@ -58,7 +67,7 @@ const [isSearching, setIsSearching] = useState(false);
   return () => {
     clearTimeout(searchTimer);
   };
-}, [searchQuery]);
+}, [searchQuery, selectedExchange]);
 
   const handleSearch = async () => {
   const trimmedQuery = searchQuery.trim();
@@ -112,8 +121,8 @@ const [isSearching, setIsSearching] = useState(false);
     setSearchResults([]);
 
     router.push(
-      `/company/${selectedStock.symbol.toLowerCase()}`
-    );
+  `/company/${selectedStock.symbol.toLowerCase()}?exchange=${selectedExchange}`
+);
   } catch (error) {
     console.error(
       "Homepage stock search error:",
@@ -234,12 +243,43 @@ const [isSearching, setIsSearching] = useState(false);
             investment decisions with STFL.
           </p>
 {/* Universal Search */}
+
+<div className="mx-auto mt-8 flex max-w-2xl items-center justify-center gap-3">
+  <span className="mr-2 text-sm font-medium text-slate-400">
+    Select Exchange:
+  </span>
+
+  {(["NSE", "BSE"] as const).map((exchange) => (
+    <label
+      key={exchange}
+      className={`flex cursor-pointer items-center gap-2 rounded-full border px-5 py-2 text-sm font-semibold transition ${
+        selectedExchange === exchange
+          ? "border-emerald-400 bg-emerald-500/10 text-emerald-400"
+          : "border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-500"
+      }`}
+    >
+      <input
+        type="radio"
+        name="stockExchange"
+        value={exchange}
+        checked={selectedExchange === exchange}
+        onChange={() => {
+          setSelectedExchange(exchange);
+          setSearchResults([]);
+        }}
+        className="accent-emerald-500"
+      />
+
+      {exchange}
+    </label>
+  ))}
+</div>
 <form
 onSubmit={(e) => {
   e.preventDefault();
   handleSearch();
 }}
- className="relative mx-auto mt-10 flex max-w-2xl items-center rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-lg">
+ className="relative mx-auto mt-5 flex max-w-2xl items-center rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-lg">
   <span className="pl-4 text-xl">⌕</span>
 
   <input
@@ -274,8 +314,8 @@ onChange={(e) => setSearchQuery(e.target.value)}
             setSearchResults([]);
 
             router.push(
-              `/company/${stock.symbol.toLowerCase()}`
-            );
+  `/company/${stock.symbol.toLowerCase()}?exchange=${selectedExchange}`
+);
           }}
           className="flex w-full items-center justify-between gap-4 border-b border-slate-800 px-5 py-4 text-left transition last:border-b-0 hover:bg-slate-900"
         >

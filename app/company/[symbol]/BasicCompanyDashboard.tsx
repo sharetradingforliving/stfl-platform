@@ -1,11 +1,12 @@
 "use client";
-
+import ChartToolbar from "@/components/charts/ChartToolbar";
+import PriceChart from "@/components/charts/PriceChart";
 import { useEffect, useState } from "react";
 
 type BasicCompanyDashboardProps = {
   symbol: string;
+  exchange: "NSE" | "BSE";
 };
-
 type MarketData = {
   symbol: string;
   companyName: string;
@@ -26,13 +27,15 @@ type MarketData = {
 
 export default function BasicCompanyDashboard({
   symbol,
-}: BasicCompanyDashboardProps) {
-  const [marketData, setMarketData] =
+  exchange,
+}: BasicCompanyDashboardProps) {  const [marketData, setMarketData] =
     useState<MarketData | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
 
   const [error, setError] = useState("");
+
+const [timeframe, setTimeframe] = useState("D");
 
   useEffect(() => {
     async function fetchMarketData() {
@@ -41,12 +44,11 @@ export default function BasicCompanyDashboard({
         setError("");
 
         const response = await fetch(
-          `/api/upstox/quote/${symbol}`,
-          {
-            cache: "no-store",
-          }
-        );
-
+  `/api/upstox/quote/${symbol}?exchange=${exchange}`,
+  {
+    cache: "no-store",
+  }
+);
         const data = await response.json();
 
         if (!response.ok) {
@@ -74,7 +76,7 @@ export default function BasicCompanyDashboard({
     }
 
     fetchMarketData();
-  }, [symbol]);
+  }, [symbol, exchange]);
 
   function formatPrice(
     value: number | null | undefined
@@ -213,6 +215,67 @@ export default function BasicCompanyDashboard({
         </div>
 
         <div className="mt-12">
+            {/* ===================== STFL Research Terminal ===================== */}
+
+<div className="mt-12 rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
+
+  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+    <div>
+
+      <p className="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-400">
+        STFL Research Terminal
+      </p>
+
+      <h2 className="mt-2 text-3xl font-bold">
+        Interactive Professional Chart
+      </h2>
+
+      <p className="mt-2 text-slate-400">
+        Live TradingView chart with AI-powered research coming soon.
+      </p>
+
+    </div>
+
+    <div className="flex flex-wrap gap-3">
+
+      <button className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-black hover:bg-emerald-400">
+        🧠 STFL AI Research
+      </button>
+
+      <button className="rounded-xl border border-slate-700 px-5 py-3">
+        📊 Indicators
+      </button>
+
+      <button className="rounded-xl border border-slate-700 px-5 py-3">
+        🔍 Compare
+      </button>
+
+      <button className="rounded-xl border border-slate-700 px-5 py-3">
+        ⭐ Watchlist
+      </button>
+
+    </div>
+
+  </div>
+
+  <div className="mt-8">
+
+    <ChartToolbar
+    timeframe={timeframe}
+    onTimeframeChange={setTimeframe}
+/>
+
+<PriceChart
+  symbol={symbol}
+  instrumentKey={marketData.instrumentKey}
+  timeframe={timeframe}
+/>
+  </div>
+
+</div>
+
+{/* =============================================================== */}
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
             Market Snapshot
           </p>

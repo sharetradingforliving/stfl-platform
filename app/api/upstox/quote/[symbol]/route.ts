@@ -14,7 +14,12 @@ export async function GET(
   try {
     const { symbol } = await params;
     const stockSymbol = symbol.toUpperCase();
+const { searchParams } = new URL(request.url);
 
+const requestedExchange: "NSE" | "BSE" =
+  searchParams.get("exchange")?.toUpperCase() === "BSE"
+    ? "BSE"
+    : "NSE";
     const searchResponse = await fetch(
   `${new URL(request.url).origin}/api/upstox/instruments/search?q=${encodeURIComponent(
     stockSymbol
@@ -40,13 +45,15 @@ const searchData = await searchResponse.json();
 const exactMatch = searchData.results?.find(
   (instrument: {
     symbol?: string;
+    companyName?: string;
     exchange?: string;
     instrumentKey?: string;
   }) =>
-    instrument.symbol?.toUpperCase() === stockSymbol &&
-    instrument.exchange?.toUpperCase() === "NSE"
+    instrument.symbol?.toUpperCase() ===
+      stockSymbol &&
+    instrument.exchange?.toUpperCase() ===
+      requestedExchange
 );
-
 const instrumentKey = exactMatch?.instrumentKey;
 const companyName =
   exactMatch?.companyName ?? stockSymbol;
@@ -139,7 +146,7 @@ const changePercent =
 return NextResponse.json({
   symbol: stockSymbol,
   companyName,
-  exchange: "NSE",
+  exchange: requestedExchange,
   instrumentKey,
 
   currentPrice,
