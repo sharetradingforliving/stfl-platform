@@ -1,12 +1,65 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { marketTickerData } from "../data/marketTicker";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const router = useRouter();
+  type StockSearchResult = {
+  symbol: string;
+  companyName: string;
+  exchange: string;
+  instrumentKey: string;
+};
+
+const [searchResults, setSearchResults] = useState<
+  StockSearchResult[]
+>([]);
+
+const [isSearching, setIsSearching] = useState(false);
+  const router = useRouter(); 
+  useEffect(() => {
+  const trimmedQuery = searchQuery.trim();
+
+  if (trimmedQuery.length < 2) {
+    setSearchResults([]);
+    setIsSearching(false);
+    return;
+  }
+
+  const searchTimer = setTimeout(async () => {
+    try {
+      setIsSearching(true);
+
+      const response = await fetch(
+        `/api/upstox/instruments/search?q=${encodeURIComponent(
+          trimmedQuery
+        )}`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Unable to search the Upstox instrument master"
+        );
+      }
+
+      const data = await response.json();
+
+      setSearchResults(data.results ?? []);
+    } catch (error) {
+      console.error("Stock search error:", error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, 400);
+
+  return () => {
+    clearTimeout(searchTimer);
+  };
+}, [searchQuery]);
+
   const handleSearch = () => {
   if (!searchQuery.trim()) {
     alert("Please enter a stock name or symbol.");
@@ -127,7 +180,7 @@ onSubmit={(e) => {
   e.preventDefault();
   handleSearch();
 }}
- className="mx-auto mt-10 flex max-w-2xl items-center rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-lg">
+ className="relative mx-auto mt-10 flex max-w-2xl items-center rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-lg">
   <span className="pl-4 text-xl">⌕</span>
 
   <input
@@ -145,6 +198,50 @@ onChange={(e) => setSearchQuery(e.target.value)}
 >
     Search
   </button>
+  
+  {searchQuery.trim().length >= 2 && (
+  <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-80 overflow-y-auto rounded-2xl border border-slate-700 bg-slate-950 shadow-2xl">
+    {isSearching ? (
+      <p className="px-5 py-4 text-sm text-slate-400">
+        Searching stocks...
+      </p>
+    ) : searchResults.length > 0 ? (
+      searchResults.map((stock) => (
+        <button
+          key={`${stock.exchange}-${stock.instrumentKey}`}
+          type="button"
+          onClick={() => {
+            setSearchQuery(stock.symbol);
+            setSearchResults([]);
+
+            router.push(
+              `/company/${stock.symbol.toLowerCase()}`
+            );
+          }}
+          className="flex w-full items-center justify-between gap-4 border-b border-slate-800 px-5 py-4 text-left transition last:border-b-0 hover:bg-slate-900"
+        >
+          <div>
+            <p className="font-semibold text-white">
+              {stock.symbol}
+            </p>
+
+            <p className="mt-1 text-sm text-slate-400">
+              {stock.companyName}
+            </p>
+          </div>
+
+          <span className="rounded-full border border-emerald-500/40 px-3 py-1 text-xs font-semibold text-emerald-400">
+            {stock.exchange}
+          </span>
+        </button>
+      ))
+    ) : (
+      <p className="px-5 py-4 text-sm text-slate-400">
+        No matching NSE or BSE stocks found.
+      </p>
+    )}
+  </div>
+)}
 </form>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <button className="rounded-xl bg-emerald-500 px-8 py-4 font-semibold text-slate-950 transition hover:bg-emerald-400">
