@@ -113,25 +113,67 @@ const isEquity =
         );
       })
             .sort((a, b) => {
-        const symbolA =
-          a.trading_symbol?.toUpperCase() ?? "";
+  const symbolA =
+    a.trading_symbol?.toUpperCase() ?? "";
 
-        const symbolB =
-          b.trading_symbol?.toUpperCase() ?? "";
+  const symbolB =
+    b.trading_symbol?.toUpperCase() ?? "";
 
-        const aIsExact = symbolA === query;
-        const bIsExact = symbolB === query;
+  const nameA = (
+    a.name ??
+    a.short_name ??
+    ""
+  ).toUpperCase();
 
-        if (aIsExact && !bIsExact) {
-          return -1;
-        }
+  const nameB = (
+    b.name ??
+    b.short_name ??
+    ""
+  ).toUpperCase();
 
-        if (!aIsExact && bIsExact) {
-          return 1;
-        }
+  const getMatchScore = (
+    symbol: string,
+    companyName: string
+  ) => {
+    if (symbol === query) {
+      return 1;
+    }
 
-        return symbolA.localeCompare(symbolB);
-      })
+    if (symbol.startsWith(query)) {
+      return 2;
+    }
+
+    if (companyName.startsWith(query)) {
+      return 3;
+    }
+
+    if (symbol.includes(query)) {
+      return 4;
+    }
+
+    if (companyName.includes(query)) {
+      return 5;
+    }
+
+    return 6;
+  };
+
+  const scoreA = getMatchScore(
+    symbolA,
+    nameA
+  );
+
+  const scoreB = getMatchScore(
+    symbolB,
+    nameB
+  );
+
+  if (scoreA !== scoreB) {
+    return scoreA - scoreB;
+  }
+
+  return symbolA.localeCompare(symbolB);
+})
       .slice(0, 20)
       .map((instrument) => ({
         symbol: instrument.trading_symbol,
