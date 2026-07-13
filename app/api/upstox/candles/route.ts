@@ -37,7 +37,7 @@ const timeframeMap: Record<
   D: {
     unit: "days",
     interval: "1",
-    days: 365,
+    days: 1500,
   },
   W: {
     unit: "weeks",

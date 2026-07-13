@@ -24,6 +24,12 @@ type MarketData = {
   lastUpdated: string | null;
   source: string;
 };
+type ChartCommand =
+  | "moveLeft"
+  | "moveRight"
+  | "zoomIn"
+  | "zoomOut"
+  | "reset";
 
 export default function BasicCompanyDashboard({
   symbol,
@@ -36,7 +42,31 @@ export default function BasicCompanyDashboard({
   const [error, setError] = useState("");
 
 const [timeframe, setTimeframe] = useState("D");
-
+const [activeIndicators, setActiveIndicators] =
+  useState<string[]>([]);
+  const [chartCommand, setChartCommand] =
+  useState<{
+    action: ChartCommand;
+    id: number;
+  } | null>(null);
+  function handleIndicatorToggle(indicator: string) {
+  setActiveIndicators((currentIndicators) =>
+    currentIndicators.includes(indicator)
+      ? currentIndicators.filter(
+          (currentIndicator) =>
+            currentIndicator !== indicator
+        )
+      : [...currentIndicators, indicator]
+  );
+}
+function handleChartCommand(
+  action: ChartCommand
+) {
+  setChartCommand({
+    action,
+    id: Date.now(),
+  });
+}
   useEffect(() => {
     async function fetchMarketData() {
       try {
@@ -232,7 +262,7 @@ const [timeframe, setTimeframe] = useState("D");
       </h2>
 
       <p className="mt-2 text-slate-400">
-        Live TradingView chart with AI-powered research coming soon.
+        Professional market chart powered by Upstox data and STFL AI research.
       </p>
 
     </div>
@@ -243,18 +273,7 @@ const [timeframe, setTimeframe] = useState("D");
         🧠 STFL AI Research
       </button>
 
-      <button className="rounded-xl border border-slate-700 px-5 py-3">
-        📊 Indicators
-      </button>
-
-      <button className="rounded-xl border border-slate-700 px-5 py-3">
-        🔍 Compare
-      </button>
-
-      <button className="rounded-xl border border-slate-700 px-5 py-3">
-        ⭐ Watchlist
-      </button>
-
+      
     </div>
 
   </div>
@@ -262,14 +281,19 @@ const [timeframe, setTimeframe] = useState("D");
   <div className="mt-8">
 
     <ChartToolbar
-    timeframe={timeframe}
-    onTimeframeChange={setTimeframe}
+  timeframe={timeframe}
+  onTimeframeChange={setTimeframe}
+  activeIndicators={activeIndicators}
+  onIndicatorToggle={handleIndicatorToggle}
+  onChartCommand={handleChartCommand}
 />
 
 <PriceChart
   symbol={symbol}
   instrumentKey={marketData.instrumentKey}
   timeframe={timeframe}
+  activeIndicators={activeIndicators}
+  chartCommand={chartCommand}
 />
   </div>
 
