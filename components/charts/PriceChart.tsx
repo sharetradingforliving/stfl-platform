@@ -22,6 +22,7 @@ type PriceChartProps = {
   instrumentKey: string;
   timeframe: string;
   activeIndicators: string[];
+  activeDrawingTool: string | null;
    chartCommand: {
     action: ChartCommand;
     id: number;
@@ -144,8 +145,8 @@ export default function PriceChart({
   instrumentKey,
   timeframe,
   activeIndicators,
-  chartCommand,
-}: PriceChartProps) {
+    activeDrawingTool,
+  }: PriceChartProps) {
       const chartRef = useRef<HTMLDivElement>(null);
       const chartInstanceRef = useRef<ReturnType<
   typeof createChart
@@ -511,6 +512,24 @@ function resetChartView() {
 
   return (
   <div className="w-full">
+    {/* Active Drawing Tool Status */}
+{activeDrawingTool === "fibonacci" && (
+  <div className="mb-3 flex items-center justify-between rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3">
+    <div>
+      <p className="text-sm font-semibold text-emerald-400">
+        📐 Fibonacci Retracement Mode Active
+      </p>
+
+      <p className="mt-1 text-xs text-slate-400">
+        Click the first point on the chart, then click the second point.
+      </p>
+    </div>
+
+    <span className="rounded-lg bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-400">
+      Drawing Mode
+    </span>
+  </div>
+)}
 
     {/* STFL OHLC Information Bar */}
     <div className="mb-3 flex min-h-[42px] flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-2 text-sm">

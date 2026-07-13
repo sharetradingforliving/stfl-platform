@@ -44,6 +44,8 @@ export default function BasicCompanyDashboard({
 const [timeframe, setTimeframe] = useState("D");
 const [activeIndicators, setActiveIndicators] =
   useState<string[]>([]);
+  const [activeDrawingTool, setActiveDrawingTool] =
+  useState<string | null>(null);
   const [chartCommand, setChartCommand] =
   useState<{
     action: ChartCommand;
@@ -285,6 +287,7 @@ function handleChartCommand(
   onTimeframeChange={setTimeframe}
   activeIndicators={activeIndicators}
   onIndicatorToggle={handleIndicatorToggle}
+  onDrawingToolSelect={setActiveDrawingTool}
   onChartCommand={handleChartCommand}
 />
 
@@ -293,6 +296,7 @@ function handleChartCommand(
   instrumentKey={marketData.instrumentKey}
   timeframe={timeframe}
   activeIndicators={activeIndicators}
+  activeDrawingTool={activeDrawingTool}
   chartCommand={chartCommand}
 />
   </div>

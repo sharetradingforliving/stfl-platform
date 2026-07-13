@@ -14,6 +14,9 @@ type ChartToolbarProps = {
   activeIndicators: string[];
   onIndicatorToggle: (indicator: string) => void;
   onChartCommand: (action: ChartCommand) => void;
+  onDrawingToolSelect: (tool: string) => void;
+  isCrosshairActive: boolean;
+onCrosshairToggle: () => void;
 };
 const timeframes = [
   "1m",
@@ -32,15 +35,43 @@ export default function ChartToolbar({
   onTimeframeChange,
   activeIndicators,
   onIndicatorToggle,
+  onDrawingToolSelect,
+  isCrosshairActive,
+onCrosshairToggle,
   onChartCommand,
 }: ChartToolbarProps) {
   const [isIndicatorMenuOpen, setIsIndicatorMenuOpen] =
     useState(false);
 
+    const [isDrawingMenuOpen, setIsDrawingMenuOpen] =
+  useState(false);
+
+  const drawingCloseTimer =
+  useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   const indicatorCloseTimer =
-    useRef<ReturnType<typeof setTimeout> | null>(
-      null
-    );
+  useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+function keepDrawingMenuOpen() {
+  if (drawingCloseTimer.current) {
+    clearTimeout(drawingCloseTimer.current);
+    drawingCloseTimer.current = null;
+  }
+}
+
+function closeDrawingMenuWithDelay() {
+  if (drawingCloseTimer.current) {
+    clearTimeout(drawingCloseTimer.current);
+  }
+
+  drawingCloseTimer.current = setTimeout(() => {
+    setIsDrawingMenuOpen(false);
+    drawingCloseTimer.current = null;
+  }, 2500);
+}
 
   function keepIndicatorMenuOpen() {
     if (indicatorCloseTimer.current) {
@@ -211,10 +242,126 @@ export default function ChartToolbar({
 </div>
 
                   
-<button className="rounded-lg border border-slate-700 px-4 py-2 hover:bg-slate-800">
-          ✏ Drawing
-        </button>
+{/* Drawing Tools */}
+<div
+  className="relative"
+  onMouseEnter={keepDrawingMenuOpen}
+  onMouseLeave={closeDrawingMenuWithDelay}
+>
+  <button
+    type="button"
+    onClick={() => {
+  keepDrawingMenuOpen();
 
+  setIsDrawingMenuOpen(
+    (currentValue) => !currentValue
+  );
+}}
+    className="rounded-xl border border-slate-700 px-5 py-3 transition hover:border-emerald-500 hover:bg-slate-800 hover:text-emerald-400"
+  >
+    ✏ Drawing
+  </button>
+
+  {isDrawingMenuOpen && (
+    <div className="absolute right-0 top-full z-[1000] mt-2 w-72 rounded-2xl border border-slate-700 bg-slate-950 p-3 shadow-2xl">
+      <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+        Drawing Tools
+      </p>
+
+      <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">
+        Fibonacci Tools
+      </p>
+
+      <button
+        type="button"
+        onClick={() => {
+  onDrawingToolSelect("fibonacci");
+  setIsDrawingMenuOpen(false);
+}}
+        className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-emerald-400"
+      >
+        📐 Fibonacci Retracement
+      </button>
+
+      <button
+        type="button"
+        className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-emerald-400"
+      >
+        📈 Fibonacci Extension
+      </button>
+
+      <button
+        type="button"
+        className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-emerald-400"
+      >
+        🕒 Fibonacci Time Zones
+      </button>
+
+      <div className="my-2 border-t border-slate-800" />
+
+      <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">
+        Lines
+      </p>
+
+      <button
+        type="button"
+        className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-emerald-400"
+      >
+        ╱ Trend Line
+      </button>
+
+      <button
+        type="button"
+        className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-emerald-400"
+      >
+        ━ Horizontal Line
+      </button>
+
+      <button
+        type="button"
+        className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-emerald-400"
+      >
+        ┃ Vertical Line
+      </button>
+
+      <div className="my-2 border-t border-slate-800" />
+
+      <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">
+        Shapes & Notes
+      </p>
+
+      <button
+        type="button"
+        className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-emerald-400"
+      >
+        ▭ Rectangle / Zone
+      </button>
+
+      <button
+        type="button"
+        className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 hover:text-emerald-400"
+      >
+        📝 Text / Note
+      </button>
+    </div>
+  )}
+</div>
+<button
+  type="button"
+  onClick={onCrosshairToggle}
+  title={
+    isCrosshairActive
+      ? "Disable crosshair"
+      : "Enable crosshair"
+  }
+  className={`rounded-xl border px-5 py-3 transition ${
+    isCrosshairActive
+      ? "border-emerald-500 bg-emerald-500/15 text-emerald-400"
+      : "border-slate-700 hover:border-emerald-500 hover:bg-slate-800 hover:text-emerald-400"
+  }`}
+>
+  ✚ Crosshair
+</button>
         <button className="rounded-lg border border-slate-700 px-4 py-2 hover:bg-slate-800">
           🔍 Compare
         </button>
