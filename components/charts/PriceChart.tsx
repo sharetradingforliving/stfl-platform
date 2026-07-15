@@ -6,6 +6,7 @@ import {
   HistogramSeries,
   LineSeries,
   ColorType,
+  CrosshairMode,
   type Time,
 } from "lightweight-charts";
 import { useEffect, useRef, useState } from "react";
@@ -23,6 +24,7 @@ type PriceChartProps = {
   timeframe: string;
   activeIndicators: string[];
   activeDrawingTool: string | null;
+  isCrosshairActive: boolean;
    chartCommand: {
     action: ChartCommand;
     id: number;
@@ -37,6 +39,11 @@ type CrosshairData = {
   close: number;
   volume: number;
 } | null;
+
+type FibonacciPoint = {
+  time: number;
+  price: number;
+};
 
 function formatVolume(volume: number) {
   if (volume >= 10_000_000) {
@@ -146,6 +153,7 @@ export default function PriceChart({
   timeframe,
   activeIndicators,
     activeDrawingTool,
+    isCrosshairActive,
   }: PriceChartProps) {
       const chartRef = useRef<HTMLDivElement>(null);
       const chartInstanceRef = useRef<ReturnType<
@@ -158,13 +166,28 @@ const [error, setError] = useState("");
 const [crosshairData, setCrosshairData] =
   useState<CrosshairData>(null);
 
+  const [fibonacciPoints, setFibonacciPoints] =
+  useState<FibonacciPoint[]>([]);
+
+const activeDrawingToolRef =
+  useRef<string | null>(activeDrawingTool);
+
+const fibonacciPointsRef =
+  useRef<FibonacciPoint[]>([]);
+
+
   useEffect(() => {
     if (!chartRef.current) return;
 
     const chart = createChart(chartRef.current, {
   width: chartRef.current.clientWidth,
-  height: 700,
-
+  height: 540,
+  
+  crosshair: {
+  mode: isCrosshairActive
+    ? CrosshairMode.Normal
+    : CrosshairMode.Hidden,
+},
   layout: {
     background: {
       color: "#020817",
@@ -402,6 +425,122 @@ chart.subscribeCrosshairMove((param) => {
   volume: matchingCandle?.volume ?? 0,
 });
 });
+chart.subscribeClick((param) => {
+  if (
+    activeDrawingToolRef.current !==
+    "fibonacci"
+  ) {
+    return;
+  }
+
+  if (!param.point || !param.time) {
+    return;
+  }
+
+  const clickedPrice =
+    candleSeries.coordinateToPrice(
+      param.point.y
+    );
+
+  if (clickedPrice === null) {
+    return;
+  }
+
+  const newPoint: FibonacciPoint = {
+    time: Number(param.time),
+    price: clickedPrice,
+  };
+
+  const currentPoints =
+    fibonacciPointsRef.current;
+
+  if (currentPoints.length === 0) {
+    fibonacciPointsRef.current = [
+      newPoint,
+    ];
+
+    setFibonacciPoints([newPoint]);
+
+    return;
+  }
+
+  const completedPoints = [
+    currentPoints[0],
+    newPoint,
+  ];
+
+  fibonacciPointsRef.current =
+    completedPoints;
+
+  setFibonacciPoints(
+    completedPoints
+  );
+
+  const startPrice =
+  completedPoints[0].price;
+
+const endPrice =
+  completedPoints[1].price;
+
+const priceDifference =
+  endPrice - startPrice;
+
+const fibonacciLevels = [
+  {
+    ratio: 0,
+    label: "0%",
+    color: "#14532d",
+  },
+  {
+    ratio: 0.236,
+    label: "23.6%",
+    color: "#166534",
+  },
+  {
+    ratio: 0.382,
+    label: "38.2%",
+    color: "#15803d",
+  },
+  {
+    ratio: 0.5,
+    label: "50%",
+    color: "#22c55e",
+  },
+  {
+    ratio: 0.618,
+    label: "61.8%",
+    color: "#4ade80",
+  },
+  {
+    ratio: 0.786,
+    label: "78.6%",
+    color: "#86efac",
+  },
+  {
+    ratio: 1,
+    label: "100%",
+    color: "#bbf7d0",
+  },
+];
+
+fibonacciLevels.forEach(
+  ({ ratio, label, color }) => {
+    const levelPrice =
+      startPrice +
+      priceDifference * ratio;
+
+    candleSeries.createPriceLine({
+      price: levelPrice,
+      title: `Fib ${label}`,
+      color,
+      lineWidth: 1,
+      lineStyle: 2,
+      axisLabelVisible: true,
+    });
+  }
+);
+  
+});
 
     const visibleCandleCount = 250;
 
@@ -432,6 +571,28 @@ chart.timeScale().fitContent();
 
     return () => chart.remove();
   }, [symbol, instrumentKey, timeframe, activeIndicators]);
+  useEffect(() => {
+  if (!chartInstanceRef.current) return;
+
+  chartInstanceRef.current.applyOptions({
+    crosshair: {
+      mode: isCrosshairActive
+        ? CrosshairMode.Normal
+        : CrosshairMode.Hidden,
+    },
+  });
+}, [isCrosshairActive]);
+
+useEffect(() => {
+  activeDrawingToolRef.current =
+    activeDrawingTool;
+
+  if (activeDrawingTool !== "fibonacci") {
+    fibonacciPointsRef.current = [];
+    setFibonacciPoints([]);
+  }
+}, [activeDrawingTool]);
+
 function moveChartLeft() {
   const chart = chartInstanceRef.current;
 
@@ -513,7 +674,8 @@ function resetChartView() {
   return (
   <div className="w-full">
     {/* Active Drawing Tool Status */}
-{activeDrawingTool === "fibonacci" && (
+{activeDrawingTool === "fibonacci" &&
+  fibonacciPoints.length < 2 && (
   <div className="mb-3 flex items-center justify-between rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3">
     <div>
       <p className="text-sm font-semibold text-emerald-400">
@@ -521,7 +683,11 @@ function resetChartView() {
       </p>
 
       <p className="mt-1 text-xs text-slate-400">
-        Click the first point on the chart, then click the second point.
+        {fibonacciPoints.length === 0
+  ? "Click the first point on the chart."
+  : fibonacciPoints.length === 1
+    ? "First point selected. Now click the second point."
+    : "Two Fibonacci points selected successfully."}
       </p>
     </div>
 
@@ -629,7 +795,7 @@ function resetChartView() {
 <div className="group relative w-full">
   <div
     ref={chartRef}
-    className="h-[700px] w-full rounded-2xl"
+    className="h-[540px] w-full rounded-2xl"
   />
 {/* Left navigation button */}
 <button

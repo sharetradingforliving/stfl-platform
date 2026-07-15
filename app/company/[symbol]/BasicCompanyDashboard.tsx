@@ -1,6 +1,8 @@
 "use client";
 import ChartToolbar from "@/components/charts/ChartToolbar";
 import PriceChart from "@/components/charts/PriceChart";
+import CompanySearch from "@/components/search/CompanySearch";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type BasicCompanyDashboardProps = {
@@ -44,8 +46,12 @@ export default function BasicCompanyDashboard({
 const [timeframe, setTimeframe] = useState("D");
 const [activeIndicators, setActiveIndicators] =
   useState<string[]>([]);
+  const [isCrosshairActive, setIsCrosshairActive] =
+  useState(false);
   const [activeDrawingTool, setActiveDrawingTool] =
   useState<string | null>(null);
+  const [isChartFullscreen, setIsChartFullscreen] =
+  useState(false);
   const [chartCommand, setChartCommand] =
   useState<{
     action: ChartCommand;
@@ -80,7 +86,7 @@ function handleChartCommand(
   {
     cache: "no-store",
   }
-);
+  );
         const data = await response.json();
 
         if (!response.ok) {
@@ -109,6 +115,12 @@ function handleChartCommand(
 
     fetchMarketData();
   }, [symbol, exchange]);
+
+  function handleChartFullscreen() {
+  setIsChartFullscreen(
+    (currentValue) => !currentValue
+  );
+}
 
   function formatPrice(
     value: number | null | undefined
@@ -175,14 +187,26 @@ function handleChartCommand(
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <header className="border-b border-slate-800 px-6 py-5">
-        <a
-          href="/"
-          className="text-sm font-semibold text-slate-400 transition hover:text-emerald-400"
-        >
-          ← Back to Home
-        </a>
+        
+        <section className="border-b border-slate-800 bg-[#020817] px-5 py-5">
+  <div className="mx-auto max-w-7xl">
+
+    <Link
+      href="/company-research"
+      className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-400 transition hover:text-emerald-400"
+    >
+      <span>←</span>
+      <span>Company Research</span>
+    </Link>
+
+    <CompanySearch variant="compact" />
+
+  </div>
+</section>
+
       </header>
 
+      
       <section className="mx-auto max-w-7xl px-6 py-14">
         <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
           <div>
@@ -264,7 +288,7 @@ function handleChartCommand(
       </h2>
 
       <p className="mt-2 text-slate-400">
-        Professional market chart powered by Upstox data and STFL AI research.
+        Professional market powered by Upstox data and STFL AI research.
       </p>
 
     </div>
@@ -288,6 +312,14 @@ function handleChartCommand(
   activeIndicators={activeIndicators}
   onIndicatorToggle={handleIndicatorToggle}
   onDrawingToolSelect={setActiveDrawingTool}
+  isCrosshairActive={isCrosshairActive}
+  isChartFullscreen={isChartFullscreen}
+onFullscreenToggle={handleChartFullscreen}
+onCrosshairToggle={() =>
+  setIsCrosshairActive(
+    (currentValue) => !currentValue
+  )
+}
   onChartCommand={handleChartCommand}
 />
 
@@ -297,6 +329,7 @@ function handleChartCommand(
   timeframe={timeframe}
   activeIndicators={activeIndicators}
   activeDrawingTool={activeDrawingTool}
+  isCrosshairActive={isCrosshairActive}
   chartCommand={chartCommand}
 />
   </div>
@@ -304,7 +337,7 @@ function handleChartCommand(
 </div>
 
 {/* =============================================================== */}
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+          <p className="mt-12 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
             Market Snapshot
           </p>
 

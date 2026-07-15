@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { marketTickerData } from "../data/marketTicker";
+import PlatformModules from "@/components/home/PlatformModules";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   type StockSearchResult = {
@@ -18,9 +19,62 @@ const [searchResults, setSearchResults] = useState<
 >([]);
 
 const [isSearching, setIsSearching] = useState(false);
+const [activeResultIndex, setActiveResultIndex] = useState(-1);
 const [selectedExchange, setSelectedExchange] =
   useState<"NSE" | "BSE">("NSE");
   const router = useRouter(); 
+  function handleSearchKeyDown(
+  event: React.KeyboardEvent<HTMLInputElement>
+) {
+  if (searchResults.length === 0) {
+    return;
+  }
+
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+
+    setActiveResultIndex((currentIndex) =>
+      currentIndex < searchResults.length - 1
+        ? currentIndex + 1
+        : 0
+    );
+  }
+
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+
+    setActiveResultIndex((currentIndex) =>
+      currentIndex > 0
+        ? currentIndex - 1
+        : searchResults.length - 1
+    );
+  }
+
+  if (event.key === "Enter") {
+    event.preventDefault();
+
+    const selectedStock =
+      searchResults[
+        activeResultIndex >= 0
+          ? activeResultIndex
+          : 0
+      ];
+
+    if (selectedStock) {
+      setSearchQuery(selectedStock.symbol);
+      setSearchResults([]);
+
+      router.push(
+        `/company/${selectedStock.symbol.toLowerCase()}?exchange=${selectedStock.exchange}`
+      );
+    }
+  }
+
+  if (event.key === "Escape") {
+    setSearchResults([]);
+    setActiveResultIndex(-1);
+  }
+}
   useEffect(() => {
   const trimmedQuery = searchQuery.trim();
 
@@ -138,66 +192,14 @@ setSearchResults(exchangeResults);
 };
   return (
     <main id="top" className="min-h-screen bg-slate-950 text-white">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-950/95">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-          {/* STFL Logo */}
-          <div className="flex items-center">
-            <Image
-              src="/sharetradingforlivingwithoutbg.png"
-              alt="Share Trading For Living"
-              width={150}
-              height={90}
-              priority
-              className="h-20 w-auto scale-125"
-            />
-          </div>
-
-          {/* Navigation */}
-          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-300 lg:flex">
-            <a href="#top" className="text-emerald-400">
-              Home
-            </a>
-            <a href="#markets" className="transition hover:text-emerald-400">
-              Markets
-            </a>
-            <a href="#stock-research" className="transition hover:text-emerald-400">
-              Stock Research
-            </a>
-            <a href="#technical-analysis" className="transition hover:text-emerald-400">
-              Technical Analysis
-            </a>
-            <a href="#" className="transition hover:text-emerald-400">
-              IPO
-            </a>
-            <a href="#" className="transition hover:text-emerald-400">
-              Mutual Funds
-            </a>
-            <a href="#acadmeys" className="transition hover:text-emerald-400">
-              Academy
-            </a>
-            <a href="#" className="transition hover:text-emerald-400">
-  Blog
-</a>
-          </nav>
-
-          {/* Login and Premium */}
-          <div className="flex items-center gap-3">
-            <button className="hidden px-4 py-2 text-sm font-semibold text-slate-300 transition hover:text-white sm:block">
-              Login
-            </button>
-
-            <a
-  href="#premium"
-  className="rounded-lg bg-emerald-500 px-5 py-2.5 font-semibold text-slate-950 transition hover:bg-emerald-400"
->
-  Premium
-</a>
-          </div>
-        </div>
-      </header>
+      
 {/* Continuous Market Ticker */}
 <section className="overflow-hidden border-y border-slate-800 bg-slate-900">
+  <div className="border-b border-slate-800 px-4 py-1 text-right">
+  <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400">
+    Demo Data • Live Market Integration In Development
+  </span>
+</div>
   <div className="market-ticker-track py-4 text-sm">
 
     {[...marketTickerData, ...marketTickerData].map(
@@ -287,6 +289,7 @@ onSubmit={(e) => {
     placeholder="Search stocks, indices, IPOs or mutual funds..."
     value={searchQuery}
 onChange={(e) => setSearchQuery(e.target.value)}
+onKeyDown={handleSearchKeyDown}
     className="w-full bg-transparent px-4 py-3 text-white outline-none placeholder:text-slate-500"
   />
 
@@ -305,7 +308,7 @@ onChange={(e) => setSearchQuery(e.target.value)}
         Searching stocks...
       </p>
     ) : searchResults.length > 0 ? (
-      searchResults.map((stock) => (
+      searchResults.map((stock, index) => (
         <button
           key={`${stock.exchange}-${stock.instrumentKey}`}
           type="button"
@@ -317,7 +320,11 @@ onChange={(e) => setSearchQuery(e.target.value)}
   `/company/${stock.symbol.toLowerCase()}?exchange=${selectedExchange}`
 );
           }}
-          className="flex w-full items-center justify-between gap-4 border-b border-slate-800 px-5 py-4 text-left transition last:border-b-0 hover:bg-slate-900"
+          className={`flex w-full items-center justify-between gap-4 border-b border-slate-800 px-5 py-4 text-left transition last:border-b-0 ${
+  activeResultIndex === index
+    ? "bg-emerald-500/15"
+    : "hover:bg-emerald-500/10"
+}`}
         >
           <div>
             <p className="font-semibold text-white">
@@ -933,6 +940,7 @@ onChange={(e) => setSearchQuery(e.target.value)}
     </div>
   </div>
 </section>
+<PlatformModules />
 {/* Footer */}
 <footer className="border-t border-slate-800 bg-slate-950 px-6 pt-16">
   <div className="mx-auto max-w-7xl">
@@ -1055,6 +1063,7 @@ onChange={(e) => setSearchQuery(e.target.value)}
       </p>
     </div>
   </div>
+  
 </footer>
 
          </main>

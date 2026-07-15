@@ -15,6 +15,8 @@ type ChartToolbarProps = {
   onIndicatorToggle: (indicator: string) => void;
   onChartCommand: (action: ChartCommand) => void;
   onDrawingToolSelect: (tool: string) => void;
+  isChartFullscreen: boolean;
+onFullscreenToggle: () => void;
   isCrosshairActive: boolean;
 onCrosshairToggle: () => void;
 };
@@ -39,6 +41,8 @@ export default function ChartToolbar({
   isCrosshairActive,
 onCrosshairToggle,
   onChartCommand,
+  isChartFullscreen,
+onFullscreenToggle,
 }: ChartToolbarProps) {
   const [isIndicatorMenuOpen, setIsIndicatorMenuOpen] =
     useState(false);
@@ -370,9 +374,19 @@ function closeDrawingMenuWithDelay() {
           ⭐ Watchlist
         </button>
 
-        <button className="rounded-lg border border-slate-700 px-4 py-2 hover:bg-slate-800">
-          ⛶ Fullscreen
-        </button>
+        <button
+  type="button"
+  onClick={onFullscreenToggle}
+  className={`rounded-xl border px-5 py-3 transition ${
+    isChartFullscreen
+      ? "border-emerald-500 bg-emerald-500/15 text-emerald-400"
+      : "border-slate-700 hover:border-emerald-500 hover:text-emerald-400"
+  }`}   
+>
+  {isChartFullscreen
+    ? "⛶ Exit Fullscreen"
+    : "⛶ Fullscreen"}
+</button>
 
       </div>
 
