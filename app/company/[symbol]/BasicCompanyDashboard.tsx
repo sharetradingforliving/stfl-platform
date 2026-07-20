@@ -3,6 +3,7 @@ import ChartToolbar from "@/components/charts/ChartToolbar";
 import PriceChart from "@/components/charts/PriceChart";
 import CompanySearch from "@/components/search/CompanySearch";
 import Link from "next/link";
+import InvestmentSummary from "@/components/company/InvestmentSummary";
 import { useEffect, useState } from "react";
 
 type BasicCompanyDashboardProps = {
@@ -306,32 +307,45 @@ function handleChartCommand(
 
   <div className="mt-8">
 
-    <ChartToolbar
-  timeframe={timeframe}
-  onTimeframeChange={setTimeframe}
-  activeIndicators={activeIndicators}
-  onIndicatorToggle={handleIndicatorToggle}
-  onDrawingToolSelect={setActiveDrawingTool}
-  isCrosshairActive={isCrosshairActive}
-  isChartFullscreen={isChartFullscreen}
-onFullscreenToggle={handleChartFullscreen}
-onCrosshairToggle={() =>
-  setIsCrosshairActive(
-    (currentValue) => !currentValue
-  )
-}
-  onChartCommand={handleChartCommand}
-/>
+  <ChartToolbar
+    timeframe={timeframe}
+    onTimeframeChange={setTimeframe}
+    activeIndicators={activeIndicators}
+    onIndicatorToggle={handleIndicatorToggle}
+    onDrawingToolSelect={setActiveDrawingTool}
+    isCrosshairActive={isCrosshairActive}
+    isChartFullscreen={isChartFullscreen}
+    onFullscreenToggle={handleChartFullscreen}
+    onCrosshairToggle={() =>
+      setIsCrosshairActive(
+        (currentValue) => !currentValue
+      )
+    }
+    onChartCommand={handleChartCommand}
+  />
 
-<PriceChart
-  symbol={symbol}
-  instrumentKey={marketData.instrumentKey}
-  timeframe={timeframe}
-  activeIndicators={activeIndicators}
-  activeDrawingTool={activeDrawingTool}
-  isCrosshairActive={isCrosshairActive}
-  chartCommand={chartCommand}
-/>
+  <div className="mt-6 grid grid-cols-1 xl:grid-cols-10 gap-6">
+
+    <div className="xl:col-span-7">
+
+      <PriceChart
+        symbol={symbol}
+        instrumentKey={marketData.instrumentKey}
+        timeframe={timeframe}
+        activeIndicators={activeIndicators}
+        activeDrawingTool={activeDrawingTool}
+        isCrosshairActive={isCrosshairActive}
+        chartCommand={chartCommand}
+      />
+
+    </div>
+
+    <div className="xl:col-span-3">
+
+      <InvestmentSummary />
+
+    </div>
+
   </div>
 
 </div>
@@ -413,6 +427,7 @@ onCrosshairToggle={() =>
             this company. Live market information is
             provided through Upstox.
           </p>
+        </div>
         </div>
       </section>
     </main>
