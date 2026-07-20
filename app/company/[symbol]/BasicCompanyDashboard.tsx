@@ -4,6 +4,8 @@ import PriceChart from "@/components/charts/PriceChart";
 import CompanySearch from "@/components/search/CompanySearch";
 import Link from "next/link";
 import InvestmentSummary from "@/components/company/InvestmentSummary";
+import MarketSnapshotCard from "@/components/company/MarketSnapshotCard";
+import TechnicalsCard from "@/components/company/TechnicalsCard";
 import { useEffect, useState } from "react";
 
 type BasicCompanyDashboardProps = {
@@ -342,9 +344,9 @@ function handleChartCommand(
 
     <div className="xl:col-span-3">
 
-      <InvestmentSummary />
+  <InvestmentSummary />
 
-    </div>
+</div>
 
   </div>
 
@@ -355,11 +357,7 @@ function handleChartCommand(
             Market Snapshot
           </p>
 
-          <h2 className="mt-4 text-3xl font-bold">
-            Key Trading Metrics
-          </h2>
-
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard
               label="Previous Close"
               value={formatPrice(
@@ -414,6 +412,14 @@ function handleChartCommand(
             />
           </div>
         </div>
+
+<div className="mt-5">
+  <MarketSnapshotCard />
+</div>
+
+<div className="mt-6">
+    <TechnicalsCard />
+</div>
 
         <div className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6">
           <p className="font-semibold text-amber-300">

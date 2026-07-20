@@ -42,8 +42,7 @@ const investmentSummary: InvestmentSummaryData = {
   reasons: [
     "Price is trading above the 200-day moving average.",
     "Strong quarterly earnings growth.",
-    "Healthy return on equity and improving margins."
-  ]
+      ]
 };
 
 export default function InvestmentSummary() {
@@ -51,18 +50,15 @@ export default function InvestmentSummary() {
     <div className="rounded-xl border border-slate-700 bg-slate-900 shadow-lg">
 
       {/* Header */}
-<div className="border-b border-slate-700 px-5 py-4">
+<div className="border-b border-slate-700 px-4 py-3">
   <h2 className="text-lg font-semibold text-white">
     Investment Summary
   </h2>
 
-  <p className="mt-1 text-sm text-slate-400">
-    60-second investment overview powered by STFL Research Engine
-  </p>
-</div>
+  </div>
 
       {/* Body */}
-      <div className="p-5">
+      <div className="p-4">
 
         {/* Technical Health */}
 
@@ -70,13 +66,13 @@ export default function InvestmentSummary() {
 
 {/* Overall Assessment */}
 
-<div className="mb-6 rounded-lg bg-slate-800 p-4">
+<div className="mb-4 rounded-lg bg-slate-800 p-3">
 
   <p className="text-sm text-slate-400">
     Overall Assessment
   </p>
 
-  <h3 className="mt-2 text-2xl font-bold text-green-400">
+  <h3 className="mt-1 text-xl font-bold text-green-400">
     {investmentSummary.overallAssessment}
   </h3>
 
@@ -93,21 +89,13 @@ export default function InvestmentSummary() {
   </p>
 
 </div>
-
-    <div className="mt-3 h-2 w-full rounded-full bg-slate-700">
-  <div
-    className="h-2 rounded-full bg-green-500"
-    style={{ width: `${investmentSummary.confidence}%` }}
-  />
-</div>
-
-  </div>
+      </div>
 
 </div>
 
         {/* Summary Metrics */}
 
-       <div className="space-y-3">
+       <div className="space-y-2">
 
   {investmentSummary.metrics.map((metric) => (
   <SummaryRow
@@ -119,7 +107,7 @@ export default function InvestmentSummary() {
 ))}
 </div>
 
-<div className="mt-6 border-t border-slate-800 pt-4">
+<div className="mt-4 border-t border-slate-800 pt-3">
   <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
     Why {investmentSummary.overallAssessment}
   </h4>
