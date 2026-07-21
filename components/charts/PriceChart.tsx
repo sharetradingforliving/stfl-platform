@@ -9,6 +9,7 @@ import {
   CrosshairMode,
   type Time,
 } from "lightweight-charts";
+
 import { useEffect, useRef, useState } from "react";
 
 type ChartCommand =
@@ -32,17 +33,24 @@ type PriceChartProps = {
 };
 
 type CrosshairData = {
-  time: number;
+  time: Time;
   open: number;
   high: number;
   low: number;
   close: number;
   volume: number;
 } | null;
-
 type FibonacciPoint = {
   time: number;
   price: number;
+};
+type ChartCandle = {
+  time: Time;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
 };
 
 function formatVolume(volume: number) {
@@ -252,8 +260,8 @@ async function loadCandles() {
         data?.error ?? "Unable to load historical candles"
       );
     }
-
-    const formattedCandles = data.candles
+    
+    const formattedCandles: ChartCandle[] = data.candles
       .map(
   (
     candle: [
@@ -267,8 +275,8 @@ async function loadCandles() {
     ]
   ) => ({
     time: Math.floor(
-      new Date(candle[0]).getTime() / 1000
-    ),
+  new Date(candle[0]).getTime() / 1000
+) as Time,
     open: candle[1],
     high: candle[2],
     low: candle[3],
@@ -283,7 +291,8 @@ async function loadCandles() {
   ) => a.time - b.time
 );
      
-    const formattedVolume = formattedCandles.map(
+    const formattedVolume =
+  formattedCandles.map(
   (candle) => ({
     time: candle.time,
     value: candle.volume,
@@ -406,18 +415,11 @@ chart.subscribeCrosshairMove((param) => {
   };
 
   const matchingCandle = formattedCandles.find(
-  (item: {
-    time: number;
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-    volume: number;
-  }) => item.time === param.time
+  (item: ChartCandle) => item.time === param.time
 );
 
   setCrosshairData({
-  time: matchingCandle?.time ?? 0,
+  time: matchingCandle?.time ?? (0 as Time),
   open: candle.open,
   high: candle.high,
   low: candle.low,
@@ -704,8 +706,8 @@ function resetChartView() {
         <>
         <span className="font-semibold text-cyan-400">
   {new Date(
-    crosshairData.time * 1000
-  ).toLocaleString("en-IN", {
+  Number(crosshairData.time) * 1000
+).toLocaleString("en-IN", {
     timeZone: "Asia/Kolkata",
     day: "2-digit",
     month: "short",
