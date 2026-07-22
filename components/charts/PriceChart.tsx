@@ -1,4 +1,8 @@
 "use client";
+import {
+  calculateSMA,
+  calculateEMA,
+} from "@/lib/indicators";
 
 import {
   createChart,
@@ -69,92 +73,6 @@ function formatVolume(volume: number) {
   return volume.toString();
 }
 
-function calculateSMA(
-  candles: {
-    time: Time;
-    close: number;
-  }[],
-  period: number
-) {
-  const smaData: {
-    time: Time;
-    value: number;
-  }[] = [];
-
-  for (
-    let index = period - 1;
-    index < candles.length;
-    index++
-  ) {
-    let total = 0;
-
-    for (
-      let candleIndex = index - period + 1;
-      candleIndex <= index;
-      candleIndex++
-    ) {
-      total += candles[candleIndex].close;
-    }
-
-    smaData.push({
-      time: candles[index].time,
-      value: total / period,
-    });
-  }
-
-  return smaData;
-}
-function calculateEMA(
-  candles: {
-    time: Time;
-    close: number;
-  }[],
-  period: number
-) {
-  const emaData: {
-    time: Time;
-    value: number;
-  }[] = [];
-
-  if (candles.length < period) {
-    return emaData;
-  }
-
-  let initialTotal = 0;
-
-  for (let index = 0; index < period; index++) {
-    initialTotal += candles[index].close;
-  }
-
-  let previousEMA = initialTotal / period;
-
-  emaData.push({
-    time: candles[period - 1].time,
-    value: previousEMA,
-  });
-
-  const multiplier = 2 / (period + 1);
-
-  for (
-    let index = period;
-    index < candles.length;
-    index++
-  ) {
-    const currentEMA =
-      (candles[index].close - previousEMA) *
-        multiplier +
-      previousEMA;
-
-    emaData.push({
-      time: candles[index].time,
-      value: currentEMA,
-    });
-
-    previousEMA = currentEMA;
-  }
-
-  return emaData;
-}
 export default function PriceChart({
   symbol,
   instrumentKey,

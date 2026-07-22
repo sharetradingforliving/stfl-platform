@@ -1,7 +1,7 @@
 "use client";
 
 import SummaryRow from "./SummaryRow";
-import { InvestmentSummaryData } from "@/types/investment";
+import { InvestmentSummaryData } from "@/lib/types/investment";
 const investmentSummary: InvestmentSummaryData = {
   overallAssessment: "Strong Candidate",
   confidence: 82,

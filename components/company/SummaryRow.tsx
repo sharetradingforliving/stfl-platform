@@ -1,4 +1,4 @@
-import { SummaryStatus } from "@/types/investment";
+import { SummaryStatus } from "@/lib/types/investment";
 interface SummaryRowProps {
   label: string;
   value: string;

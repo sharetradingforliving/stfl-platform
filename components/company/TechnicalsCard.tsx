@@ -1,7 +1,11 @@
 "use client";
 
-export default function TechnicalsCard() {
-  return (
+
+import { TechnicalResearchResult } from "@/lib/technical/types";
+
+export default function TechnicalsCard() 
+{
+   return (
     <div className="rounded-xl border border-slate-700 bg-slate-900 p-6">
 
       <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
@@ -120,7 +124,7 @@ export default function TechnicalsCard() {
       </h3>
 
       <p className="mt-3 text-3xl font-bold text-emerald-400">
-        87 / 100
+        87/ 100
       </p>
 
     </div>
