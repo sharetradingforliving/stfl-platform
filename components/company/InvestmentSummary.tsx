@@ -2,6 +2,7 @@
 
 import SummaryRow from "./SummaryRow";
 import { InvestmentSummaryData } from "@/lib/types/investment";
+import type { CompanyResearch } from "@/lib/types/research";
 const investmentSummary: InvestmentSummaryData = {
   overallAssessment: "Strong Candidate",
   confidence: 82,
@@ -45,7 +46,15 @@ const investmentSummary: InvestmentSummaryData = {
       ]
 };
 
-export default function InvestmentSummary() {
+type InvestmentSummaryProps = {
+  research: CompanyResearch | null;
+};
+
+export default function InvestmentSummary({
+  research,
+}: InvestmentSummaryProps) {
+   const summary = investmentSummary;
+
   return (
     <div className="rounded-xl border border-slate-700 bg-slate-900 shadow-lg">
 
@@ -73,7 +82,7 @@ export default function InvestmentSummary() {
   </p>
 
   <h3 className="mt-1 text-xl font-bold text-green-400">
-    {investmentSummary.overallAssessment}
+    {summary.overallAssessment}
   </h3>
 
   <div className="mt-4">
@@ -85,7 +94,7 @@ export default function InvestmentSummary() {
   </p>
 
   <p className="text-sm font-semibold text-white">
-    {investmentSummary.confidence}%
+    {summary.confidence}%
   </p>
 
 </div>
@@ -97,7 +106,7 @@ export default function InvestmentSummary() {
 
        <div className="space-y-2">
 
-  {investmentSummary.metrics.map((metric) => (
+  {summary.metrics.map((metric) => (
   <SummaryRow
     key={metric.label}
     label={metric.label}
@@ -113,7 +122,7 @@ export default function InvestmentSummary() {
   </h4>
 
   <ul className="space-y-2 text-sm text-slate-300">
-  {investmentSummary.reasons.map((reason) => (
+  {summary.reasons.map((reason) => (
     <li key={reason}>• {reason}</li>
   ))}
 </ul>

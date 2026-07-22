@@ -14,6 +14,13 @@ import {
   type Time,
 } from "lightweight-charts";
 
+import { buildPriceHistory } from "@/lib/technical/builders/buildPriceHistory";
+import { buildTechnicalInput } from "@/lib/technical/builders/technicalInputBuilder";
+
+import { runResearchEngine } from "@/lib/services/researchEngine";
+
+import type { CompanyResearch } from "@/lib/types/research";
+
 import { useEffect, useRef, useState } from "react";
 
 type ChartCommand =
@@ -25,6 +32,7 @@ type ChartCommand =
 
 type PriceChartProps = {
   symbol: string;
+  exchange: "NSE" | "BSE";
   instrumentKey: string;
   timeframe: string;
   activeIndicators: string[];
@@ -34,6 +42,9 @@ type PriceChartProps = {
     action: ChartCommand;
     id: number;
   } | null;
+  onResearchReady?: (
+    research: CompanyResearch
+  ) => void;
 };
 
 type CrosshairData = {
@@ -75,11 +86,14 @@ function formatVolume(volume: number) {
 
 export default function PriceChart({
   symbol,
+  exchange,
   instrumentKey,
   timeframe,
   activeIndicators,
     activeDrawingTool,
     isCrosshairActive,
+    chartCommand,
+  onResearchReady,
   }: PriceChartProps) {
       const chartRef = useRef<HTMLDivElement>(null);
       const chartInstanceRef = useRef<ReturnType<
@@ -208,7 +222,28 @@ async function loadCandles() {
     b: { time: number }
   ) => a.time - b.time
 );
-     
+const priceHistory = buildPriceHistory(
+  formattedCandles
+);
+
+const technicalInput =
+  buildTechnicalInput({
+    symbol,
+    exchange, // temporary
+    currentPrice:
+      formattedCandles[
+        formattedCandles.length - 1
+      ].close,
+    priceHistory,
+  });
+
+const research =
+  await runResearchEngine(
+    technicalInput
+  );
+
+onResearchReady?.(research);     
+
     const formattedVolume =
   formattedCandles.map(
   (candle) => ({

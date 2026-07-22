@@ -6,6 +6,7 @@ import Link from "next/link";
 import InvestmentSummary from "@/components/company/InvestmentSummary";
 import MarketSnapshotCard from "@/components/company/MarketSnapshotCard";
 import TechnicalsCard from "@/components/company/TechnicalsCard";
+import type {  CompanyResearch,} from "@/lib/types/research";
 import { useEffect, useState } from "react";
 
 type BasicCompanyDashboardProps = {
@@ -41,7 +42,8 @@ export default function BasicCompanyDashboard({
   exchange,
 }: BasicCompanyDashboardProps) {  const [marketData, setMarketData] =
     useState<MarketData | null>(null);
-
+const [research, setResearch] =
+  useState<CompanyResearch | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const [error, setError] = useState("");
@@ -331,20 +333,24 @@ function handleChartCommand(
     <div className="xl:col-span-7">
 
       <PriceChart
-        symbol={symbol}
-        instrumentKey={marketData.instrumentKey}
-        timeframe={timeframe}
-        activeIndicators={activeIndicators}
-        activeDrawingTool={activeDrawingTool}
-        isCrosshairActive={isCrosshairActive}
-        chartCommand={chartCommand}
-      />
+  symbol={symbol}
+  exchange={exchange}
+  instrumentKey={marketData.instrumentKey}
+  timeframe={timeframe}
+  activeIndicators={activeIndicators}
+  activeDrawingTool={activeDrawingTool}
+  isCrosshairActive={isCrosshairActive}
+  chartCommand={chartCommand}
+  onResearchReady={setResearch}
+/>
 
     </div>
 
     <div className="xl:col-span-3">
 
-  <InvestmentSummary />
+  <InvestmentSummary
+  research={research}
+/>
 
 </div>
 
@@ -418,7 +424,9 @@ function handleChartCommand(
 </div>
 
 <div className="mt-6">
-    <TechnicalsCard />
+    <TechnicalsCard
+  research={research}
+/>
 </div>
 
         <div className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6">
