@@ -1,15 +1,26 @@
 "use client";
 
 
-import { TechnicalResearchResult } from "@/lib/technical/types";
+import type { CompanyResearch } from "@/lib/types/research";
+import { formatPrice } from "@/lib/utils/formatters";
+import { Recommendation } from "@/lib/technical/types";
 
-export default function TechnicalsCard() 
+type TechnicalsCardProps = {
+  research: CompanyResearch | null;
+};
+
+export default function TechnicalsCard({
+  research,
+}: TechnicalsCardProps) 
 {
-   return (
+
+  const summary = research?.investmentSummary;
+
+     return (
     <div className="rounded-xl border border-slate-700 bg-slate-900 p-6">
 
-      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
-        TECHNICALS
+      <p className="text-sm font-semibold text-emerald-400">
+        STFL Technical Summary
       </p>
 
       
@@ -19,12 +30,12 @@ export default function TechnicalsCard()
 
     <div>
       <p className="text-sm text-slate-400">
-        Overall Technical View
+        Pattern
       </p>
 
       <p className="mt-1 text-3xl font-bold text-emerald-400">
-        Bullish
-      </p>
+  {summary?.pattern ?? "Loading..."}
+</p>
     </div>
 
     <div className="text-right">
@@ -33,56 +44,105 @@ export default function TechnicalsCard()
       </p>
 
       <p className="mt-1 text-4xl font-bold text-white">
-        87
+        {summary?.technicalScore ?? "--"}
         <span className="text-xl text-slate-400">/100</span>
       </p>
     </div>
 
   </div>
 
-  <div className="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-4">
+  <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-8">
 
     <div>
-      <p className="text-xs uppercase tracking-wide text-slate-500">
-        Confidence
-      </p>
+  <p className="text-xs uppercase tracking-wide text-slate-500">
+    Confidence
+  </p>
 
-      <p className="mt-1 text-lg font-semibold text-white">
-        92%
-      </p>
-    </div>
-
-    <div>
-      <p className="text-xs uppercase tracking-wide text-slate-500">
-        Suggested Action
-      </p>
-
-      <p className="mt-1 text-lg font-semibold text-emerald-400">
-        Buy
-      </p>
-    </div>
+  <p className="mt-1 text-lg font-semibold text-white">
+    {summary?.confidence ?? "--"}%
+  </p>
+</div>
 
     <div>
-      <p className="text-xs uppercase tracking-wide text-slate-500">
-        Risk
-      </p>
+  <p className="text-xs uppercase tracking-wide text-slate-500">
+    Recommendation
+  </p>
 
-      <p className="mt-1 text-lg font-semibold text-yellow-400">
-        Medium
-      </p>
-    </div>
+  <p className={`mt-1 text-lg font-semibold ${
+  summary?.recommendation === Recommendation.BUY ||
+  summary?.recommendation === Recommendation.STRONG_BUY
+    ? "text-emerald-400"
+    : summary?.recommendation === Recommendation.HOLD
+    ? "text-yellow-400"
+    : summary?.recommendation === Recommendation.SELL ||
+      summary?.recommendation === Recommendation.STRONG_SELL
+    ? "text-red-400"
+    : "text-slate-400"
+}`}>
+    {summary?.recommendation ?? "--"}  </p>
+</div>
+
+<div>
+  <p className="text-xs uppercase tracking-wide text-slate-500">
+    Current Price
+  </p>
+
+  <p className="mt-1 text-lg font-semibold text-white">
+    {summary ? formatPrice(summary.currentPrice) : "--"}
+  </p>
+</div>
+
+<div>
+  <p className="text-xs uppercase tracking-wide text-slate-500">
+    Support
+  </p>
+
+  <p className="mt-1 text-lg font-semibold text-green-400">
+    {summary ? formatPrice(summary.support) : "--"}
+  </p>
+</div>
+
+<div>
+  <p className="text-xs uppercase tracking-wide text-slate-500">
+    Resistance
+  </p>
+
+  <p className="mt-1 text-lg font-semibold text-red-400">
+    {summary ? formatPrice(summary.resistance) : "--"}
+  </p>
+</div>
+
+<div>
+  <p className="text-xs uppercase tracking-wide text-slate-500">
+    Stop Loss
+  </p>
+
+  <p className="mt-1 text-lg font-semibold text-red-400">
+    {summary ? formatPrice(summary.stopLoss) : "--"}
+  </p>
+</div>
+
+<div>
+  <p className="text-xs uppercase tracking-wide text-slate-500">
+    Target
+  </p>
+
+  <p className="mt-1 text-lg font-semibold text-green-400">
+    {summary ? formatPrice(summary.target) : "--"}
+  </p>
+</div>
 
     <div>
-      <p className="text-xs uppercase tracking-wide text-slate-500">
-        Time Horizon
-      </p>
+  <p className="text-xs uppercase tracking-wide text-slate-500">
+    Risk : Reward
+  </p>
 
-      <p className="mt-1 text-lg font-semibold text-white">
-        Swing
-      </p>
+  <p className="mt-1 text-lg font-semibold text-yellow-400">
+    1 : {summary?.riskReward ?? "--"}
+  </p>
+</div>
+
     </div>
-
-  </div>
 
 </div>
 

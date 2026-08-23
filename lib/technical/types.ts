@@ -201,6 +201,10 @@ export interface SupportResistanceResult {
   confidence: number;
 
   explanation: string;
+
+  supportZones?: PriceZone[];
+
+  resistanceZones?: PriceZone[];
 }
 
 /* ================================================================
@@ -270,6 +274,8 @@ export interface TechnicalScoreResult {
 export interface TechnicalResearchResult {
   symbol: string;
 
+  currentPrice: number;
+  
   generatedAt: string;
 
   trend: TrendResult;
@@ -333,4 +339,46 @@ export interface ModuleResult {
   score: number;
   confidence: number;
   explanation: string;
+}
+
+// ========================================
+// Support & Resistance V2
+// ========================================
+
+export type LevelSource =
+  | "Swing"
+  | "Fibonacci"
+  | "Pivot"
+  | "VWAP"
+  | "VolumeProfile"
+  | "MovingAverage"
+  | "PreviousHighLow";
+
+export interface PriceLevel {
+  price: number;
+
+  source: LevelSource;
+
+  label: string;
+
+  weight: number;
+
+  timeframe?: "Daily" | "Weekly" | "Monthly";
+}
+export interface PriceZone {
+  lower: number;
+  upper: number;
+  center: number;
+
+  strength: number;
+
+  confidence: number;
+
+  contributors: PriceLevel[];
+
+  explanation: string;
+
+  touches: number;
+
+  type: "Support" | "Resistance";
 }

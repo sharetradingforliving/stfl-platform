@@ -68,6 +68,8 @@ export function runTechnicalAnalysis(
   return {
   symbol: input.symbol,
 
+  currentPrice: input.currentPrice,
+
   generatedAt: new Date().toISOString(),
 
   trend,

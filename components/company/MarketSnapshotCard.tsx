@@ -1,7 +1,24 @@
 "use client";
 
-export default function MarketSnapshotCard() {
-  return (
+import type { CompanyResearch } from "@/lib/types/research";
+
+interface Props {
+  research: CompanyResearch | null;
+}
+export default function MarketSnapshotCard({
+  research,
+}: Props) {
+
+  if (!research) {
+    return null;
+  }
+
+  const technical = research.technical;
+
+  if (!technical) {
+    return null;
+  }
+    return (
     <div className="rounded-xl border border-slate-700 bg-slate-900 shadow-lg">
 
       {/* Header */}
@@ -25,7 +42,7 @@ export default function MarketSnapshotCard() {
             </p>
 
             <p className="text-lg font-bold text-green-400">
-              88%
+              {technical.technicalScore.confidence}%
             </p>
 
           </div>
@@ -40,34 +57,19 @@ export default function MarketSnapshotCard() {
 
         <Metric
           title="Trend"
-          value="Bullish"
+          value={technical.trend.direction}
           color="text-green-400"
         />
 
-        <Metric
-          title="Support"
-          value="₹1,250"
-        />
-
-        <Metric
-          title="Resistance"
-          value="₹1,413"
-        />
-
-        <Metric
-          title="Risk : Reward"
-          value="1 : 2.8"
-        />
-
-        <Metric
+                <Metric
           title="Entry"
-          value="Good"
+          value={technical.entryQuality.quality}
           color="text-green-400"
         />
 
         <Metric
   title="Momentum"
-  value="Strong"
+  value={technical.momentum.momentumStrength}
   color="text-green-400"
 />
 

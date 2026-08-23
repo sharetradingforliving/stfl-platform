@@ -5,4 +5,3 @@ export * from "./macd";
 export * from "./atr";
 export * from "./adx";
 export * from "./stochastic";
-export * from "./technicalInputBuilder";

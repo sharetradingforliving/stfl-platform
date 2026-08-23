@@ -188,6 +188,7 @@ function handleChartCommand(
   }
 
   const isPositive = marketData.change >= 0;
+  
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -419,16 +420,22 @@ function handleChartCommand(
           </div>
         </div>
 
-<div className="mt-5">
-  <MarketSnapshotCard />
-</div>
+    {research && (
+  <>
+    <div className="mt-5">
+      <MarketSnapshotCard
+        research={research}
+      />
+    </div>
 
-<div className="mt-6">
-    <TechnicalsCard
-  research={research}
-/>
-</div>
-
+    <div className="mt-6">
+      <TechnicalsCard
+        research={research}
+      />
+    </div>
+  </>
+)}
+  
         <div className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6">
           <p className="font-semibold text-amber-300">
             Detailed company research is being added

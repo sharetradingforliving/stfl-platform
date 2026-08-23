@@ -15,6 +15,10 @@ import type {
 import type {
   CompanyResearch,
 } from "@/lib/types/research";
+
+import {
+  buildInvestmentSummary,
+} from "@/lib/research/investmentSummaryEngine";
 /**
  * Runs the complete STFL Technical Research Engine.
  *
@@ -28,15 +32,20 @@ export async function runResearchEngine(
   input: TechnicalResearchInput
 ): Promise<CompanyResearch> {
   const technical = runTechnicalAnalysis(input);
+  const investmentSummary = buildInvestmentSummary(
+  technical
+);
 
   return {
-    technical,
+  technical,
 
-    // Future modules
-    fundamental: undefined,
-    valuation: undefined,
-    marketIntelligence: undefined,
-    aiResearch: undefined,
-    newsSentiment: undefined,
-  };
+  investmentSummary,
+
+  // Future modules
+  fundamental: undefined,
+  valuation: undefined,
+  marketIntelligence: undefined,
+  aiResearch: undefined,
+  newsSentiment: undefined,
+};
 }

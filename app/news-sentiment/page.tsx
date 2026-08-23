@@ -1,12 +1,15 @@
-import ModulePlaceholder from "@/components/modules/ModulePlaceholder";
+import ModuleLayout from "@/components/modules/ModuleLayout";
+import NewsDashboard from "@/components/news/NewsDashboard";
 
 export default function Page() {
   return (
-    <ModulePlaceholder
+    <ModuleLayout
       eyebrow="STFL NEWS INTELLIGENCE"
       title="News & Sentiment"
       description="Follow important market, company, sector and global news with AI-assisted summaries and sentiment analysis."
-      features={["Latest Market News", "Company News", "Sector News", "Global Market News", "AI News Summary", "Positive Sentiment", "Negative Sentiment", "Neutral Sentiment", "News Impact Score"]}
-    />
+      status="In Development"
+    >
+      <NewsDashboard />
+    </ModuleLayout>
   );
 }

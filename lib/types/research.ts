@@ -1,18 +1,23 @@
     import type {
   TechnicalResearchResult,
 } from "@/lib/technical/types";
+import type {
+  InvestmentSummaryResult,
+} from "@/lib/research/investmentSummaryEngine";
 
     export interface CompanyResearch {
-    technical: TechnicalResearchResult;
+  technical: TechnicalResearchResult;
 
-    // Coming Soon
-    fundamental?: unknown;
+  investmentSummary: InvestmentSummaryResult;
 
-    valuation?: unknown;
+  // Coming Soon
+  fundamental?: unknown;
 
-    marketIntelligence?: unknown;
+  valuation?: unknown;
 
-    aiResearch?: unknown;
+  marketIntelligence?: unknown;
 
-    newsSentiment?: unknown;
-    }
+  aiResearch?: unknown;
+
+  newsSentiment?: unknown;
+}
