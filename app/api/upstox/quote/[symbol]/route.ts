@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+
+import {
+  getUpstoxReadOnlyAccessToken,
+} from "@/lib/upstox/accessToken";
 
 type RouteContext = {
   params: Promise<{
@@ -7,82 +10,182 @@ type RouteContext = {
   }>;
 };
 
+type InstrumentSearchResult = {
+  symbol?: string;
+  companyName?: string;
+  exchange?: string;
+  instrumentKey?: string;
+};
+
+type InstrumentSearchResponse = {
+  results?: InstrumentSearchResult[];
+};
+
+type UpstoxQuote = {
+  last_price?: number;
+  net_change?: number;
+  volume?: number;
+  average_price?: number;
+  timestamp?: string;
+
+  ohlc?: {
+    open?: number;
+    high?: number;
+    low?: number;
+    close?: number;
+  };
+};
+
+type UpstoxQuoteResponse = {
+  data?: Record<
+    string,
+    UpstoxQuote
+  >;
+};
+
 export async function GET(
   request: Request,
   { params }: RouteContext
 ) {
   try {
-    const { symbol } = await params;
-    const stockSymbol = symbol.toUpperCase();
-const { searchParams } = new URL(request.url);
+    const { symbol } =
+      await params;
 
-const requestedExchange: "NSE" | "BSE" =
-  searchParams.get("exchange")?.toUpperCase() === "BSE"
-    ? "BSE"
-    : "NSE";
-    const searchResponse = await fetch(
-  `${new URL(request.url).origin}/api/upstox/instruments/search?q=${encodeURIComponent(
-    stockSymbol
-  )}`,
-  {
-    cache: "no-store",
-  }
-);
+    const stockSymbol =
+      symbol
+        .trim()
+        .toUpperCase();
 
-if (!searchResponse.ok) {
-  return NextResponse.json(
-    {
-      error: "Unable to search the Upstox instrument master",
-    },
-    {
-      status: searchResponse.status,
-    }
-  );
-}
-
-const searchData = await searchResponse.json();
-
-const exactMatch = searchData.results?.find(
-  (instrument: {
-    symbol?: string;
-    companyName?: string;
-    exchange?: string;
-    instrumentKey?: string;
-  }) =>
-    instrument.symbol?.toUpperCase() ===
-      stockSymbol &&
-    instrument.exchange?.toUpperCase() ===
-      requestedExchange
-);
-const instrumentKey = exactMatch?.instrumentKey;
-const companyName =
-  exactMatch?.companyName ?? stockSymbol;
-
-if (!instrumentKey) {
-  return NextResponse.json(
-    {
-      error: "NSE equity instrument was not found",
-      symbol: stockSymbol,
-    },
-    {
-      status: 404,
-    }
-  );
-
-    }
-
-    const cookieStore = await cookies();
-
-    const accessToken = cookieStore.get(
-      "upstox_access_token"
-    )?.value;
-
-    if (!accessToken) {
+    if (!stockSymbol) {
       return NextResponse.json(
         {
-          error: "Upstox access token is missing",
+          error:
+            "Stock symbol is required.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const requestUrl =
+      new URL(request.url);
+
+    const { searchParams } =
+      requestUrl;
+
+    const requestedExchange:
+      "NSE" | "BSE" =
+        searchParams
+          .get("exchange")
+          ?.toUpperCase() ===
+        "BSE"
+          ? "BSE"
+          : "NSE";
+
+    /*
+     * Instrument discovery uses the
+     * Upstox instrument master and does
+     * not require daily authentication.
+     */
+    const searchUrl =
+      new URL(
+        "/api/upstox/instruments/search",
+        requestUrl.origin
+      );
+
+    searchUrl.searchParams.set(
+      "q",
+      stockSymbol
+    );
+
+    const searchResponse =
+      await fetch(
+        searchUrl.toString(),
+        {
+          method: "GET",
+
+          headers: {
+            Accept:
+              "application/json",
+          },
+
+          cache: "no-store",
+        }
+      );
+
+    if (!searchResponse.ok) {
+      return NextResponse.json(
+        {
+          error:
+            "Unable to search the Upstox instrument master",
+        },
+        {
+          status:
+            searchResponse.status,
+        }
+      );
+    }
+
+    const searchData =
+      (await searchResponse.json()) as
+        InstrumentSearchResponse;
+
+    const exactMatch =
+      searchData.results?.find(
+        (instrument) =>
+          instrument.symbol
+            ?.toUpperCase() ===
+            stockSymbol &&
+          instrument.exchange
+            ?.toUpperCase() ===
+            requestedExchange
+      );
+
+    const instrumentKey =
+      exactMatch
+        ?.instrumentKey;
+
+    const companyName =
+      exactMatch
+        ?.companyName ??
+      stockSymbol;
+
+    if (!instrumentKey) {
+      return NextResponse.json(
+        {
+          error:
+            `${requestedExchange} equity instrument was not found`,
+
+          symbol:
+            stockSymbol,
+
+          exchange:
+            requestedExchange,
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    /*
+     * Prefer the one-year Analytics
+     * Token. Retain the daily OAuth
+     * cookie only as a development
+     * fallback.
+     */
+    const tokenResult =
+      await getUpstoxReadOnlyAccessToken();
+
+    if (!tokenResult) {
+      return NextResponse.json(
+        {
+          error:
+            "Upstox read-only access token is missing",
+
           instruction:
-            "Open /api/upstox/login and authorize Upstox again.",
+            "Add UPSTOX_ANALYTICS_TOKEN to frontend/.env.local or authorize Upstox through /api/upstox/login.",
         },
         {
           status: 401,
@@ -90,91 +193,172 @@ if (!instrumentKey) {
       );
     }
 
+    const {
+      accessToken,
+      source:
+        authenticationSource,
+    } = tokenResult;
+
     const quoteUrl =
       "https://api.upstox.com/v2/market-quote/quotes" +
-      `?instrument_key=${encodeURIComponent(instrumentKey)}`;
+      `?instrument_key=${encodeURIComponent(
+        instrumentKey
+      )}`;
 
-    const upstoxResponse = await fetch(quoteUrl, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      cache: "no-store",
-    });
+    const upstoxResponse =
+      await fetch(
+        quoteUrl,
+        {
+          method: "GET",
 
-    const upstoxData = await upstoxResponse.json();
+          headers: {
+            Accept:
+              "application/json",
+
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+
+          cache: "no-store",
+        }
+      );
+
+    const upstoxData =
+      (await upstoxResponse.json()) as
+        UpstoxQuoteResponse;
 
     if (!upstoxResponse.ok) {
-      console.error("Upstox quote error:", upstoxData);
-      
+      console.error(
+        "Upstox quote error:",
+        upstoxData
+      );
+
       return NextResponse.json(
         {
-          error: "Unable to fetch Upstox market quote",
-          details: upstoxData,
+          error:
+            "Unable to fetch Upstox market quote",
+
+          details:
+            upstoxData,
         },
         {
-          status: upstoxResponse.status,
+          status:
+            upstoxResponse.status,
         }
       );
     }
 
-   const quote = Object.values(
-  upstoxData.data ?? {}
-)[0] as any;
+    const quote =
+      Object.values(
+        upstoxData.data ?? {}
+      )[0];
 
-if (!quote) {
-  return NextResponse.json(
-    {
-      error: "Quote data was not found in the Upstox response",
-    },
-    {
-      status: 404,
+    if (!quote) {
+      return NextResponse.json(
+        {
+          error:
+            "Quote data was not found in the Upstox response",
+        },
+        {
+          status: 404,
+        }
+      );
     }
-  );
-}
 
-const currentPrice = quote.last_price ?? 0;
-const change = quote.net_change ?? 0;
-const previousClose = currentPrice - change;
+    const currentPrice =
+      typeof quote.last_price ===
+        "number"
+        ? quote.last_price
+        : 0;
 
-const changePercent =
-  previousClose !== 0
-    ? (change / previousClose) * 100
-    : 0;
+    const change =
+      typeof quote.net_change ===
+        "number"
+        ? quote.net_change
+        : 0;
 
-return NextResponse.json({
-  symbol: stockSymbol,
-  companyName,
-  exchange: requestedExchange,
-  instrumentKey,
+    const previousClose =
+      currentPrice -
+      change;
 
-  currentPrice,
-  previousClose,
-  change,
-  changePercent,
+    const changePercent =
+      previousClose !== 0
+        ? (
+            change /
+            previousClose
+          ) *
+          100
+        : 0;
 
-  open: quote.ohlc?.open ?? null,
-  high: quote.ohlc?.high ?? null,
-  low: quote.ohlc?.low ?? null,
+    return NextResponse.json({
+      symbol:
+        stockSymbol,
 
-  volume: quote.volume ?? null,
-  averagePrice: quote.average_price ?? null,
+      companyName,
 
-  lastUpdated: quote.timestamp ?? null,
-  source: "Upstox",
-});
+      exchange:
+        requestedExchange,
 
-} catch (error) {
-  console.error("Upstox quote route error:", error);
+      instrumentKey,
 
-  return NextResponse.json(
-    {
-      error: "Internal server error",
-    },
-    {
-      status: 500,
-    }
-  );
-}
+      currentPrice,
+      previousClose,
+      change,
+      changePercent,
+
+      open:
+        quote.ohlc?.open ??
+        null,
+
+      high:
+        quote.ohlc?.high ??
+        null,
+
+      low:
+        quote.ohlc?.low ??
+        null,
+
+      volume:
+        quote.volume ??
+        null,
+
+      averagePrice:
+        quote.average_price ??
+        null,
+
+      lastUpdated:
+        quote.timestamp ??
+        null,
+
+      source:
+        "Upstox",
+
+      /*
+       * Only the authentication method
+       * is returned. The secret token is
+       * never exposed.
+       */
+      authenticationSource,
+    });
+  } catch (error) {
+    console.error(
+      "Upstox quote route error:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Internal server error",
+
+        details:
+          error instanceof Error
+            ? error.message
+            : "Unknown error",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 }
