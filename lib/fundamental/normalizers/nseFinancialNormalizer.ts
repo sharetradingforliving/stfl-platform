@@ -33,20 +33,29 @@ const RUPEES_PER_CRORE =
 
 const METRIC_TAGS = {
   revenue: [
-    "RevenueFromOperations",
-    "RevenueFromOperationsNet",
-    "IncomeFromOperations",
-    "Revenue",
-  ],
+  "RevenueFromOperations",
+  "RevenueFromOperationsNet",
+  "IncomeFromOperations",
+  "Revenue",
+
+  // BANKING taxonomy
+  "Income",
+  "TotalIncome",
+  "InterestEarned",
+  "TotalInterestEarned",
+],
 
   otherIncome: [
     "OtherIncome",
   ],
 
   operatingIncome: [
-    "ProfitFromOperationsBeforeOtherIncomeFinanceCostsAndExceptionalItems",
-    "OperatingProfit",
-  ],
+  "ProfitFromOperationsBeforeOtherIncomeFinanceCostsAndExceptionalItems",
+  "OperatingProfit",
+
+  // BANKING taxonomy
+  "OperatingProfitBeforeProvisionsAndContingencies",
+],
 
   ebit: [
     "ProfitBeforeFinanceCostsExceptionalItemsAndTax",
@@ -54,10 +63,14 @@ const METRIC_TAGS = {
   ],
 
   financeCosts: [
-    "FinanceCosts",
-    "FinanceCost",
-    "InterestExpense",
-  ],
+  "FinanceCosts",
+  "FinanceCost",
+  "InterestExpense",
+
+  // BANKING taxonomy
+  "InterestExpended",
+  "InterestExpenseOnDeposits",
+],
 
   depreciation: [
     "DepreciationDepletionAndAmortisationExpense",
@@ -66,10 +79,15 @@ const METRIC_TAGS = {
   ],
 
   profitBeforeTax: [
-    "ProfitBeforeTax",
-    "ProfitLossBeforeTax",
-    "ProfitBeforeExceptionalItemsAndTax",
-  ],
+  "ProfitBeforeTax",
+  "ProfitLossBeforeTax",
+  "ProfitBeforeExceptionalItemsAndTax",
+
+  // BANKING taxonomy
+  "ProfitLossFromOrdinaryActivitiesBeforeTax",
+  "ProfitLossBeforeTaxAndExceptionalItems",
+  "ProfitBeforeTaxAndExceptionalItems",
+],
 
   taxExpense: [
     "TaxExpense",
@@ -79,29 +97,73 @@ const METRIC_TAGS = {
   ],
 
   netProfit: [
-    "ProfitOrLossAttributableToOwnersOfParent",
-    "ProfitLossAttributableToOwnersOfParent",
-    "ProfitLossForPeriod",
-    "ProfitLossForPeriodFromContinuingOperations",
-    "NetProfitLossForThePeriod",
-  ],
+  "ProfitOrLossAttributableToOwnersOfParent",
+  "ProfitLossAttributableToOwnersOfParent",
+  "ProfitLossForPeriod",
+  "ProfitLossForPeriodFromContinuingOperations",
+  "NetProfitLossForThePeriod",
+
+  // BANKING taxonomy
+  "ProfitLossAfterTaxesMinorityInterestAndShareOfProfitLossOfAssociates",
+  "ProfitLossForThePeriod",
+  "ProfitLossFromOrdinaryActivitiesAfterTax",
+  "NetProfitLossForPeriod",
+  "NetProfitForThePeriod",
+  "ProfitLossAfterTax",
+  "ProfitAfterTax",
+],
 
   epsBasic: [
-    "BasicEarningsLossPerShareFromContinuingAndDiscontinuedOperations",
-    "BasicEarningsLossPerShareFromContinuingOperations",
-    "BasicEarningsPerShare",
-  ],
+  "BasicEarningsLossPerShareFromContinuingAndDiscontinuedOperations",
+  "BasicEarningsLossPerShareFromContinuingOperations",
+  "BasicEarningsPerShare",
+
+  // BANKING taxonomy
+  "BasicEarningsPerShareBeforeExtraordinaryItems",
+  "BasicEPSBeforeExtraordinaryItems",
+  "BasicEarningsPerShareAfterExtraordinaryItems",
+],
 
   epsDiluted: [
-    "DilutedEarningsLossPerShareFromContinuingAndDiscontinuedOperations",
-    "DilutedEarningsLossPerShareFromContinuingOperations",
-    "DilutedEarningsPerShare",
-  ],
+  "DilutedEarningsLossPerShareFromContinuingAndDiscontinuedOperations",
+  "DilutedEarningsLossPerShareFromContinuingOperations",
+  "DilutedEarningsPerShare",
+
+  // BANKING taxonomy
+  "DilutedEarningsPerShareBeforeExtraordinaryItems",
+  "DilutedEPSBeforeExtraordinaryItems",
+  "DilutedEarningsPerShareAfterExtraordinaryItems",
+],
 
   totalAssets: [
     "Assets",
     "TotalAssets",
   ],
+
+  deposits: [
+  // BANKING taxonomy
+  "Deposits",
+],
+
+advances: [
+  // BANKING taxonomy
+  "Advances",
+],
+
+grossNpaPercent: [
+  // BANKING taxonomy
+  "PercentageOfGrossNpa",
+],
+
+netNpaPercent: [
+  // BANKING taxonomy
+  "PercentageOfNpa",
+],
+
+returnOnAssetsPercent: [
+  // BANKING taxonomy
+  "ReturnOnAssets",
+],
 
   totalEquity: [
     "EquityAttributableToOwnersOfParent",
@@ -110,9 +172,19 @@ const METRIC_TAGS = {
   ],
 
   equityShareCapital: [
-    "EquityShareCapital",
-    "PaidUpValueOfEquityShareCapital",
-  ],
+  /*
+   * Keep the specific paid-up-capital
+   * tag first. Generic "Capital" can
+   * incorrectly match face value.
+   */
+  "PaidUpValueOfEquityShareCapital",
+  "EquityShareCapital",
+],
+
+reservesAndSurplus: [
+  // BANKING taxonomy
+  "ReservesAndSurplus",
+],
 
   faceValuePerShare: [
     "FaceValueOfEquityShareCapital",
@@ -551,14 +623,39 @@ function getDurationMetric(
 function getInstantMetric(
   document: ParsedNseXbrl,
   contextId: string | null,
-  aliases: readonly string[]
+  aliases: readonly string[],
+  assumeRupeesWhenUnitMissing = false
 ): NullableNumber {
-  return convertMoneyToCrores(
+  const fact =
     findFact(
       document,
       contextId,
       aliases
-    )
+    );
+
+  /*
+   * Some verified NSE BANKING filings
+   * omit unitRef from balance-sheet
+   * monetary facts such as Assets.
+   *
+   * Apply this fallback only when the
+   * caller has explicitly confirmed a
+   * banking taxonomy.
+   */
+  if (
+    assumeRupeesWhenUnitMissing &&
+    fact?.numericValue !== null &&
+    fact?.numericValue !== undefined &&
+    !fact.unitRef?.trim()
+  ) {
+    return (
+      fact.numericValue /
+      RUPEES_PER_CRORE
+    );
+  }
+
+  return convertMoneyToCrores(
+    fact
   );
 }
 
@@ -577,6 +674,43 @@ function getPerShareMetric(
   return (
     fact?.numericValue ?? null
   );
+}
+
+function getPercentageMetric(
+  document: ParsedNseXbrl,
+  contextId: string | null,
+  aliases: readonly string[]
+): NullableNumber {
+  const fact =
+    findFact(
+      document,
+      contextId,
+      aliases
+    );
+
+  const value =
+    fact?.numericValue ??
+    null;
+
+  if (
+    value === null ||
+    !Number.isFinite(value)
+  ) {
+    return null;
+  }
+
+  /*
+   * NSE BANKING XBRL commonly stores
+   * percentages as decimal ratios:
+   * 0.0218 means 2.18%.
+   *
+   * Values already expressed as a
+   * percentage, such as 2.18, remain
+   * unchanged.
+   */
+  return Math.abs(value) <= 1
+    ? value * 100
+    : value;
 }
 
 function addValues(
@@ -622,6 +756,18 @@ export function normalizeNseXbrlPeriod(
   options: NseNormalizerOptions
 ): NormalizedNsePeriodResult {
   const warnings: string[] = [];
+
+  const isBankingTaxonomy =
+  document.taxonomyPrefixes.some(
+    (prefix) =>
+      prefix
+        .trim()
+        .toLowerCase() ===
+      "in-bse-fin"
+  ) ||
+  document.sourceUrl
+    .toUpperCase()
+    .includes("/BANKING_");
 
   const durationContext =
     selectDurationContext(
@@ -742,28 +888,33 @@ export function normalizeNseXbrlPeriod(
     ]);
 
   const ebit =
-    reportedEbit ??
-    derivedEbit;
+  isBankingTaxonomy
+    ? null
+    : reportedEbit ??
+      derivedEbit;
 
   /*
    * EBITDA is derived only when both
    * EBIT and depreciation are present.
    */
   const ebitda =
-    addValues([
-      ebit,
-      depreciation,
-    ]);
+  isBankingTaxonomy
+    ? null
+    : addValues([
+        ebit,
+        depreciation,
+      ]);
 
   /*
    * Operating income excludes other
    * income when it can be derived.
    */
   const derivedOperatingIncome =
-    ebit !== null &&
-    otherIncome !== null
-      ? ebit - otherIncome
-      : null;
+  !isBankingTaxonomy &&
+  ebit !== null &&
+  otherIncome !== null
+    ? ebit - otherIncome
+    : null;
 
   const operatingIncome =
     reportedOperatingIncome ??
@@ -847,12 +998,137 @@ export function normalizeNseXbrlPeriod(
       noncurrentBorrowings,
     ]);
 
-  const equityShareCapital =
-    getInstantMetric(
-      document,
-      instantContextId,
-      METRIC_TAGS.equityShareCapital
-    );
+  const equityShareCapitalTags =
+  isBankingTaxonomy
+    ? [
+        "PaidUpValueOfEquityShareCapital",
+      ]
+    : METRIC_TAGS
+        .equityShareCapital;
+
+const reportedEquityShareCapital =
+  getInstantMetric(
+    document,
+    instantContextId,
+    equityShareCapitalTags,
+    isBankingTaxonomy
+  ) ??
+  (
+    isBankingTaxonomy
+      ? getDurationMetric(
+          document,
+          durationContextId,
+          equityShareCapitalTags
+        )
+      : null
+  );
+
+/*
+ * A listed bank's paid-up equity
+ * capital cannot reasonably be ₹10
+ * crore or less. Some legacy BANKING
+ * filings incorrectly expose the ₹2
+ * face value through a capital fact.
+ */
+const equityShareCapital =
+  isBankingTaxonomy &&
+  reportedEquityShareCapital !== null &&
+  reportedEquityShareCapital <= 10
+    ? null
+    : reportedEquityShareCapital;
+
+  const reservesAndSurplus =
+  isBankingTaxonomy
+    ? getInstantMetric(
+        document,
+        instantContextId,
+        METRIC_TAGS
+          .reservesAndSurplus,
+        true
+      )
+    : null;
+
+const bankingTotalEquity =
+  isBankingTaxonomy &&
+  equityShareCapital !== null &&
+  reservesAndSurplus !== null
+    ? equityShareCapital +
+      reservesAndSurplus
+    : null;
+
+    const deposits =
+  isBankingTaxonomy
+    ? getInstantMetric(
+        document,
+        instantContextId,
+        METRIC_TAGS.deposits,
+        true
+      )
+    : null;
+
+const advances =
+  isBankingTaxonomy
+    ? getInstantMetric(
+        document,
+        instantContextId,
+        METRIC_TAGS.advances,
+        true
+      )
+    : null;
+
+    const grossNpaPercent =
+  isBankingTaxonomy
+    ? (
+        getPercentageMetric(
+          document,
+          instantContextId,
+          METRIC_TAGS
+            .grossNpaPercent
+        ) ??
+        getPercentageMetric(
+          document,
+          durationContextId,
+          METRIC_TAGS
+            .grossNpaPercent
+        )
+      )
+    : null;
+
+const netNpaPercent =
+  isBankingTaxonomy
+    ? (
+        getPercentageMetric(
+          document,
+          instantContextId,
+          METRIC_TAGS
+            .netNpaPercent
+        ) ??
+        getPercentageMetric(
+          document,
+          durationContextId,
+          METRIC_TAGS
+            .netNpaPercent
+        )
+      )
+    : null;
+
+const returnOnAssetsPercent =
+  isBankingTaxonomy
+    ? (
+        getPercentageMetric(
+          document,
+          instantContextId,
+          METRIC_TAGS
+            .returnOnAssetsPercent
+        ) ??
+        getPercentageMetric(
+          document,
+          durationContextId,
+          METRIC_TAGS
+            .returnOnAssetsPercent
+        )
+      )
+    : null;
 
   const faceValuePerShare =
     getPerShareMetric(
@@ -915,20 +1191,27 @@ export function normalizeNseXbrlPeriod(
       financeCosts,
 
       totalAssets:
-        getInstantMetric(
-          document,
-          instantContextId,
-          METRIC_TAGS.totalAssets
-        ),
+  getInstantMetric(
+    document,
+    instantContextId,
+    METRIC_TAGS.totalAssets,
+    isBankingTaxonomy
+  ),
 
       totalEquity:
-        getInstantMetric(
-          document,
-          instantContextId,
-          METRIC_TAGS.totalEquity
-        ),
+  bankingTotalEquity ??
+  getInstantMetric(
+    document,
+    instantContextId,
+    METRIC_TAGS.totalEquity
+  ),
 
       totalDebt,
+      deposits,
+advances,
+grossNpaPercent,
+netNpaPercent,
+returnOnAssetsPercent,
       equityShareCapital,
       faceValuePerShare,
       sharesOutstanding,

@@ -42,7 +42,7 @@ export async function GET(
         stockSymbol,
         {
           quarterlyLimit: 20,
-          annualLimit: 5,
+          annualLimit: 10,
         }
       );
 
@@ -123,6 +123,8 @@ export async function GET(
 
         companyName:
           series.companyName,
+
+quarterly: series.quarterly,
 
         annual:
           combinedAnnual,

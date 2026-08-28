@@ -483,6 +483,31 @@ function buildDerivedAnnual(
           .financialPeriod
           .totalDebt,
 
+          deposits:
+  marchQuarter
+    .financialPeriod
+    .deposits,
+
+    grossNpaPercent:
+  marchQuarter
+    .financialPeriod
+    .grossNpaPercent,
+
+netNpaPercent:
+  marchQuarter
+    .financialPeriod
+    .netNpaPercent,
+
+returnOnAssetsPercent:
+  marchQuarter
+    .financialPeriod
+    .returnOnAssetsPercent,
+    
+advances:
+  marchQuarter
+    .financialPeriod
+    .advances,
+
       cashAndEquivalents:
         marchQuarter
           .financialPeriod

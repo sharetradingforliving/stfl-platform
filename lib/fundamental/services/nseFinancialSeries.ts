@@ -784,8 +784,8 @@ export async function getNseFinancialSeries(
     1,
     Math.min(
       options.quarterlyLimit ??
-        8,
-      20
+        20,
+      24
     )
   );
 

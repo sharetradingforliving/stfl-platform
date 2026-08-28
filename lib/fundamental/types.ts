@@ -110,7 +110,28 @@ export type FinancialStatementPeriod = {
   totalAssets: NullableNumber;
   totalEquity: NullableNumber;
   totalDebt: NullableNumber;
+  /*
+ * Banking-specific balance-sheet
+ * values. These remain null for
+ * non-banking companies.
+ */
+deposits: NullableNumber;
+advances: NullableNumber;
 
+/*
+ * Banking-specific asset-quality
+ * and profitability ratios.
+ * Values are stored as percentages,
+ * for example 2.18 means 2.18%.
+ */
+grossNpaPercent:
+  NullableNumber;
+
+netNpaPercent:
+  NullableNumber;
+
+returnOnAssetsPercent:
+  NullableNumber;
   /*
    * Equity share capital is stored in
    * crores, while face value is rupees

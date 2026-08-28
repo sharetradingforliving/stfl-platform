@@ -598,6 +598,250 @@ function getTaxonomyPrefixes(
     .sort();
 }
 
+function findFactValue(
+  facts: XbrlFact[],
+  requestedLocalName: string
+): string | null {
+  const normalizedRequestedName =
+    requestedLocalName
+      .replace(
+        /[^a-z0-9]/gi,
+        ""
+      )
+      .toLowerCase();
+
+  const matchedFact =
+    facts.find(
+      (fact) =>
+        fact.localName
+          .replace(
+            /[^a-z0-9]/gi,
+            ""
+          )
+          .toLowerCase() ===
+        normalizedRequestedName
+    );
+
+  return matchedFact
+    ?.value
+    .trim() || null;
+}
+
+function getQuarterStartDate(
+  reportingPeriodEnd:
+    string
+): string | null {
+  const matchedDate =
+    reportingPeriodEnd.match(
+      /^(\d{4})-(\d{2})-(\d{2})$/
+    );
+
+  if (!matchedDate) {
+    return null;
+  }
+
+  const year =
+    Number(matchedDate[1]);
+
+  const monthIndex =
+    Number(matchedDate[2]) - 1;
+
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(
+      monthIndex
+    )
+  ) {
+    return null;
+  }
+
+  /*
+   * A standalone quarter begins on
+   * the first day two months before
+   * its ending month:
+   *
+   * June -> April
+   * September -> July
+   * December -> October
+   * March -> January
+   */
+  const startDate =
+    new Date(
+      Date.UTC(
+        year,
+        monthIndex - 2,
+        1
+      )
+    );
+
+  return startDate
+    .toISOString()
+    .slice(0, 10);
+}
+
+function addMissingBankingContexts(
+  contexts: XbrlContext[],
+  facts: XbrlFact[],
+  sourceUrl: string,
+  warnings: string[]
+) {
+  const isBankingDocument =
+    sourceUrl
+      .toUpperCase()
+      .includes(
+        "/BANKING_"
+      );
+
+  if (!isBankingDocument) {
+    return;
+  }
+
+  const existingContextIds =
+    new Set(
+      contexts.map(
+        (context) =>
+          context.id
+      )
+    );
+
+  const referencedContextIds =
+    new Set(
+      facts.map(
+        (fact) =>
+          fact.contextRef
+      )
+    );
+
+  const reportingPeriodEnd =
+    findFactValue(
+      facts,
+      "DateOfEndOfReportingPeriod"
+    );
+
+  const financialYearStart =
+    findFactValue(
+      facts,
+      "DateOfStartOfFinancialYear"
+    );
+
+  const reportingQuarter =
+    findFactValue(
+      facts,
+      "ReportingQuarter"
+    );
+
+  const entityIdentifier =
+    findFactValue(
+      facts,
+      "Symbol"
+    );
+
+  if (!reportingPeriodEnd) {
+    warnings.push(
+      "BANKING XBRL referenced missing contexts, but DateOfEndOfReportingPeriod was unavailable."
+    );
+
+    return;
+  }
+
+  /*
+   * NSE BANKING quarterly documents
+   * sometimes reference OneD without
+   * defining it. When ReportingQuarter
+   * confirms a quarter, reconstruct a
+   * standalone three-month duration.
+   *
+   * Otherwise use the verified financial
+   * year start, which supports annual
+   * BANKING documents.
+   */
+  const isQuarterlyReport =
+    reportingQuarter !== null &&
+    /quarter/i.test(
+      reportingQuarter
+    );
+
+  const durationStartDate =
+    isQuarterlyReport
+      ? getQuarterStartDate(
+          reportingPeriodEnd
+        )
+      : financialYearStart;
+
+  if (
+    referencedContextIds.has(
+      "OneD"
+    ) &&
+    !existingContextIds.has(
+      "OneD"
+    ) &&
+    durationStartDate
+  ) {
+    contexts.push({
+      id:
+        "OneD",
+
+      entityIdentifier,
+
+      periodType:
+        "DURATION",
+
+      startDate:
+        durationStartDate,
+
+      endDate:
+        reportingPeriodEnd,
+
+      instant:
+        null,
+
+      dimensions: {},
+    });
+
+    warnings.push(
+      `Reconstructed missing BANKING duration context OneD from verified reporting metadata (${durationStartDate} to ${reportingPeriodEnd}).`
+    );
+  }
+
+  /*
+   * Balance-sheet facts may similarly
+   * reference an omitted instant context.
+   */
+  if (
+    referencedContextIds.has(
+      "OneI"
+    ) &&
+    !existingContextIds.has(
+      "OneI"
+    )
+  ) {
+    contexts.push({
+      id:
+        "OneI",
+
+      entityIdentifier,
+
+      periodType:
+        "INSTANT",
+
+      startDate:
+        null,
+
+      endDate:
+        null,
+
+      instant:
+        reportingPeriodEnd,
+
+      dimensions: {},
+    });
+
+    warnings.push(
+      `Reconstructed missing BANKING instant context OneI from the verified reporting-period end ${reportingPeriodEnd}.`
+    );
+  }
+}
+
 function validateXbrlUrl(
   sourceUrl: string
 ): URL {
@@ -693,6 +937,13 @@ export function parseNseXbrl(
     collectFacts(
       parsedDocument
     );
+
+    addMissingBankingContexts(
+  contexts,
+  facts,
+  sourceUrl,
+  warnings
+);
 
   if (contexts.length === 0) {
     warnings.push(
