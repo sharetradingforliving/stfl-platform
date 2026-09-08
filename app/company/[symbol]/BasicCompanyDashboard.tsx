@@ -1,18 +1,27 @@
 "use client";
+
 import ChartToolbar from "@/components/charts/ChartToolbar";
 import PriceChart from "@/components/charts/PriceChart";
 import CompanySearch from "@/components/search/CompanySearch";
-import Link from "next/link";
 import InvestmentSummary from "@/components/company/InvestmentSummary";
 import MarketSnapshotCard from "@/components/company/MarketSnapshotCard";
 import TechnicalsCard from "@/components/company/TechnicalsCard";
-import type {  CompanyResearch,} from "@/lib/types/research";
-import { useEffect, useState } from "react";
+
+import type {
+  CompanyResearch,
+} from "@/lib/types/research";
+
+import Link from "next/link";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 type BasicCompanyDashboardProps = {
   symbol: string;
   exchange: "NSE" | "BSE";
 };
+
 type MarketData = {
   symbol: string;
   companyName: string;
@@ -30,6 +39,7 @@ type MarketData = {
   lastUpdated: string | null;
   source: string;
 };
+
 type ChartCommand =
   | "moveLeft"
   | "moveRight"
@@ -40,59 +50,116 @@ type ChartCommand =
 export default function BasicCompanyDashboard({
   symbol,
   exchange,
-}: BasicCompanyDashboardProps) {  const [marketData, setMarketData] =
-    useState<MarketData | null>(null);
-const [research, setResearch] =
-  useState<CompanyResearch | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+}: BasicCompanyDashboardProps) {
+  const [
+    marketData,
+    setMarketData,
+  ] = useState<MarketData | null>(
+    null
+  );
 
-  const [error, setError] = useState("");
+  const [
+    research,
+    setResearch,
+  ] = useState<CompanyResearch | null>(
+    null
+  );
 
-const [timeframe, setTimeframe] = useState("D");
-const [activeIndicators, setActiveIndicators] =
-  useState<string[]>([]);
-  const [isCrosshairActive, setIsCrosshairActive] =
-  useState(false);
-  const [activeDrawingTool, setActiveDrawingTool] =
-  useState<string | null>(null);
-  const [isChartFullscreen, setIsChartFullscreen] =
-  useState(false);
-  const [chartCommand, setChartCommand] =
-  useState<{
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(true);
+
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  const [
+    timeframe,
+    setTimeframe,
+  ] = useState("D");
+
+  const [
+    activeIndicators,
+    setActiveIndicators,
+  ] = useState<string[]>([]);
+
+  const [
+    isCrosshairActive,
+    setIsCrosshairActive,
+  ] = useState(false);
+
+  const [
+    activeDrawingTool,
+    setActiveDrawingTool,
+  ] = useState<string | null>(null);
+
+  const [
+    isChartFullscreen,
+    setIsChartFullscreen,
+  ] = useState(false);
+
+  const [
+    chartCommand,
+    setChartCommand,
+  ] = useState<{
     action: ChartCommand;
     id: number;
   } | null>(null);
-  function handleIndicatorToggle(indicator: string) {
-  setActiveIndicators((currentIndicators) =>
-    currentIndicators.includes(indicator)
-      ? currentIndicators.filter(
-          (currentIndicator) =>
-            currentIndicator !== indicator
+
+  function handleIndicatorToggle(
+    indicator: string
+  ) {
+    setActiveIndicators(
+      (currentIndicators) =>
+        currentIndicators.includes(
+          indicator
         )
-      : [...currentIndicators, indicator]
-  );
-}
-function handleChartCommand(
-  action: ChartCommand
-) {
-  setChartCommand({
-    action,
-    id: Date.now(),
-  });
-}
+          ? currentIndicators.filter(
+              (currentIndicator) =>
+                currentIndicator !==
+                indicator
+            )
+          : [
+              ...currentIndicators,
+              indicator,
+            ]
+    );
+  }
+
+  function handleChartCommand(
+    action: ChartCommand
+  ) {
+    setChartCommand({
+      action,
+      id: Date.now(),
+    });
+  }
+
+  function handleChartFullscreen() {
+    setIsChartFullscreen(
+      (currentValue) =>
+        !currentValue
+    );
+  }
+
   useEffect(() => {
     async function fetchMarketData() {
       try {
         setIsLoading(true);
         setError("");
 
-        const response = await fetch(
-  `/api/upstox/quote/${symbol}?exchange=${exchange}`,
-  {
-    cache: "no-store",
-  }
-  );
-        const data = await response.json();
+        const response =
+          await fetch(
+            `/api/upstox/quote/${symbol}?exchange=${exchange}`,
+            {
+              cache: "no-store",
+            }
+          );
+
+        const data =
+          await response.json();
 
         if (!response.ok) {
           throw new Error(
@@ -121,33 +188,43 @@ function handleChartCommand(
     fetchMarketData();
   }, [symbol, exchange]);
 
-  function handleChartFullscreen() {
-  setIsChartFullscreen(
-    (currentValue) => !currentValue
-  );
-}
-
   function formatPrice(
-    value: number | null | undefined
+  value:
+    | number
+    | null
+    | undefined
+) {
+  if (
+    value === null ||
+    value === undefined
   ) {
-    if (value === null || value === undefined) {
-      return "—";
-    }
-
-    return `₹${value.toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    return "—";
   }
 
+  return `₹${value.toLocaleString(
+    "en-IN",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }
+  )}`;
+}
   function formatVolume(
-    value: number | null | undefined
+    value:
+      | number
+      | null
+      | undefined
   ) {
-    if (value === null || value === undefined) {
+    if (
+      value === null ||
+      value === undefined
+    ) {
       return "—";
     }
 
-    return value.toLocaleString("en-IN");
+    return value.toLocaleString(
+      "en-IN"
+    );
   }
 
   if (isLoading) {
@@ -187,32 +264,30 @@ function handleChartCommand(
     );
   }
 
-  const isPositive = marketData.change >= 0;
-  
+  const isPositive =
+    marketData.change >= 0;
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <header className="border-b border-slate-800 px-6 py-5">
-        
         <section className="border-b border-slate-800 bg-[#020817] px-5 py-5">
-  <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-7xl">
+            <Link
+              href="/company-research"
+              className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-400 transition hover:text-emerald-400"
+            >
+              <span>←</span>
 
-    <Link
-      href="/company-research"
-      className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-400 transition hover:text-emerald-400"
-    >
-      <span>←</span>
-      <span>Company Research</span>
-    </Link>
+              <span>
+                Company Research
+              </span>
+            </Link>
 
-    <CompanySearch variant="compact" />
-
-  </div>
-</section>
-
+            <CompanySearch variant="compact" />
+          </div>
+        </section>
       </header>
 
-      
       <section className="mx-auto max-w-7xl px-6 py-14">
         <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
           <div>
@@ -231,12 +306,13 @@ function handleChartCommand(
             </div>
 
             <p className="mt-5 text-lg font-medium text-slate-300">
-  {marketData.companyName}
-</p>
+              {marketData.companyName}
+            </p>
 
-<p className="mt-2 text-slate-400">
-  Live market overview powered by Upstox
-</p>
+            <p className="mt-2 text-slate-400">
+              Live market overview
+              powered by Upstox
+            </p>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 lg:min-w-96">
@@ -258,11 +334,16 @@ function handleChartCommand(
                     : "text-red-400"
                 }`}
               >
-                {isPositive ? "▲" : "▼"}{" "}
+                {isPositive
+                  ? "▲"
+                  : "▼"}{" "}
                 {formatPrice(
-                  Math.abs(marketData.change)
+                  Math.abs(
+                    marketData.change
+                  )
                 )}{" "}
-                ({isPositive ? "+" : "-"}
+                (
+                {isPositive ? "+" : "-"}
                 {Math.abs(
                   marketData.changePercent
                 ).toFixed(2)}
@@ -271,185 +352,230 @@ function handleChartCommand(
             </div>
 
             <p className="mt-4 text-xs text-slate-500">
-              Market data: {marketData.source}
+              Market data:{" "}
+              {marketData.source}
             </p>
           </div>
         </div>
 
-        <div className="mt-12">
-            {/* ===================== STFL Research Terminal ===================== */}
+        {/* STFL Research Terminal */}
+        <div className="mt-12 rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-400">
+                STFL Research Terminal
+              </p>
 
-<div className="mt-12 rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
+              <h2 className="mt-2 text-3xl font-bold">
+                Interactive Professional
+                Chart
+              </h2>
 
-  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <p className="mt-2 text-slate-400">
+                Professional market
+                analysis powered by
+                Upstox data and STFL AI
+                research.
+              </p>
+            </div>
 
-    <div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-black hover:bg-emerald-400"
+              >
+                🧠 STFL AI Research
+              </button>
+            </div>
+          </div>
 
-      <p className="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-400">
-        STFL Research Terminal
-      </p>
-
-      <h2 className="mt-2 text-3xl font-bold">
-        Interactive Professional Chart
-      </h2>
-
-      <p className="mt-2 text-slate-400">
-        Professional market powered by Upstox data and STFL AI research.
-      </p>
-
-    </div>
-
-    <div className="flex flex-wrap gap-3">
-
-      <button className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-black hover:bg-emerald-400">
-        🧠 STFL AI Research
-      </button>
-
-      
-    </div>
-
-  </div>
-
-  <div className="mt-8">
-
-  <ChartToolbar
-    timeframe={timeframe}
-    onTimeframeChange={setTimeframe}
-    activeIndicators={activeIndicators}
-    onIndicatorToggle={handleIndicatorToggle}
-    onDrawingToolSelect={setActiveDrawingTool}
-    isCrosshairActive={isCrosshairActive}
-    isChartFullscreen={isChartFullscreen}
-    onFullscreenToggle={handleChartFullscreen}
-    onCrosshairToggle={() =>
-      setIsCrosshairActive(
-        (currentValue) => !currentValue
-      )
-    }
-    onChartCommand={handleChartCommand}
-  />
-
-  <div className="mt-6 grid grid-cols-1 xl:grid-cols-10 gap-6">
-
-    <div className="xl:col-span-7">
-
-      <PriceChart
-  symbol={symbol}
-  exchange={exchange}
-  instrumentKey={marketData.instrumentKey}
-  timeframe={timeframe}
-  activeIndicators={activeIndicators}
-  activeDrawingTool={activeDrawingTool}
-  isCrosshairActive={isCrosshairActive}
-  chartCommand={chartCommand}
-  onResearchReady={setResearch}
-/>
-
-    </div>
-
-    <div className="xl:col-span-3">
-
-  <InvestmentSummary
-  research={research}
-/>
-
-</div>
-
-  </div>
-
-</div>
-
-{/* =============================================================== */}
-          <p className="mt-12 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
-            Market Snapshot
-          </p>
-
-                    <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard
-              label="Previous Close"
-              value={formatPrice(
-                marketData.previousClose
-              )}
+          <div className="mt-8">
+            <ChartToolbar
+              timeframe={timeframe}
+              onTimeframeChange={
+                setTimeframe
+              }
+              activeIndicators={
+                activeIndicators
+              }
+              onIndicatorToggle={
+                handleIndicatorToggle
+              }
+              onDrawingToolSelect={
+                setActiveDrawingTool
+              }
+              isCrosshairActive={
+                isCrosshairActive
+              }
+              isChartFullscreen={
+                isChartFullscreen
+              }
+              onFullscreenToggle={
+                handleChartFullscreen
+              }
+              onCrosshairToggle={() =>
+                setIsCrosshairActive(
+                  (currentValue) =>
+                    !currentValue
+                )
+              }
+              onChartCommand={
+                handleChartCommand
+              }
             />
 
-            <MetricCard
-              label="Open"
-              value={formatPrice(
-                marketData.open
-              )}
-            />
+            <div className="mt-6 grid grid-cols-1 items-start gap-6 xl:grid-cols-10">
+              {/* Left side */}
+              <div className="min-w-0 xl:col-span-7">
+                <PriceChart
+                  symbol={symbol}
+                  exchange={exchange}
+                  instrumentKey={
+                    marketData.instrumentKey
+                  }
+                  timeframe={
+                    timeframe
+                  }
+                  activeIndicators={
+                    activeIndicators
+                  }
+                  activeDrawingTool={
+                    activeDrawingTool
+                  }
+                  isCrosshairActive={
+                    isCrosshairActive
+                  }
+                  chartCommand={
+                    chartCommand
+                  }
+                  onResearchReady={
+                    setResearch
+                  }
+                />
 
-            <MetricCard
-              label="Day High"
-              value={formatPrice(
-                marketData.high
-              )}
-            />
+                {/* Market Snapshot now follows the chart */}
+                <div className="mt-6">
+                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+                    Market Snapshot
+                  </p>
 
-            <MetricCard
-              label="Day Low"
-              value={formatPrice(
-                marketData.low
-              )}
-            />
+                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                    <MetricCard
+                      label="Previous Close"
+                      value={formatPrice(
+                        marketData.previousClose
+                      )}
+                    />
 
-            <MetricCard
-              label="Volume"
-              value={formatVolume(
-                marketData.volume
-              )}
-            />
+                    <MetricCard
+                      label="Open"
+                      value={formatPrice(
+                        marketData.open
+                      )}
+                    />
 
-            <MetricCard
-              label="Average Price"
-              value={formatPrice(
-                marketData.averagePrice
-              )}
-            />
+                    <MetricCard
+                      label="Day High"
+                      value={formatPrice(
+                        marketData.high
+                      )}
+                    />
 
-            <MetricCard
-              label="Instrument Key"
-              value={marketData.instrumentKey}
-              small
-            />
+                    <MetricCard
+                      label="Day Low"
+                      value={formatPrice(
+                        marketData.low
+                      )}
+                    />
 
-            <MetricCard
-              label="Data Source"
-              value={marketData.source}
-            />
+                    <MetricCard
+                      label="Volume"
+                      value={formatVolume(
+                        marketData.volume
+                      )}
+                    />
+
+                    <MetricCard
+                      label="Average Price"
+                      value={formatPrice(
+                        marketData.averagePrice
+                      )}
+                    />
+
+                    <MetricCard
+                      label="Instrument Key"
+                      value={
+                        marketData.instrumentKey
+                      }
+                      small
+                    />
+
+                    <MetricCard
+                      label="Data Source"
+                      value={
+                        marketData.source
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Right side */}
+              <aside className="min-w-0 xl:col-span-3">
+                <div className="xl:sticky xl:top-6">
+                  <InvestmentSummary
+                    research={
+                      research
+                    }
+                  />
+                </div>
+              </aside>
+            </div>
           </div>
         </div>
 
-    {research && (
-  <>
-    <div className="mt-5">
-      <MarketSnapshotCard
-        research={research}
-      />
-    </div>
+        {research && (
+          <>
+            <div className="mt-5">
+              <MarketSnapshotCard
+                research={research}
+              />
+            </div>
 
-    <div className="mt-6">
-      <TechnicalsCard
-        research={research}
-      />
-    </div>
-  </>
-)}
-  
-        <div className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6">
-          <p className="font-semibold text-amber-300">
-            Detailed company research is being added
-          </p>
+            <div className="mt-6">
+              <TechnicalsCard
+                research={research}
+              />
+            </div>
+          </>
+        )}
 
-          <p className="mt-2 leading-7 text-slate-400">
-            Financial statements, valuation,
-            shareholding, technical analysis, news,
-            and AI research are not yet available for
-            this company. Live market information is
-            provided through Upstox.
-          </p>
-        </div>
-        </div>
+        <div className="mt-12 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-6 md:flex md:items-center md:justify-between md:gap-8">
+  <div>
+    <p className="font-semibold text-emerald-300">
+      Explore Detailed Fundamental Research
+    </p>
+
+    <p className="mt-2 leading-7 text-slate-400">
+      Review verified annual financial statements,
+      growth, profitability, banking metrics,
+      valuation methods and peer comparisons for{" "}
+      {marketData.companyName}.
+    </p>
+  </div>
+
+  <Link
+    href={`/fundamental-research/${encodeURIComponent(
+      symbol
+    )}?exchange=${encodeURIComponent(
+      exchange
+    )}&method=composite`}
+    className="mt-5 inline-flex shrink-0 items-center justify-center rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 md:mt-0"
+  >
+    Open Fundamental Research
+    <span className="ml-2">→</span>
+  </Link>
+</div>
       </section>
     </main>
   );
@@ -465,16 +591,16 @@ function MetricCard({
   small?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
       <p className="text-sm text-slate-400">
         {label}
       </p>
 
       <p
-        className={`mt-3 font-bold ${
+        className={`mt-2 font-bold text-white ${
           small
             ? "break-all text-sm"
-            : "text-2xl"
+            : "text-xl"
         }`}
       >
         {value}

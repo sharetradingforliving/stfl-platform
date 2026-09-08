@@ -48,6 +48,14 @@ import {
   type DerivedAnnualSource,
 } from "./deriveAnnualFinancials";
 
+import {
+  getNseCorporateActions,
+} from "../providers/nseCorporateActions";
+
+import {
+  adjustFinancialPeriodsForCorporateActions,
+} from "./corporateActionAdjuster";
+
 export type AnalyticsAnnualSource =
   | NseFinancialSeriesSource
   | DerivedAnnualSource;
@@ -220,8 +228,7 @@ function getElapsedYears(
 }
 
 function officialToRecord(
-  annual:
-    NseFinancialSeriesItem
+  annual: NseFinancialSeriesItem
 ): CombinedAnnualRecord {
   return {
     financialPeriod:
@@ -248,8 +255,7 @@ function officialToRecord(
       audited:
         annual.audited,
 
-      contributingQuarterCount:
-        0,
+      contributingQuarterCount: 0,
 
       warnings:
         annual.warnings,
@@ -258,8 +264,7 @@ function officialToRecord(
 }
 
 function derivedToRecord(
-  annual:
-    DerivedAnnualFinancial
+  annual: DerivedAnnualFinancial
 ): CombinedAnnualRecord {
   return {
     financialPeriod:
@@ -279,31 +284,23 @@ function derivedToRecord(
       derived: true,
 
       consolidated:
-        annual
-          .contributingQuarters
-          .every(
-            (quarter) =>
-              quarter.consolidated ===
-              true
-          )
+        annual.contributingQuarters.every(
+          (quarter) =>
+            quarter.consolidated === true
+        )
           ? true
           : null,
 
       audited:
-        annual
-          .contributingQuarters
-          .every(
-            (quarter) =>
-              quarter.audited ===
-              true
-          )
+        annual.contributingQuarters.every(
+          (quarter) =>
+            quarter.audited === true
+        )
           ? true
           : false,
 
       contributingQuarterCount:
-        annual
-          .contributingQuarters
-          .length,
+        annual.contributingQuarters.length,
 
       warnings:
         annual.warnings,
@@ -316,7 +313,10 @@ function combineAnnualRecords(
     NseFinancialSeriesItem[],
 
   derivedAnnual:
-    DerivedAnnualFinancial[]
+    DerivedAnnualFinancial[],
+
+  quarterlyPeriods:
+    NseFinancialSeriesItem[]
 ): CombinedAnnualRecord[] {
   const recordsByPeriod =
     new Map<
@@ -324,10 +324,89 @@ function combineAnnualRecords(
       CombinedAnnualRecord
     >();
 
+  const derivedByPeriod =
+    new Map<
+      string,
+      DerivedAnnualFinancial
+    >(
+      derivedAnnual.map(
+        (annual) => [
+          annual.periodEnded,
+          annual,
+        ]
+      )
+    );
+
   /*
-   * Add derived records first.
-   * Official records then overwrite
-   * matching derived periods.
+   * Some annual XBRL documents contain
+   * income-statement values but omit
+   * usable point-in-time balance-sheet
+   * facts.
+   *
+   * A verified quarterly filing ending
+   * on exactly the same date can safely
+   * supplement those missing fields.
+   */
+  const quarterlyByPeriod =
+    new Map<
+      string,
+      NseFinancialSeriesItem
+    >();
+
+  for (
+    const quarter
+    of quarterlyPeriods
+  ) {
+    const existing =
+      quarterlyByPeriod.get(
+        quarter.periodEnded
+      );
+
+    if (!existing) {
+      quarterlyByPeriod.set(
+        quarter.periodEnded,
+        quarter
+      );
+
+      continue;
+    }
+
+    /*
+     * Prefer consolidated and audited
+     * records when duplicate filings
+     * exist for the same period end.
+     */
+    const existingScore =
+      (existing.consolidated === true
+        ? 2
+        : 0) +
+      (existing.audited === true
+        ? 1
+        : 0);
+
+    const candidateScore =
+      (quarter.consolidated === true
+        ? 2
+        : 0) +
+      (quarter.audited === true
+        ? 1
+        : 0);
+
+    if (
+      candidateScore >
+      existingScore
+    ) {
+      quarterlyByPeriod.set(
+        quarter.periodEnded,
+        quarter
+      );
+    }
+  }
+
+  /*
+   * Add derived annual records first.
+   * An official annual record replaces
+   * a derived record for the same date.
    */
   for (
     const annual
@@ -345,11 +424,210 @@ function combineAnnualRecords(
     const annual
     of officialAnnual
   ) {
-    recordsByPeriod.set(
-      annual.periodEnded,
+    const officialRecord =
       officialToRecord(
         annual
-      )
+      );
+
+    const officialPeriod =
+      officialRecord
+        .financialPeriod;
+
+    const matchingDerived =
+      derivedByPeriod.get(
+        annual.periodEnded
+      )?.financialPeriod ??
+      null;
+
+    const matchingQuarter =
+      quarterlyByPeriod.get(
+        annual.periodEnded
+      )?.financialPeriod ??
+      null;
+
+    const supplementedFields:
+      string[] = [];
+
+    const usePointInTimeFallback = (
+      fieldName: string,
+
+      officialValue:
+        | number
+        | null
+        | undefined,
+
+      derivedValue:
+        | number
+        | null
+        | undefined,
+
+      quarterlyValue:
+        | number
+        | null
+        | undefined
+    ): number | null => {
+      if (
+        typeof officialValue ===
+          "number" &&
+        Number.isFinite(
+          officialValue
+        )
+      ) {
+        return officialValue;
+      }
+
+      if (
+        typeof derivedValue ===
+          "number" &&
+        Number.isFinite(
+          derivedValue
+        )
+      ) {
+        supplementedFields.push(
+          `${fieldName} from the matching derived annual record`
+        );
+
+        return derivedValue;
+      }
+
+      if (
+        typeof quarterlyValue ===
+          "number" &&
+        Number.isFinite(
+          quarterlyValue
+        )
+      ) {
+        supplementedFields.push(
+          `${fieldName} from the matching verified quarterly record`
+        );
+
+        return quarterlyValue;
+      }
+
+      return null;
+    };
+
+    const mergedFinancialPeriod:
+      FinancialStatementPeriod = {
+      ...officialPeriod,
+
+      /*
+       * Only point-in-time fields are
+       * supplemented. Revenue, profit,
+       * tax, finance cost and EPS always
+       * remain from the official annual
+       * record.
+       */
+      totalAssets:
+        usePointInTimeFallback(
+          "total assets",
+          officialPeriod.totalAssets,
+          matchingDerived
+            ?.totalAssets,
+          matchingQuarter
+            ?.totalAssets
+        ),
+
+      totalEquity:
+        usePointInTimeFallback(
+          "total equity",
+          officialPeriod.totalEquity,
+          matchingDerived
+            ?.totalEquity,
+          matchingQuarter
+            ?.totalEquity
+        ),
+
+      totalDebt:
+        usePointInTimeFallback(
+          "total debt",
+          officialPeriod.totalDebt,
+          matchingDerived
+            ?.totalDebt,
+          matchingQuarter
+            ?.totalDebt
+        ),
+
+      deposits:
+        usePointInTimeFallback(
+          "deposits",
+          officialPeriod.deposits,
+          matchingDerived
+            ?.deposits,
+          matchingQuarter
+            ?.deposits
+        ),
+
+      advances:
+        usePointInTimeFallback(
+          "advances",
+          officialPeriod.advances,
+          matchingDerived
+            ?.advances,
+          matchingQuarter
+            ?.advances
+        ),
+
+      equityShareCapital:
+        usePointInTimeFallback(
+          "equity share capital",
+          officialPeriod
+            .equityShareCapital,
+          matchingDerived
+            ?.equityShareCapital,
+          matchingQuarter
+            ?.equityShareCapital
+        ),
+
+      faceValuePerShare:
+        usePointInTimeFallback(
+          "face value per share",
+          officialPeriod
+            .faceValuePerShare,
+          matchingDerived
+            ?.faceValuePerShare,
+          matchingQuarter
+            ?.faceValuePerShare
+        ),
+
+      sharesOutstanding:
+        usePointInTimeFallback(
+          "shares outstanding",
+          officialPeriod
+            .sharesOutstanding,
+          matchingDerived
+            ?.sharesOutstanding,
+          matchingQuarter
+            ?.sharesOutstanding
+        ),
+    };
+
+    recordsByPeriod.set(
+      annual.periodEnded,
+      {
+        financialPeriod:
+          mergedFinancialPeriod,
+
+        metadata: {
+          ...officialRecord.metadata,
+
+          warnings:
+            supplementedFields.length >
+            0
+              ? [
+                  ...officialRecord
+                    .metadata
+                    .warnings,
+
+                  `Missing annual point-in-time values were supplemented using same-date verified records: ${supplementedFields.join(
+                    ", "
+                  )}.`,
+                ]
+              : officialRecord
+                  .metadata
+                  .warnings,
+        },
+      }
     );
   }
 
@@ -359,8 +637,7 @@ function combineAnnualRecords(
     (first, second) =>
       first.metadata.periodEnded
         .localeCompare(
-          second
-            .metadata
+          second.metadata
             .periodEnded
         )
   );
@@ -440,14 +717,29 @@ export async function getFundamentalAnalytics(
     );
   }
 
-  const series =
-    await getNseFinancialSeries(
+  /*
+   * Financial filings and corporate
+   * actions are independent NSE data
+   * sources, so load them together.
+   * A corporate-action failure does not
+   * prevent the financial analysis.
+   */
+  const [
+    series,
+    corporateActions,
+  ] = await Promise.all([
+    getNseFinancialSeries(
       symbol,
       {
         quarterlyLimit: 20,
         annualLimit: 5,
       }
-    );
+    ),
+
+    getNseCorporateActions(
+      symbol
+    ),
+  ]);
 
   const derived =
     deriveAnnualFinancials(
@@ -456,16 +748,37 @@ export async function getFundamentalAnalytics(
     );
 
   const combinedRecords =
-    combineAnnualRecords(
-      series.annual,
-      derived.annual
-    );
+  combineAnnualRecords(
+    series.annual,
+    derived.annual,
+    series.quarterly
+  );
 
-  const annualFinancials =
+  const unadjustedAnnualFinancials =
     combinedRecords.map(
       (record) =>
         record.financialPeriod
     );
+
+  /*
+   * Restate historical per-share data
+   * onto the current share basis before
+   * calculating market capitalization,
+   * valuation multiples or fair value.
+   *
+   * Revenue, profit, assets, equity and
+   * other absolute financial values are
+   * left unchanged by the adjuster.
+   */
+  const corporateActionAdjustment =
+    adjustFinancialPeriodsForCorporateActions(
+      unadjustedAnnualFinancials,
+      corporateActions.actions
+    );
+
+  const annualFinancials =
+    corporateActionAdjustment
+      .periods;
 
     const annualMetadata =
     combinedRecords.map(
@@ -547,11 +860,18 @@ export async function getFundamentalAnalytics(
           }
         : null;
 
-  const metrics =
-    calculateFundamentalMetrics(
-      annualFinancials,
-      enrichedMarket
-    );
+  const quarterlyFinancialPeriods =
+  series.quarterly.map(
+    (quarter) =>
+      quarter.financialPeriod
+  );
+
+const metrics =
+  calculateFundamentalMetrics(
+    annualFinancials,
+    enrichedMarket,
+    quarterlyFinancialPeriods
+  );
 
       const grahamValuation =
     calculateGrahamValuation(
@@ -642,6 +962,51 @@ export async function getFundamentalAnalytics(
       ...series.warnings,
       ...derived.warnings,
       ...periodWarnings,
+
+      ...corporateActions
+        .warnings
+        .map(
+          (warning) =>
+            `Corporate actions: ${warning}`
+        ),
+
+      ...corporateActionAdjustment
+        .warnings
+        .map(
+          (warning) =>
+            `Corporate-action adjustment: ${warning}`
+        ),
+
+      ...corporateActionAdjustment
+        .adjustedPeriods
+        .filter(
+          (period) =>
+            period
+              .appliedAdjustments
+              .length > 0
+        )
+        .map(
+          (period) => {
+            const reportingPeriod =
+              period
+                .financialPeriod
+                .endDate ??
+              period
+                .financialPeriod
+                .period;
+
+            const adjustments =
+              period
+                .appliedAdjustments
+                .map(
+                  (adjustment) =>
+                    `stock split ${adjustment.oldFaceValue}:${adjustment.newFaceValue} effective ${adjustment.exDate}`
+                )
+                .join(", ");
+
+            return `Adjusted ${reportingPeriod} to the current share basis by factor ${period.cumulativeShareAdjustmentFactor} for ${adjustments}.`;
+          }
+        ),
 
       ...derived
         .incompleteFiscalYears

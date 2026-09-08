@@ -222,18 +222,79 @@ async function loadCandles() {
     b: { time: number }
   ) => a.time - b.time
 );
-const priceHistory = buildPriceHistory(
-  formattedCandles
-);
+const priceHistory =
+  buildPriceHistory(
+    formattedCandles
+  );
+
+/*
+ * Use the live Upstox quote for the
+ * technical summary.
+ *
+ * The latest historical candle close
+ * remains a safe fallback when the
+ * quote endpoint is unavailable.
+ */
+const historicalClose =
+  formattedCandles[
+    formattedCandles.length - 1
+  ].close;
+
+let currentPrice =
+  historicalClose;
+
+try {
+  const quoteResponse =
+    await fetch(
+      `/api/upstox/quote/${encodeURIComponent(
+        symbol
+      )}?exchange=${encodeURIComponent(
+        exchange
+      )}`,
+      {
+        method: "GET",
+        cache: "no-store",
+      }
+    );
+
+  if (
+    quoteResponse.ok
+  ) {
+    const quoteData =
+      await quoteResponse.json();
+
+    if (
+      typeof quoteData
+        ?.currentPrice ===
+        "number" &&
+      Number.isFinite(
+        quoteData.currentPrice
+      ) &&
+      quoteData.currentPrice > 0
+    ) {
+      currentPrice =
+        quoteData.currentPrice;
+    }
+  } else {
+    console.warn(
+      "Live quote unavailable. Using latest historical close."
+    );
+  }
+} catch (quoteError) {
+  console.warn(
+    "Unable to retrieve the live quote. Using latest historical close:",
+    quoteError
+  );
+}
 
 const technicalInput =
   buildTechnicalInput({
     symbol,
-    exchange, // temporary
-    currentPrice:
-      formattedCandles[
-        formattedCandles.length - 1
-      ].close,
+
+    exchange,
+
+    currentPrice,
+
     priceHistory,
   });
 
@@ -242,7 +303,9 @@ const research =
     technicalInput
   );
 
-onResearchReady?.(research);     
+onResearchReady?.(
+  research
+);
 
     const formattedVolume =
   formattedCandles.map(

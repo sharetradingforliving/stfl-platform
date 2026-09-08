@@ -14,9 +14,13 @@ import type {
 const RUPEES_PER_CRORE =
   10_000_000;
 
-const MINIMUM_PEERS = 3;
+const MINIMUM_PEERS_FOR_VALUATION =
+  3;
 
 const MINIMUM_VALUES_PER_MULTIPLE =
+  1;
+
+const MINIMUM_VALUES_AFTER_OUTLIER_CHECK =
   3;
 
 const MINIMUM_VALUES_FOR_OUTLIER_CHECK =
@@ -205,9 +209,9 @@ function removeOutliers(
    * evidence requirement.
    */
   if (
-    filteredValues.length <
-    MINIMUM_VALUES_PER_MULTIPLE
-  ) {
+  filteredValues.length <
+  MINIMUM_VALUES_AFTER_OUTLIER_CHECK
+) {
     return {
       values,
       excludedCount: 0,
@@ -283,6 +287,59 @@ function calculateAverage(
       0
     ) /
     validValues.length
+  );
+}
+
+function calculateWeightedAverage(
+  values: {
+    value: NullableNumber;
+    weight: number;
+  }[]
+): NullableNumber {
+  const validValues =
+    values.filter(
+      (
+        item
+      ): item is {
+        value: number;
+        weight: number;
+      } =>
+        isPositiveNumber(
+          item.value
+        ) &&
+        Number.isFinite(
+          item.weight
+        ) &&
+        item.weight > 0
+    );
+
+  if (
+    validValues.length === 0
+  ) {
+    return null;
+  }
+
+  const totalWeight =
+    validValues.reduce(
+      (total, item) =>
+        total +
+        item.weight,
+      0
+    );
+
+  if (totalWeight <= 0) {
+    return null;
+  }
+
+  return (
+    validValues.reduce(
+      (total, item) =>
+        total +
+        item.value *
+          item.weight,
+      0
+    ) /
+    totalWeight
   );
 }
 
@@ -473,7 +530,10 @@ function calculateConfidence(
   },
 
   impliedFairValue:
-    NullableNumber
+    NullableNumber,
+
+  isBankingCompany:
+    boolean
 ): EvidenceStrength {
   if (
     !isPositiveNumber(
@@ -483,12 +543,18 @@ function calculateConfidence(
     return "INSUFFICIENT";
   }
 
-  const coverageValues = [
-    coverage.priceToEarnings,
-    coverage.priceToBook,
-    coverage
-      .enterpriseValueToEbitda,
-  ];
+  const coverageValues =
+  isBankingCompany
+    ? [
+        coverage.priceToBook,
+        coverage.priceToEarnings,
+      ]
+    : [
+        coverage.priceToEarnings,
+        coverage.priceToBook,
+        coverage
+          .enterpriseValueToEbitda,
+      ];
 
   const applicableMethods =
     coverageValues.filter(
@@ -503,12 +569,18 @@ function calculateConfidence(
         count >= 5
     ).length;
 
-  if (
-    peerCount >= 5 &&
-    strongMethods === 3
-  ) {
-    return "HIGH";
-  }
+  const requiredStrongMethods =
+  isBankingCompany
+    ? 2
+    : 3;
+
+if (
+  peerCount >= 5 &&
+  strongMethods ===
+    requiredStrongMethods
+) {
+  return "HIGH";
+}
 
   if (
     peerCount >= 3 &&
@@ -637,6 +709,28 @@ export function calculatePeerValuation(
       annualPeriods
     );
 
+    /*
+ * Banks require equity-based peer
+ * valuation. Deposits and advances are
+ * operating balance-sheet items and
+ * must not be treated as corporate debt.
+ */
+const isBankingCompany =
+  metrics?.industrySpecific
+    .bank !== undefined ||
+  (
+    latestAnnual?.deposits !==
+      null &&
+    latestAnnual?.deposits !==
+      undefined
+  ) ||
+  (
+    latestAnnual?.advances !==
+      null &&
+    latestAnnual?.advances !==
+      undefined
+  );
+
   const validPeers =
     peers.filter(
       (peer) =>
@@ -661,14 +755,23 @@ export function calculatePeerValuation(
       )
     );
 
-  const preparedEvEbitda =
-    prepareMultiple(
-      validPeers.map(
-        (peer) =>
-          peer
-            .enterpriseValueToEbitda
-      )
-    );
+  /*
+ * EV/EBITDA is not an appropriate
+ * banking multiple because deposits
+ * and advances form part of banking
+ * operations rather than conventional
+ * corporate financing.
+ */
+const preparedEvEbitda =
+  isBankingCompany
+    ? prepareMultiple([])
+    : prepareMultiple(
+        validPeers.map(
+          (peer) =>
+            peer
+              .enterpriseValueToEbitda
+        )
+      );
 
   const outlierWarnings:
     string[] = [];
@@ -714,10 +817,10 @@ export function calculatePeerValuation(
 
   if (
     validPeers.length <
-    MINIMUM_PEERS
+    MINIMUM_PEERS_FOR_VALUATION
   ) {
     return createUnavailableResult(
-      "Peer valuation requires at least three valid comparable companies.",
+      "Peer comparison is available, but a peer fair-value conclusion requires at least three valid comparable companies.",
       validPeers,
       preparedPe,
       preparedPb,
@@ -725,6 +828,40 @@ export function calculatePeerValuation(
       outlierWarnings
     );
   }
+
+  /*
+ * For banking valuation, at least one
+ * supported equity multiple must contain
+ * observations from three valid peers.
+ *
+ * Merely selecting three companies is
+ * not sufficient when their P/B and P/E
+ * values are unavailable.
+ */
+/*
+ * P/B is the primary bank valuation
+ * method. Therefore, a bank fair-value
+ * conclusion requires at least three
+ * valid peer P/B observations.
+ *
+ * P/E remains a secondary supporting
+ * method and cannot independently make
+ * the bank valuation applicable.
+ */
+if (
+  isBankingCompany &&
+  preparedPb.coverage <
+    MINIMUM_PEERS_FOR_VALUATION
+) {
+  return createUnavailableResult(
+    "Bank peer comparison is available, but a fair-value conclusion requires at least three valid peer P/B observations. P/E is retained only as a secondary supporting multiple.",
+    validPeers,
+    preparedPe,
+    preparedPb,
+    preparedEvEbitda,
+    outlierWarnings
+  );
+}
 
   const netDebt =
     isFiniteNumber(
@@ -763,26 +900,47 @@ export function calculatePeerValuation(
     );
 
   const evEbitdaFairValue =
-    fairValueFromEnterpriseMultiple(
-      latestAnnual.ebitda,
+  isBankingCompany
+    ? null
+    : fairValueFromEnterpriseMultiple(
+        latestAnnual.ebitda,
 
-      preparedEvEbitda.median,
+        preparedEvEbitda.median,
 
-      netDebt,
+        netDebt,
 
-      sharesOutstanding
-    );
+        sharesOutstanding
+      );
 
   /*
-   * Each available valuation method
-   * currently receives equal weight.
-   */
-  const impliedFairValue =
-    calculateAverage([
-      peFairValue,
-      pbFairValue,
-      evEbitdaFairValue,
-    ]);
+ * Banks are valued primarily on P/B
+ * because book equity and regulatory
+ * capital are central to the banking
+ * business model. P/E is a secondary
+ * profitability-based cross-check.
+ *
+ * Non-banking companies retain equal
+ * weighting across applicable methods.
+ */
+const impliedFairValue =
+  isBankingCompany
+    ? calculateWeightedAverage([
+        {
+          value:
+            pbFairValue,
+          weight: 70,
+        },
+        {
+          value:
+            peFairValue,
+          weight: 30,
+        },
+      ])
+    : calculateAverage([
+        peFairValue,
+        pbFairValue,
+        evEbitdaFairValue,
+      ]);
 
   const premiumDiscountToPeers =
     calculatePremiumDiscount(
@@ -805,11 +963,12 @@ export function calculatePeerValuation(
   };
 
   const confidence =
-    calculateConfidence(
-      validPeers.length,
-      multipleCoverage,
-      impliedFairValue
-    );
+  calculateConfidence(
+    validPeers.length,
+    multipleCoverage,
+    impliedFairValue,
+    isBankingCompany
+  );
 
   const valuationLabel =
     classifyPeerValuation(
@@ -829,17 +988,28 @@ export function calculatePeerValuation(
       impliedFairValue !== null,
 
     suitabilityReason:
-      impliedFairValue !== null
-        ? [
-            "Peer fair value was calculated from the median valuation multiples of the selected comparable companies.",
-            `${availableMethods} valuation method(s) were applicable and received equal weight.`,
-            describePremiumDiscount(
-              premiumDiscountToPeers
-            ),
-            "Industry membership alone does not guarantee full business-model comparability.",
-          ].join(" ")
-        : "The selected peers did not provide at least three valid observations for any supported valuation multiple.",
-
+  impliedFairValue !== null
+    ? isBankingCompany
+      ? [
+          "Bank peer fair value was calculated from the median P/B and P/E multiples of the selected comparable banks.",
+          "P/B is the primary banking valuation method with a 70% weight, while P/E is the secondary method with a 30% weight.",
+          `${availableMethods} supported banking valuation method(s) were applicable. Missing methods were automatically excluded and the remaining valid weights were normalized.`,
+          describePremiumDiscount(
+            premiumDiscountToPeers
+          ),
+          "Bank peer valuation should also be assessed with asset quality, return on assets, net interest margin and regulatory-capital strength.",
+        ].join(" ")
+      : [
+          "Peer fair value was calculated from the median valuation multiples of the selected comparable companies.",
+          `${availableMethods} valuation method(s) were applicable and received equal weight.`,
+          describePremiumDiscount(
+            premiumDiscountToPeers
+          ),
+          "Industry membership alone does not guarantee full business-model comparability.",
+        ].join(" ")
+    : isBankingCompany
+      ? "The selected bank peers did not provide sufficient valid P/B or P/E observations to calculate a peer-implied fair value."
+      : "The selected peers did not provide at least one valid observation for any supported valuation multiple.",
     peers:
       validPeers,
 

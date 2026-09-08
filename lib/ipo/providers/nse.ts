@@ -885,14 +885,16 @@ async function enrichIPO(
 
 
   return {
+  ...ipo,
 
-    ...ipo,
+  lotSize:
+    detail.lotSize ??
+    ipo.lotSize,
 
-    lotSize:
-      detail.lotSize,
-
-    subscription,
-  };
+  subscription:
+    subscription ??
+    ipo.subscription,
+};
 }
 
 
@@ -904,21 +906,15 @@ async function enrichIPO(
 
 export async function fetchNSEIPOData():
 Promise<NSEIPORecord[]> {
-
   try {
-
     const [
       currentResult,
       upcomingResult,
     ] =
       await Promise.allSettled([
-
         fetchNSECurrentIPOs(),
-
         fetchNSEUpcomingIPOs(),
-
       ]);
-
 
     const currentIPOs =
       currentResult.status ===
@@ -926,31 +922,25 @@ Promise<NSEIPORecord[]> {
         ? currentResult.value
         : [];
 
-
     const upcomingIPOs =
       upcomingResult.status ===
       "fulfilled"
         ? upcomingResult.value
         : [];
 
-
-    /**
-     * Enrich BOTH current and upcoming IPOs
+    /*
+     * Current IPOs receive live
+     * subscription and lot information.
      *
-     * Current:
-     * subscription + lot
-     *
-     * Upcoming:
-     * lot
+     * Upcoming IPOs receive available
+     * detail information.
      */
-
     const enrichedCurrent =
       await Promise.all(
         currentIPOs.map(
           enrichIPO
         )
       );
-
 
     const enrichedUpcoming =
       await Promise.all(
@@ -959,73 +949,191 @@ Promise<NSEIPORecord[]> {
         )
       );
 
-
     const combined = [
-
       ...enrichedCurrent,
-
       ...enrichedUpcoming,
-
     ];
 
-
-    /**
-     * Remove duplicates
+    /*
+     * Merge records representing the
+     * same IPO instead of discarding
+     * either the current or upcoming
+     * version.
      */
+    const recordsByKey =
+      new Map<
+        string,
+        NSEIPORecord
+      >();
 
-    const seen =
-      new Set<string>();
+    for (const ipo of combined) {
+      const key =
+        (
+          ipo.symbol ||
+          ipo.companyName ||
+          ""
+        )
+          .trim()
+          .toLowerCase();
 
+      if (!key) {
+        continue;
+      }
 
-    const unique =
-      combined.filter(
-        (ipo) => {
+      const existing =
+        recordsByKey.get(key);
 
-          const key =
-            (
-              ipo.symbol ||
-              ipo.companyName ||
-              ""
-            )
-              .trim()
-              .toLowerCase();
+      if (!existing) {
+        recordsByKey.set(
+          key,
+          ipo
+        );
 
+        continue;
+      }
 
-          if (!key) {
-            return false;
-          }
+      const currentRecord =
+        existing.sourceType ===
+        "current"
+          ? existing
+          : ipo.sourceType ===
+              "current"
+            ? ipo
+            : existing;
 
+      const supplementaryRecord =
+        currentRecord === existing
+          ? ipo
+          : existing;
 
-          if (
-            seen.has(key)
-          ) {
-            return false;
-          }
+      recordsByKey.set(
+        key,
+        {
+          ...supplementaryRecord,
+          ...currentRecord,
 
+          symbol:
+            currentRecord.symbol ??
+            supplementaryRecord
+              .symbol,
 
-          seen.add(key);
+          companyName:
+            currentRecord
+              .companyName ??
+            supplementaryRecord
+              .companyName,
 
-          return true;
+          issueStartDate:
+            currentRecord
+              .issueStartDate ??
+            supplementaryRecord
+              .issueStartDate,
+
+          issueEndDate:
+            currentRecord
+              .issueEndDate ??
+            supplementaryRecord
+              .issueEndDate,
+
+          listingDate:
+            currentRecord
+              .listingDate ??
+            supplementaryRecord
+              .listingDate,
+
+          priceBand:
+            currentRecord.priceBand ??
+            supplementaryRecord
+              .priceBand,
+
+          issuePrice:
+            currentRecord.issuePrice ??
+            supplementaryRecord
+              .issuePrice,
+
+          issueSize:
+            currentRecord.issueSize ??
+            supplementaryRecord
+              .issueSize,
+
+          noOfSharesOffered:
+            currentRecord
+              .noOfSharesOffered ??
+            supplementaryRecord
+              .noOfSharesOffered,
+
+          noOfsharesBid:
+            currentRecord
+              .noOfsharesBid ??
+            supplementaryRecord
+              .noOfsharesBid,
+
+          noOfTime:
+            currentRecord.noOfTime ??
+            supplementaryRecord
+              .noOfTime,
+
+          lotSize:
+            currentRecord.lotSize ??
+            supplementaryRecord
+              .lotSize,
+
+          series:
+            currentRecord.series ??
+            supplementaryRecord
+              .series,
+
+          securityType:
+            currentRecord
+              .securityType ??
+            supplementaryRecord
+              .securityType,
+
+          issueType:
+            currentRecord.issueType ??
+            supplementaryRecord
+              .issueType,
+
+          category:
+            currentRecord.category ??
+            supplementaryRecord
+              .category,
+
+          status:
+            currentRecord.status ??
+            supplementaryRecord
+              .status,
+
+          sourceType:
+            currentRecord.sourceType,
+
+          subscription:
+            currentRecord
+              .subscription ??
+            supplementaryRecord
+              .subscription,
         }
       );
+    }
 
+    const unique =
+      Array.from(
+        recordsByKey.values()
+      );
 
     console.log(
       "===== NSE IPO PROVIDER ====="
     );
-
 
     console.log(
       "Current IPOs:",
       currentIPOs.length
     );
 
-
     console.log(
       "Upcoming IPOs:",
       upcomingIPOs.length
     );
-
 
     console.log(
       "Lot enriched:",
@@ -1036,31 +1144,26 @@ Promise<NSEIPORecord[]> {
       ).length
     );
 
-
     console.log(
       "Subscription enriched:",
       unique.filter(
         (ipo) =>
-          ipo.subscription
+          ipo.subscription !==
+          undefined
       ).length
     );
-
 
     console.log(
       "Unique IPO records:",
       unique.length
     );
 
-
     return unique;
-
   } catch (error) {
-
     console.error(
       "Unable to fetch NSE IPO data:",
       error
     );
-
 
     return [];
   }

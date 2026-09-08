@@ -9,7 +9,7 @@ import type {
 } from "../types";
 
 export type DcfCalculatorInputs = {
-  baseFreeCashFlow:
+    baseFreeCashFlow:
     NullableNumber;
 
   currentPrice:
@@ -315,6 +315,7 @@ function unavailableResult(
 export function calculateDcfValuation(
   inputs: DcfCalculatorInputs
 ): DcfValuationResult {
+  
   const assumptions:
     DcfAssumptions = {
       forecastYears:

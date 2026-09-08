@@ -49,10 +49,11 @@ export function runTechnicalAnalysis(
 
   // Step 6: Risk / Reward
   const riskReward =
-    analyzeRiskReward(
-      input.currentPrice,
-      supportResistance
-    );
+  analyzeRiskReward(
+    input.currentPrice,
+    supportResistance,
+    input.oscillators.atr
+  );
 
   // Step 7: Overall Technical Score
   const technicalScore =
@@ -66,11 +67,23 @@ export function runTechnicalAnalysis(
 );
 
   return {
-  symbol: input.symbol,
+  symbol:
+    input.symbol,
 
-  currentPrice: input.currentPrice,
+  currentPrice:
+    input.currentPrice,
 
-  generatedAt: new Date().toISOString(),
+  generatedAt:
+    new Date().toISOString(),
+
+  movingAverages:
+    input.movingAverages,
+
+  oscillators:
+    input.oscillators,
+
+  volumeData:
+    input.volume,
 
   trend,
 

@@ -169,6 +169,53 @@ export function calculateCompanyDcf(
       annualPeriods
     );
 
+    /*
+ * Conventional FCFF/WACC DCF is not
+ * suitable for banking companies.
+ *
+ * Bank detection uses verified banking
+ * metrics or banking balance-sheet
+ * fields—never a hard-coded symbol.
+ */
+const isBankingCompany =
+  metrics?.industrySpecific
+    .bank !== undefined ||
+  (
+    latestAnnual
+      ?.deposits !== null &&
+    latestAnnual
+      ?.deposits !== undefined
+  ) ||
+  (
+    latestAnnual
+      ?.advances !== null &&
+    latestAnnual
+      ?.advances !== undefined
+  );
+
+if (isBankingCompany) {
+  return {
+    applicable: false,
+
+    suitabilityReason:
+      "Conventional DCF valuation is not applicable to banking companies. Banks require valuation based on book value, regulatory capital, profitability, asset quality and comparable bank multiples.",
+
+    assumptions:
+      null,
+
+    scenarios: [],
+
+    selectedFairValue:
+      null,
+
+    marginOfSafety:
+      null,
+
+    valuationLabel:
+      "INSUFFICIENT_DATA",
+  };
+}
+
   return calculateDcfValuation({
     baseFreeCashFlow:
       getFreeCashFlow(

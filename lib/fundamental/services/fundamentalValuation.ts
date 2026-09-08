@@ -136,6 +136,34 @@ export function calculateGrahamValuation(
     };
   }
 
+  /*
+ * Graham valuation is designed for
+ * conventional operating companies.
+ * Banks require valuation based on
+ * regulatory capital, asset quality,
+ * profitability and peer P/B multiples.
+ */
+if (
+  metrics.industrySpecific
+    .bank
+) {
+  return {
+    applicable: false,
+
+    suitabilityReason:
+      "Graham valuation is not applicable to banking companies because deposits, advances and regulatory capital require bank-specific valuation methods.",
+
+    fairValuePerShare:
+      null,
+
+    upsideDownsidePercent:
+      null,
+
+    valuationLabel:
+      "INSUFFICIENT_DATA",
+  };
+}
+
   const earningsPerShare =
     metrics.valuation
       .earningsPerShare;

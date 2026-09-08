@@ -27,6 +27,10 @@ import {
 } from "@/lib/fundamental/services/peerValuationCalculator";
 
 import {
+  calculatePeerComparisonRanking,
+} from "@/lib/fundamental/services/peerComparisonRanking";
+
+import {
   calculateCompositeValuation,
 } from "@/lib/fundamental/services/compositeValuationCalculator";
 
@@ -545,12 +549,20 @@ export async function GET(
       );
 
     const companyAnalytics =
-      companyAnalyticsResult
-        .analytics;
+  companyAnalyticsResult
+    .analytics;
 
-    const peerValuation =
-      companyAnalytics
-        ? calculatePeerValuation(
+const selectedCompanyComparison =
+  companyAnalytics
+    ? analyticsToPeerCompany(
+        stockSymbol,
+        companyAnalytics
+      )
+    : null;
+
+const peerValuation =
+  companyAnalytics
+    ? calculatePeerValuation(
             companyAnalytics
               .annualFinancials,
 
@@ -563,6 +575,14 @@ export async function GET(
             peerCompanies
           )
         : null;
+
+        const peerComparisonRanking =
+  selectedCompanyComparison
+    ? calculatePeerComparisonRanking(
+        selectedCompanyComparison,
+        peerCompanies
+      )
+    : null;
 
     /*
      * Combine DCF, relative, peer and
@@ -604,8 +624,8 @@ export async function GET(
         : null;
 
     const peerComparisonAvailable =
-      peerValuation
-        ?.applicable === true;
+  peerComparisonRanking
+    ?.available === true;
 
     const compositeAvailable =
       compositeValuation
@@ -630,8 +650,11 @@ export async function GET(
         peerUniverse,
         peerSelection,
 
+        selectedCompanyComparison,
         peerCompanies,
 
+        peerComparisonRanking,
+        
         peerValuation,
 
         compositeValuation,

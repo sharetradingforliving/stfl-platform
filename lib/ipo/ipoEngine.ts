@@ -14,6 +14,10 @@ import {
 } from "./providers/nse";
 
 import {
+  enrichIPOOfferDetails,
+} from "./providers/ipoOfferDetails";
+
+import {
   fetchGMPData,
   type GMPRecord,
 } from "./providers/gmp";
@@ -57,9 +61,10 @@ export interface IPOEngineResult {
   };
 
   providers: {
-    nse: boolean;
-    gmp: boolean;
-  };
+  nse: boolean;
+  offerDetails: boolean;
+  gmp: boolean;
+};
 
   lastUpdated: string;
 }
@@ -526,33 +531,61 @@ Promise<IPOEngineResult> {
      */
 
     const normalizedIPOs =
-      normalizeNSEIPOData(
-        rawNSEData
-      );
+  normalizeNSEIPOData(
+    rawNSEData
+  );
+
+console.log(
+  "Normalized IPO records:",
+  normalizedIPOs.length
+);
 
 
-    console.log(
-      "Normalized IPO records:",
-      normalizedIPOs.length
-    );
+/**
+ * ------------------------------------------------
+ * STEP 3
+ *
+ * Fill missing price band, lot size
+ * and issue size.
+ *
+ * NSE values remain primary and are
+ * never overwritten.
+ * ------------------------------------------------
+ */
+
+const offerDetailsResult =
+  await enrichIPOOfferDetails(
+    normalizedIPOs
+  );
+
+console.log(
+  "Offer-detail records enriched:",
+  offerDetailsResult
+    .enrichedCount
+);
 
 
-    /**
-     * ------------------------------------------------
-     * STEP 3
-     *
-     * Merge GMP data
-     * ------------------------------------------------
-     */
+/**
+ * ------------------------------------------------
+ * STEP 4
+ *
+ * Merge optional GMP data after the
+ * price band has been completed.
+ *
+ * This allows GMP percentage and
+ * estimated listing price to use the
+ * completed upper price band.
+ * ------------------------------------------------
+ */
 
-    const enrichedIPOs =
-      normalizedIPOs.map(
-        (ipo) =>
-          enrichWithGMP(
-            ipo,
-            gmpRecords
-          )
-      );
+const enrichedIPOs =
+  offerDetailsResult.ipos.map(
+    (ipo) =>
+      enrichWithGMP(
+        ipo,
+        gmpRecords
+      )
+  );
 
 
     /**
@@ -614,15 +647,16 @@ Promise<IPOEngineResult> {
       summary,
 
       providers: {
+  nse:
+    rawNSEData.length > 0,
 
-        nse:
-          rawNSEData.length >
-          0,
+  offerDetails:
+    offerDetailsResult
+      .providerAvailable,
 
-        gmp:
-          gmpRecords.length >
-          0,
-      },
+  gmp:
+    gmpRecords.length > 0,
+},
 
       lastUpdated:
         new Date()
@@ -661,11 +695,10 @@ Promise<IPOEngineResult> {
       },
 
       providers: {
-
-        nse: false,
-
-        gmp: false,
-      },
+  nse: false,
+  offerDetails: false,
+  gmp: false,
+},
 
       lastUpdated:
         new Date()

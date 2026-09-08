@@ -2,88 +2,241 @@
  * ================================================================
  * STFL Technical Research Engine
  * File: confluence.ts
- * Purpose: Merge nearby technical levels into support/resistance zones
+ * Purpose: Merge and rank nearby technical levels into zones
  * ================================================================
  */
 
-import { PriceLevel, PriceZone } from "./types";
+import type {
+  LevelSource,
+  PriceLevel,
+  PriceZone,
+} from "./types";
 
-const DEFAULT_ZONE_THRESHOLD = 0.005; // 0.5%
+/*
+ * Levels within 0.5% of the developing
+ * zone centre are treated as one zone.
+ */
+const DEFAULT_ZONE_THRESHOLD =
+  0.005;
 
-export function buildConfluenceZones(
-  levels: PriceLevel[],
-  zoneType: "Support" | "Resistance",
-  threshold = DEFAULT_ZONE_THRESHOLD
-): PriceZone[] {
+function isValidPrice(
+  value: number
+): boolean {
+  return (
+    Number.isFinite(value) &&
+    value > 0
+  );
+}
 
-  if (levels.length === 0) {
-    return [];
+function getWeightedCenter(
+  levels:
+    PriceLevel[]
+): number {
+  const totalWeight =
+    levels.reduce(
+      (total, level) =>
+        total +
+        Math.max(
+          level.weight,
+          1
+        ),
+      0
+    );
+
+  if (totalWeight <= 0) {
+    return (
+      levels.reduce(
+        (total, level) =>
+          total +
+          level.price,
+        0
+      ) /
+      levels.length
+    );
   }
 
-  // Sort price levels
-  const sorted = [...levels].sort((a, b) => a.price - b.price);
+  return (
+    levels.reduce(
+      (total, level) =>
+        total +
+        level.price *
+          Math.max(
+            level.weight,
+            1
+          ),
+      0
+    ) /
+    totalWeight
+  );
+}
 
-  const zones: PriceZone[] = [];
+function calculateConfidence(
+  levels:
+    PriceLevel[],
 
-  let currentGroup: PriceLevel[] = [sorted[0]];
+  strength:
+    number,
 
-  for (let i = 1; i < sorted.length; i++) {
+  sourceCount:
+    number,
 
-    const previous = currentGroup[currentGroup.length - 1];
-    const current = sorted[i];
+  swingTouches:
+    number
+): number {
+  /*
+   * Confidence combines:
+   *
+   * 1. Total contributor weight
+   * 2. Independent source diversity
+   * 3. Historical swing touches
+   *
+   * This prevents a single minor swing
+   * from receiving the same confidence
+   * as a multi-source confluence zone.
+   */
+  const strengthScore =
+    Math.min(
+      50,
+      strength * 3
+    );
 
-    const difference =
-      Math.abs(current.price - previous.price) / previous.price;
+  const sourceScore =
+    Math.min(
+      25,
+      sourceCount * 6
+    );
 
-    if (difference <= threshold) {
+  const touchScore =
+    Math.min(
+      20,
+      swingTouches * 5
+    );
 
-      currentGroup.push(current);
+  const timeframeBonus =
+    levels.some(
+      (level) =>
+        level.timeframe ===
+        "Monthly"
+    )
+      ? 5
+      : levels.some(
+            (level) =>
+              level.timeframe ===
+              "Weekly"
+          )
+        ? 3
+        : 0;
 
-    } else {
-
-      zones.push(createZone(currentGroup, zoneType));
-
-      currentGroup = [current];
-
-    }
-
-  }
-
-  zones.push(createZone(currentGroup, zoneType));
-
-  return zones;
+  return Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(
+        strengthScore +
+        sourceScore +
+        touchScore +
+        timeframeBonus
+      )
+    )
+  );
 }
 
 function createZone(
-  levels: PriceLevel[],
-  zoneType: "Support" | "Resistance"
+  levels:
+    PriceLevel[],
+
+  zoneType:
+    "Support" | "Resistance"
 ): PriceZone {
+  const prices =
+    levels.map(
+      (level) =>
+        level.price
+    );
 
-  const prices = levels.map(level => level.price);
+  const lower =
+    Math.min(
+      ...prices
+    );
 
-  const lower = Math.min(...prices);
+  const upper =
+    Math.max(
+      ...prices
+    );
 
-  const upper = Math.max(...prices);
+  /*
+   * Weighted centre gives stronger
+   * technical evidence more influence
+   * than weak nearby levels.
+   */
+  const center =
+    getWeightedCenter(
+      levels
+    );
 
-  const center = (lower + upper) / 2;
+  const strength =
+    levels.reduce(
+      (total, level) =>
+        total +
+        Math.max(
+          level.weight,
+          0
+        ),
+      0
+    );
 
-  const strength = levels.reduce(
-    (sum, level) => sum + level.weight,
-    0
-  );
+  const sources =
+    new Set<LevelSource>(
+      levels.map(
+        (level) =>
+          level.source
+      )
+    );
 
-  const confidence = Math.min(
-    100,
-    Math.round((strength / 15) * 100)
-  );
+  /*
+   * Only swing contributors count as
+   * historical price touches.
+   * Fibonacci, pivots and moving
+   * averages are confluence sources,
+   * not market touches.
+   */
+  const swingTouches =
+    levels.filter(
+      (level) =>
+        level.source ===
+        "Swing"
+    ).length;
+
+  const confidence =
+    calculateConfidence(
+      levels,
+      strength,
+      sources.size,
+      swingTouches
+    );
+
+  const sourceNames =
+    Array.from(
+      sources
+    ).join(", ");
 
   const explanation =
-    `${zoneType} zone formed by ${levels
-      .map(level => level.label)
-      .join(", ")}.`;
+    `${zoneType} zone ₹${lower.toFixed(
+      2
+    )}–₹${upper.toFixed(
+      2
+    )} formed from ${sourceNames}. ` +
+    `${swingTouches} historical swing touch${
+      swingTouches === 1
+        ? ""
+        : "es"
+    }, ${sources.size} independent source${
+      sources.size === 1
+        ? ""
+        : "s"
+    } and strength ${strength}.`;
 
   return {
-
     lower,
 
     upper,
@@ -94,12 +247,122 @@ function createZone(
 
     confidence,
 
-    touches: levels.length,
+    touches:
+      swingTouches,
 
-    contributors: levels,
+    contributors:
+      levels,
 
     explanation,
 
-    type: zoneType,
+    type:
+      zoneType,
   };
+}
+
+export function buildConfluenceZones(
+  levels:
+    PriceLevel[],
+
+  zoneType:
+    "Support" | "Resistance",
+
+  threshold =
+    DEFAULT_ZONE_THRESHOLD
+): PriceZone[] {
+  const validLevels =
+    levels
+      .filter(
+        (level) =>
+          isValidPrice(
+            level.price
+          )
+      )
+      .sort(
+        (first, second) =>
+          first.price -
+          second.price
+      );
+
+  if (
+    validLevels.length === 0
+  ) {
+    return [];
+  }
+
+  const zones:
+    PriceZone[] = [];
+
+  let currentGroup:
+    PriceLevel[] = [
+      validLevels[0],
+    ];
+
+  for (
+    let index = 1;
+    index <
+    validLevels.length;
+    index += 1
+  ) {
+    const currentLevel =
+      validLevels[index];
+
+    /*
+     * Compare with the developing
+     * group centre—not merely the
+     * previous price. This prevents
+     * chain-merging unrelated levels
+     * into one overly broad zone.
+     */
+    const groupCenter =
+      getWeightedCenter(
+        currentGroup
+      );
+
+    const difference =
+      Math.abs(
+        currentLevel.price -
+        groupCenter
+      ) /
+      groupCenter;
+
+    if (
+      difference <= threshold
+    ) {
+      currentGroup.push(
+        currentLevel
+      );
+    } else {
+      zones.push(
+        createZone(
+          currentGroup,
+          zoneType
+        )
+      );
+
+      currentGroup = [
+        currentLevel,
+      ];
+    }
+  }
+
+  zones.push(
+    createZone(
+      currentGroup,
+      zoneType
+    )
+  );
+
+  /*
+   * Preserve price order. The
+   * support/resistance analyzer will
+   * rank eligible zones using their
+   * strength, confidence, touches and
+   * distance from current price.
+   */
+  return zones.sort(
+    (first, second) =>
+      first.center -
+      second.center
+  );
 }

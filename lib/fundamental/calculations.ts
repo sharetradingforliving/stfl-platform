@@ -8,6 +8,7 @@ import type {
   MarketValuationMetrics,
   NullableNumber,
   ProfitabilityMetrics,
+  BankSpecificMetrics,
 } from "./types";
 
 function isValidNumber(
@@ -311,6 +312,74 @@ function calculateGrowthMetrics(
   const oldest =
     annualPeriods[0] ?? null;
 
+  const isBankingCompany =
+    annualPeriods.some(
+      (period) =>
+        isValidNumber(
+          period.deposits
+        ) ||
+        isValidNumber(
+          period.advances
+        ) ||
+        isValidNumber(
+          period.grossNpaPercent
+        ) ||
+        isValidNumber(
+          period.netNpaPercent
+        ) ||
+        isValidNumber(
+          period.returnOnAssetsPercent
+        )
+    );
+
+  const availableCagrYears =
+    getAvailableCagrYears(
+      oldest,
+      latest
+    );
+
+  /*
+   * Generic corporate growth metrics
+   * are not presented for banks.
+   *
+   * Banking XBRL filings can change
+   * taxonomy and income definitions
+   * between annual and reconstructed
+   * periods. Comparing those values can
+   * create misleading growth rates.
+   *
+   * Banks should instead use verified
+   * deposit growth, advance/credit
+   * growth and bank-specific ratios.
+   */
+  if (isBankingCompany) {
+    return {
+      availableCagrYears,
+
+      revenueGrowth1Y: null,
+      revenueCagrAvailable: null,
+      revenueCagr3Y: null,
+      revenueCagr5Y: null,
+      revenueCagr10Y: null,
+
+      ebitdaGrowth1Y: null,
+      ebitdaCagrAvailable: null,
+      ebitdaCagr3Y: null,
+      ebitdaCagr5Y: null,
+
+      patGrowth1Y: null,
+      patCagrAvailable: null,
+      patCagr3Y: null,
+      patCagr5Y: null,
+      patCagr10Y: null,
+
+      epsGrowth1Y: null,
+      epsCagrAvailable: null,
+      epsCagr3Y: null,
+      epsCagr5Y: null,
+    };
+  }
+
   const previous =
     findHistoricalPeriod(
       annualPeriods,
@@ -333,12 +402,6 @@ function calculateGrowthMetrics(
     findHistoricalPeriod(
       annualPeriods,
       10
-    );
-
-  const availableCagrYears =
-    getAvailableCagrYears(
-      oldest,
-      latest
     );
 
   const latestEps =
@@ -544,7 +607,6 @@ function calculateGrowthMetrics(
       ),
   };
 }
-
 function calculateProfitabilityMetrics(
   annualPeriods:
     FinancialStatementPeriod[]
@@ -574,15 +636,100 @@ function calculateProfitabilityMetrics(
     };
   }
 
-  const averageAssets = average(
-    latest.totalAssets,
-    previous?.totalAssets ?? null
-  );
+  /*
+   * Automatically identify banking
+   * companies from verified banking
+   * financial fields.
+   */
+  const isBankingCompany =
+    annualPeriods.some(
+      (period) =>
+        isValidNumber(
+          period.deposits
+        ) ||
+        isValidNumber(
+          period.advances
+        ) ||
+        isValidNumber(
+          period.grossNpaPercent
+        ) ||
+        isValidNumber(
+          period.netNpaPercent
+        ) ||
+        isValidNumber(
+          period.returnOnAssetsPercent
+        )
+    );
 
-  const averageEquity = average(
-    latest.totalEquity,
-    previous?.totalEquity ?? null
-  );
+  const averageAssets =
+    average(
+      latest.totalAssets,
+      previous?.totalAssets ??
+        null
+    );
+
+  const averageEquity =
+    average(
+      latest.totalEquity,
+      previous?.totalEquity ??
+        null
+    );
+
+  /*
+   * Conventional operating margins,
+   * ROCE, ROIC and asset turnover are
+   * not directly comparable for banks.
+   *
+   * Deposits and advances are operating
+   * balance-sheet items rather than
+   * conventional debt and working
+   * capital.
+   */
+  if (isBankingCompany) {
+    const reportedReturnOnAssets =
+      isValidNumber(
+        latest.returnOnAssetsPercent
+      )
+        ? latest
+            .returnOnAssetsPercent
+        : null;
+
+    const calculatedReturnOnAssets =
+      percentage(
+        latest.netProfit,
+        averageAssets ??
+          latest.totalAssets
+      );
+
+    return {
+      grossMargin: null,
+
+      ebitdaMargin: null,
+
+      ebitMargin: null,
+
+      patMargin: null,
+
+      returnOnAssets:
+        reportedReturnOnAssets ??
+        calculatedReturnOnAssets,
+
+      returnOnEquity:
+        percentage(
+          latest.netProfit,
+          averageEquity ??
+            latest.totalEquity
+        ),
+
+      returnOnCapitalEmployed:
+        null,
+
+      returnOnInvestedCapital:
+        null,
+
+      assetTurnover: null,
+    };
+  }
 
   const latestCapitalEmployed =
     subtract(
@@ -604,15 +751,18 @@ function calculateProfitabilityMetrics(
       previousCapitalEmployed
     ) ?? latestCapitalEmployed;
 
-  const investedCapital = add([
-    latest.totalEquity,
-    latest.totalDebt,
-    isValidNumber(
-      latest.cashAndEquivalents
-    )
-      ? -latest.cashAndEquivalents
-      : null,
-  ]);
+  const investedCapital =
+    add([
+      latest.totalEquity,
+      latest.totalDebt,
+
+      isValidNumber(
+        latest.cashAndEquivalents
+      )
+        ? -latest
+            .cashAndEquivalents
+        : null,
+    ]);
 
   const taxRate =
     percentage(
@@ -621,8 +771,12 @@ function calculateProfitabilityMetrics(
     );
 
   const nopat =
-    isValidNumber(latest.ebit) &&
-    isValidNumber(taxRate)
+    isValidNumber(
+      latest.ebit
+    ) &&
+    isValidNumber(
+      taxRate
+    )
       ? latest.ebit *
         (1 - taxRate / 100)
       : null;
@@ -777,6 +931,54 @@ function calculateCashFlowMetrics(
     };
   }
 
+  /*
+   * Deposits and advances are operating
+   * balance-sheet items for banks.
+   * Therefore, conventional corporate
+   * cash-conversion and free-cash-flow
+   * ratios are not meaningful for them.
+   *
+   * This detection is based entirely on
+   * verified banking fields and contains
+   * no company-specific hardcoding.
+   */
+  const isBankingCompany =
+    annualPeriods.some(
+      (period) =>
+        isValidNumber(
+          period.deposits
+        ) ||
+        isValidNumber(
+          period.advances
+        ) ||
+        isValidNumber(
+          period.grossNpaPercent
+        ) ||
+        isValidNumber(
+          period.netNpaPercent
+        ) ||
+        isValidNumber(
+          period
+            .returnOnAssetsPercent
+        )
+    );
+
+  if (isBankingCompany) {
+    return {
+      operatingCashFlowToPat: null,
+      freeCashFlowToPat: null,
+      freeCashFlowMargin: null,
+      capitalExpenditureToRevenue:
+        null,
+      cumulativeOperatingCashFlow:
+        null,
+      cumulativeNetProfit: null,
+      cumulativeOcfToPat: null,
+      cashConversionLabel:
+        "INSUFFICIENT_DATA",
+    };
+  }
+
   const latestFreeCashFlow =
     getFreeCashFlow(latest);
 
@@ -826,18 +1028,21 @@ function calculateCashFlowMetrics(
     )
   ) {
     if (cumulativeOcfToPat >= 1) {
-      cashConversionLabel = "STRONG";
+      cashConversionLabel =
+        "STRONG";
     } else if (
       cumulativeOcfToPat >= 0.8
     ) {
-      cashConversionLabel = "HEALTHY";
+      cashConversionLabel =
+        "HEALTHY";
     } else if (
       cumulativeOcfToPat >= 0.6
     ) {
       cashConversionLabel =
         "MODERATE";
     } else {
-      cashConversionLabel = "WEAK";
+      cashConversionLabel =
+        "WEAK";
     }
   }
 
@@ -887,7 +1092,7 @@ function calculateCashFlowMetrics(
     cashConversionLabel,
   };
 }
-
+    
 function calculateMarketValuation(
   annualPeriods:
     FinancialStatementPeriod[],
@@ -914,6 +1119,25 @@ function calculateMarketValuation(
     };
   }
 
+  /*
+ * Banks are identified from verified
+ * banking statement fields—not from a
+ * hard-coded company symbol.
+ */
+const isBankingCompany =
+  (
+    isValidNumber(
+      latest.deposits
+    ) &&
+    latest.deposits > 0
+  ) ||
+  (
+    isValidNumber(
+      latest.advances
+    ) &&
+    latest.advances > 0
+  );
+
     /*
    * Prefer the verified NSE annual
    * share count. Use the market record
@@ -923,9 +1147,31 @@ function calculateMarketValuation(
     latest.sharesOutstanding ??
     market.sharesOutstanding;
     
-  const earningsPerShare =
-    latest.epsDiluted ??
-    latest.epsBasic;
+  /*
+ * Prefer reported diluted/basic EPS.
+ *
+ * Banking annual periods derived from
+ * four validated quarters may not carry
+ * a reported annual EPS. In that case,
+ * calculate EPS from verified annual PAT
+ * and the verified share count.
+ */
+const reportedEarningsPerShare =
+  latest.epsDiluted ??
+  latest.epsBasic;
+
+const calculatedBankEarningsPerShare =
+  isBankingCompany
+    ? valuePerShare(
+        latest.netProfit,
+        sharesOutstanding,
+        latest.unit
+      )
+    : null;
+
+const earningsPerShare =
+  reportedEarningsPerShare ??
+  calculatedBankEarningsPerShare;
 
   const bookValuePerShare =
     valuePerShare(
@@ -934,19 +1180,31 @@ function calculateMarketValuation(
       latest.unit
     );
 
-  const freeCashFlowPerShare =
-    valuePerShare(
-      getFreeCashFlow(latest),
-      sharesOutstanding,
-      latest.unit
-    );
+  /*
+ * Conventional free cash flow is not
+ * comparable for banks because deposits,
+ * advances and regulatory capital are
+ * integral operating balance-sheet items.
+ */
+const freeCashFlowPerShare =
+  isBankingCompany
+    ? null
+    : valuePerShare(
+        getFreeCashFlow(
+          latest
+        ),
+        sharesOutstanding,
+        latest.unit
+      );
 
   const revenuePerShare =
-    valuePerShare(
-      latest.revenue,
-      sharesOutstanding,
-      latest.unit
-    );
+  isBankingCompany
+    ? null
+    : valuePerShare(
+        latest.revenue,
+        sharesOutstanding,
+        latest.unit
+      );
 
   const marketCapitalization =
     isValidNumber(
@@ -974,10 +1232,18 @@ function calculateMarketValuation(
               1_000
             : marketCapitalization;
 
-  const netDebt = subtract(
-    latest.totalDebt,
-    latest.cashAndEquivalents
-  );
+  /*
+ * Corporate net debt and enterprise
+ * value are not meaningful valuation
+ * bases for banking companies.
+ */
+const netDebt =
+  isBankingCompany
+    ? null
+    : subtract(
+        latest.totalDebt,
+        latest.cashAndEquivalents
+      );
 
   const enterpriseValueInUnit =
     add([
@@ -1012,31 +1278,38 @@ function calculateMarketValuation(
       ),
 
     priceToSales:
-      safeDivide(
+  isBankingCompany
+    ? null
+    : safeDivide(
         market.currentPrice,
         revenuePerShare
       ),
 
-    enterpriseValueToEbitda:
-      safeDivide(
+enterpriseValueToEbitda:
+  isBankingCompany
+    ? null
+    : safeDivide(
         enterpriseValueInUnit,
         latest.ebitda
       ),
 
-    enterpriseValueToSales:
-      safeDivide(
+enterpriseValueToSales:
+  isBankingCompany
+    ? null
+    : safeDivide(
         enterpriseValueInUnit,
         latest.revenue
       ),
 
-    pegRatio:
-      isValidNumber(epsGrowth) &&
-      epsGrowth > 0
-        ? safeDivide(
-            priceToEarnings,
-            epsGrowth
-          )
-        : null,
+pegRatio:
+  !isBankingCompany &&
+  isValidNumber(epsGrowth) &&
+  epsGrowth > 0
+    ? safeDivide(
+        priceToEarnings,
+        epsGrowth
+      )
+    : null,
 
     dividendYield:
       percentage(
@@ -1046,17 +1319,284 @@ function calculateMarketValuation(
   };
 }
 
+function calculateBankingGrowth(
+  currentValue: NullableNumber,
+  previousValue: NullableNumber
+): NullableNumber {
+  if (
+    !isValidNumber(currentValue) ||
+    !isValidNumber(previousValue) ||
+    previousValue <= 0
+  ) {
+    return null;
+  }
+
+  return (
+    (
+      currentValue /
+      previousValue -
+      1
+    ) *
+    100
+  );
+}
+
+function calculateBankSpecificMetrics(
+  annualPeriods:
+    FinancialStatementPeriod[],
+
+  quarterlyPeriods:
+    FinancialStatementPeriod[] = []
+): BankSpecificMetrics | undefined {
+  /*
+   * Bank detection is based entirely
+   * on verified banking fields.
+   */
+  const getBankingPeriods = (
+    periods:
+      FinancialStatementPeriod[]
+  ) =>
+    periods
+      .filter(
+        (period) =>
+          (
+            isValidNumber(
+              period.deposits
+            ) &&
+            period.deposits > 0
+          ) ||
+          (
+            isValidNumber(
+              period.advances
+            ) &&
+            period.advances > 0
+          )
+      )
+      .slice()
+      .sort(
+        (first, second) =>
+          (
+            first.endDate ??
+            first.period
+          ).localeCompare(
+            second.endDate ??
+            second.period
+          )
+      );
+
+  const bankingAnnualPeriods =
+    getBankingPeriods(
+      annualPeriods
+    );
+
+  const bankingQuarterlyPeriods =
+    getBankingPeriods(
+      quarterlyPeriods
+    );
+
+  const latestAnnual =
+    bankingAnnualPeriods.at(-1) ??
+    null;
+
+  const latestQuarter =
+    bankingQuarterlyPeriods.at(-1) ??
+    null;
+
+  const latest =
+    latestAnnual ??
+    latestQuarter;
+
+  if (!latest) {
+    return undefined;
+  }
+
+  /*
+   * Annual growth remains the preferred
+   * source whenever two valid annual
+   * observations are available.
+   */
+  let growthLatest:
+    FinancialStatementPeriod | null =
+    null;
+
+  let growthPrevious:
+    FinancialStatementPeriod | null =
+    null;
+
+  if (
+    bankingAnnualPeriods.length >= 2
+  ) {
+    growthLatest =
+      bankingAnnualPeriods.at(-1) ??
+      null;
+
+    growthPrevious =
+      bankingAnnualPeriods.at(-2) ??
+      null;
+  } else {
+    /*
+     * When consecutive annual banking
+     * balance-sheet values are missing,
+     * use exact year-on-year comparable
+     * quarters.
+     *
+     * For example:
+     * June 2024 versus June 2023.
+     *
+     * Sequential quarters are never
+     * compared because that would
+     * misrepresent annual growth.
+     */
+    for (
+      let latestIndex =
+        bankingQuarterlyPeriods.length -
+        1;
+
+      latestIndex >= 0;
+      latestIndex -= 1
+    ) {
+      const candidateLatest =
+        bankingQuarterlyPeriods[
+          latestIndex
+        ];
+
+      const latestDateValue =
+        candidateLatest.endDate ??
+        candidateLatest.period;
+
+      const latestMatch =
+        latestDateValue.match(
+          /^(\d{4})-(\d{2})-(\d{2})$/
+        );
+
+      if (!latestMatch) {
+        continue;
+      }
+
+      const latestYear =
+        Number(latestMatch[1]);
+
+      const latestMonthDay =
+        `${latestMatch[2]}-${latestMatch[3]}`;
+
+      const matchingPrevious =
+        bankingQuarterlyPeriods.find(
+          (candidatePrevious) => {
+            const previousDateValue =
+              candidatePrevious.endDate ??
+              candidatePrevious.period;
+
+            const previousMatch =
+              previousDateValue.match(
+                /^(\d{4})-(\d{2})-(\d{2})$/
+              );
+
+            if (!previousMatch) {
+              return false;
+            }
+
+            const previousYear =
+              Number(
+                previousMatch[1]
+              );
+
+            const previousMonthDay =
+              `${previousMatch[2]}-${previousMatch[3]}`;
+
+            return (
+              previousYear ===
+                latestYear - 1 &&
+              previousMonthDay ===
+                latestMonthDay
+            );
+          }
+        ) ?? null;
+
+      if (matchingPrevious) {
+        growthLatest =
+          candidateLatest;
+
+        growthPrevious =
+          matchingPrevious;
+
+        break;
+      }
+    }
+  }
+const hasPlaceholderBankRatios =
+  latest.grossNpaPercent === 0 &&
+  latest.netNpaPercent === 0 &&
+  latest.returnOnAssetsPercent === 0;
+
+  return {
+    netInterestMargin: null,
+
+    grossNpa:
+  hasPlaceholderBankRatios
+    ? null
+    : latest.grossNpaPercent,
+
+netNpa:
+  hasPlaceholderBankRatios
+    ? null
+    : latest.netNpaPercent,
+
+returnOnAssets:
+  hasPlaceholderBankRatios
+    ? null
+    : latest.returnOnAssetsPercent,
+
+    provisionCoverageRatio:
+      null,
+
+    capitalAdequacyRatio:
+      null,
+
+    casaRatio:
+      null,
+
+    creditGrowth:
+      calculateBankingGrowth(
+        growthLatest?.advances ??
+          null,
+
+        growthPrevious?.advances ??
+          null
+      ),
+
+    depositGrowth:
+      calculateBankingGrowth(
+        growthLatest?.deposits ??
+          null,
+
+        growthPrevious?.deposits ??
+          null
+      ),
+
+    costToIncomeRatio: null,
+
+    creditCost: null,
+  };
+}
+
 export function calculateFundamentalMetrics(
   financialPeriods:
     FinancialStatementPeriod[],
-  market: MarketSnapshot | null
+
+  market:
+    MarketSnapshot | null,
+
+  quarterlyPeriods:
+    FinancialStatementPeriod[] = []
 ): FundamentalMetrics | null {
   const annualPeriods =
     sortAnnualPeriods(
       financialPeriods
     );
 
-  if (annualPeriods.length === 0) {
+  if (
+    annualPeriods.length === 0
+  ) {
     return null;
   }
 
@@ -1088,6 +1628,12 @@ export function calculateFundamentalMetrics(
       ),
 
     industrySpecific: {
+      bank:
+        calculateBankSpecificMetrics(
+          annualPeriods,
+          quarterlyPeriods
+        ),
+
       additionalMetrics: {},
     },
   };

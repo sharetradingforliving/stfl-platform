@@ -5,12 +5,33 @@ import {
   type Nifty500Constituent,
 } from "@/lib/market/nifty500";
 
+import {
+  getAllNseEquities,
+  type NseCashEquity,
+} from "@/lib/market/allNseEquities";
+
+import {
+  findDirectBusinessPeerGroup,
+} from "@/lib/fundamental/data/directBusinessPeerGroups";
+
+export type PeerUniverse =
+  | "NSE_LISTED"
+  | "NIFTY_500";
+
+export type PeerSelectionScope =
+  | "DIRECT_BUSINESS"
+  | "PUBLISHED_INDUSTRY";
+
 export type Nifty500PeerCandidate = {
   companyName: string;
   industry: string;
   symbol: string;
   series: string;
   isin: string;
+
+  instrumentKey?: string;
+
+  nifty500Member?: boolean;
 };
 
 export type Nifty500PeerUniverseResult = {
@@ -18,7 +39,10 @@ export type Nifty500PeerUniverseResult = {
 
   suitabilityReason: string;
 
-  universe: "NIFTY_500";
+  universe: PeerUniverse;
+
+  selectionScope:
+    PeerSelectionScope;
 
   selectedCompany:
     Nifty500PeerCandidate | null;
@@ -57,7 +81,7 @@ function normalizeIndustry(
     .toUpperCase();
 }
 
-function isEligibleEquity(
+function isEligibleNiftyEquity(
   constituent:
     Nifty500Constituent
 ): boolean {
@@ -66,19 +90,35 @@ function isEligibleEquity(
       .trim()
       .toUpperCase();
 
-  /*
-   * Some versions of the Nifty 500
-   * constituent file may not provide
-   * a series value. A blank series is
-   * therefore accepted.
-   */
   return (
     series === "" ||
     series === "EQ"
   );
 }
 
-function toPeerCandidate(
+function isEligibleNseEquity(
+  equity: NseCashEquity
+): boolean {
+  const segment =
+    equity.segment
+      .trim()
+      .toUpperCase();
+
+  const instrumentType =
+    equity.instrumentType
+      .trim()
+      .toUpperCase();
+
+  return (
+    segment === "NSE_EQ" &&
+    instrumentType === "EQ" &&
+    equity.symbol
+      .trim()
+      .length > 0
+  );
+}
+
+function niftyToPeerCandidate(
   constituent:
     Nifty500Constituent
 ): Nifty500PeerCandidate {
@@ -90,13 +130,55 @@ function toPeerCandidate(
       constituent.industry,
 
     symbol:
-      constituent.symbol,
+      normalizeSymbol(
+        constituent.symbol
+      ),
 
     series:
-      constituent.series,
+      constituent.series ||
+      "EQ",
 
     isin:
       constituent.isin,
+
+    nifty500Member: true,
+  };
+}
+
+function nseToPeerCandidate(
+  equity: NseCashEquity,
+
+  peerGroup: string,
+
+  nifty500Symbols:
+    Set<string>
+): Nifty500PeerCandidate {
+  const symbol =
+    normalizeSymbol(
+      equity.symbol
+    );
+
+  return {
+    companyName:
+      equity.companyName,
+
+    industry:
+      peerGroup,
+
+    symbol,
+
+    series: "EQ",
+
+    isin:
+      equity.isin,
+
+    instrumentKey:
+      equity.instrumentKey,
+
+    nifty500Member:
+      nifty500Symbols.has(
+        symbol
+      ),
   };
 }
 
@@ -106,7 +188,9 @@ function getAvailableIndustries(
 ): string[] {
   const industries =
     constituents
-      .filter(isEligibleEquity)
+      .filter(
+        isEligibleNiftyEquity
+      )
       .map(
         (constituent) =>
           constituent.industry
@@ -121,7 +205,43 @@ function getAvailableIndustries(
     new Set(industries)
   ).sort(
     (first, second) =>
-      first.localeCompare(second)
+      first.localeCompare(
+        second
+      )
+  );
+}
+
+function uniquePeerCandidates(
+  candidates:
+    Nifty500PeerCandidate[]
+): Nifty500PeerCandidate[] {
+  const candidatesBySymbol =
+    new Map<
+      string,
+      Nifty500PeerCandidate
+    >();
+
+  for (
+    const candidate
+    of candidates
+  ) {
+    const symbol =
+      normalizeSymbol(
+        candidate.symbol
+      );
+
+    if (!symbol) {
+      continue;
+    }
+
+    candidatesBySymbol.set(
+      symbol,
+      candidate
+    );
+  }
+
+  return Array.from(
+    candidatesBySymbol.values()
   );
 }
 
@@ -141,39 +261,270 @@ export async function getNifty500PeerUniverse(
     );
   }
 
-  const constituents =
-    await getNifty500Constituents();
+  const [
+    nifty500Constituents,
+    nseUniverse,
+  ] = await Promise.all([
+    getNifty500Constituents(),
+    getAllNseEquities(),
+  ]);
 
-  const eligibleConstituents =
-    constituents.filter(
-      isEligibleEquity
+  const eligibleNiftyConstituents =
+    nifty500Constituents.filter(
+      isEligibleNiftyEquity
+    );
+
+  const eligibleNseEquities =
+    nseUniverse.equities.filter(
+      isEligibleNseEquity
     );
 
   const availableIndustries =
     getAvailableIndustries(
-      eligibleConstituents
+      eligibleNiftyConstituents
     );
 
-  const selectedConstituent =
-    eligibleConstituents.find(
+  const nifty500Symbols =
+    new Set(
+      eligibleNiftyConstituents.map(
+        (constituent) =>
+          normalizeSymbol(
+            constituent.symbol
+          )
+      )
+    );
+
+  const nseEquityBySymbol =
+    new Map<
+      string,
+      NseCashEquity
+    >();
+
+  for (
+    const equity
+    of eligibleNseEquities
+  ) {
+    const equitySymbol =
+      normalizeSymbol(
+        equity.symbol
+      );
+
+    if (!equitySymbol) {
+      continue;
+    }
+
+    nseEquityBySymbol.set(
+      equitySymbol,
+      equity
+    );
+  }
+
+  /*
+   * Highest-confidence classification:
+   * use a centrally maintained,
+   * direct-business peer group.
+   */
+  const directBusinessGroup =
+    findDirectBusinessPeerGroup(
+      symbol
+    );
+
+  if (directBusinessGroup) {
+    const selectedEquity =
+      nseEquityBySymbol.get(
+        symbol
+      ) ?? null;
+
+    const selectedNiftyConstituent =
+      eligibleNiftyConstituents.find(
+        (constituent) =>
+          normalizeSymbol(
+            constituent.symbol
+          ) === symbol
+      ) ?? null;
+
+    const selectedCompany =
+      selectedEquity
+        ? nseToPeerCandidate(
+            selectedEquity,
+            directBusinessGroup
+              .peerGroup,
+            nifty500Symbols
+          )
+        : selectedNiftyConstituent
+          ? {
+              ...niftyToPeerCandidate(
+                selectedNiftyConstituent
+              ),
+
+              industry:
+                directBusinessGroup
+                  .peerGroup,
+            }
+          : null;
+
+    if (!selectedCompany) {
+      return {
+        available: false,
+
+        suitabilityReason:
+          `${symbol} belongs to the ${directBusinessGroup.peerGroup} peer group, but its NSE equity instrument could not be resolved.`,
+
+        universe:
+          "NSE_LISTED",
+
+        selectionScope:
+          "DIRECT_BUSINESS",
+
+        selectedCompany:
+          null,
+
+        selectedIndustry:
+          directBusinessGroup
+            .peerGroup,
+
+        peerCandidates: [],
+
+        candidateCount: 0,
+
+        availableIndustries,
+
+        source: {
+          name:
+            "STFL Direct Business Classification and Upstox NSE Instrument Master",
+
+          methodology:
+            "The company was classified through the central STFL direct-business registry, but its NSE cash-equity instrument was unavailable.",
+        },
+      };
+    }
+
+    const directCandidates =
+      directBusinessGroup
+        .symbols
+        .map(normalizeSymbol)
+        .filter(
+          (candidateSymbol) =>
+            candidateSymbol !==
+            symbol
+        )
+        .map(
+          (candidateSymbol) => {
+            const candidateEquity =
+              nseEquityBySymbol.get(
+                candidateSymbol
+              );
+
+            if (!candidateEquity) {
+              return null;
+            }
+
+            return nseToPeerCandidate(
+              candidateEquity,
+              directBusinessGroup
+                .peerGroup,
+              nifty500Symbols
+            );
+          }
+        )
+        .filter(
+          (
+            candidate
+          ): candidate is
+            Nifty500PeerCandidate =>
+              candidate !== null
+        );
+
+    const peerCandidates =
+      uniquePeerCandidates(
+        directCandidates
+      ).sort(
+        (first, second) =>
+          first.companyName
+            .localeCompare(
+              second.companyName
+            )
+      );
+
+    return {
+      available:
+        peerCandidates.length > 0,
+
+      suitabilityReason:
+        peerCandidates.length > 0
+          ? `${peerCandidates.length} direct-business NSE-listed peer candidates were found in the ${directBusinessGroup.peerGroup} group.`
+          : `No other eligible NSE-listed companies from the ${directBusinessGroup.peerGroup} group could be resolved.`,
+
+      universe:
+        "NSE_LISTED",
+
+      selectionScope:
+        "DIRECT_BUSINESS",
+
+      selectedCompany,
+
+      selectedIndustry:
+        directBusinessGroup
+          .peerGroup,
+
+      peerCandidates,
+
+      candidateCount:
+        peerCandidates.length,
+
+      availableIndustries,
+
+      source: {
+        name:
+          "STFL Direct Business Classification and Upstox NSE Instrument Master",
+
+        methodology:
+          "Peer candidates belong to the same centrally curated direct-business group. Nifty 500 membership is informational and is not required.",
+      },
+    };
+  }
+
+  /*
+   * Fallback classification:
+   * use the published Nifty 500
+   * industry only for peer discovery.
+   */
+  const selectedNiftyConstituent =
+    eligibleNiftyConstituents.find(
       (constituent) =>
         normalizeSymbol(
           constituent.symbol
         ) === symbol
     ) ?? null;
 
-  if (!selectedConstituent) {
+  if (!selectedNiftyConstituent) {
+    const selectedNseEquity =
+      nseEquityBySymbol.get(
+        symbol
+      ) ?? null;
+
     return {
       available: false,
 
       suitabilityReason:
-        `${symbol} is not available in the current Nifty 500 constituent universe.`,
+        selectedNseEquity
+          ? `${symbol} is NSE-listed, but no verified direct-business peer group is currently available.`
+          : `${symbol} could not be resolved in the eligible NSE cash-equity universe.`,
 
       universe:
-        "NIFTY_500",
+        "NSE_LISTED",
+
+      selectionScope:
+        "DIRECT_BUSINESS",
 
       selectedCompany:
-        null,
+        selectedNseEquity
+          ? nseToPeerCandidate(
+              selectedNseEquity,
+              "Unclassified",
+              nifty500Symbols
+            )
+          : null,
 
       selectedIndustry:
         null,
@@ -186,16 +537,16 @@ export async function getNifty500PeerUniverse(
 
       source: {
         name:
-          "Nifty Indices",
+          "STFL Direct Business Classification and Upstox NSE Instrument Master",
 
         methodology:
-          "Automatic peer selection is limited to companies classified within the Nifty 500 universe.",
+          "The engine does not invent direct peers when no verified business classification is available.",
       },
     };
   }
 
   const selectedIndustry =
-    selectedConstituent
+    selectedNiftyConstituent
       .industry
       .trim();
 
@@ -204,14 +555,17 @@ export async function getNifty500PeerUniverse(
       available: false,
 
       suitabilityReason:
-        `No industry classification was available for ${symbol} in the Nifty 500 constituent file.`,
+        `No published industry classification was available for ${symbol}.`,
 
       universe:
         "NIFTY_500",
 
+      selectionScope:
+        "PUBLISHED_INDUSTRY",
+
       selectedCompany:
-        toPeerCandidate(
-          selectedConstituent
+        niftyToPeerCandidate(
+          selectedNiftyConstituent
         ),
 
       selectedIndustry:
@@ -228,7 +582,7 @@ export async function getNifty500PeerUniverse(
           "Nifty Indices",
 
         methodology:
-          "Automatic peer selection requires a valid Nifty 500 industry classification.",
+          "Broad-industry fallback requires a valid published Nifty 500 industry classification.",
       },
     };
   }
@@ -239,25 +593,28 @@ export async function getNifty500PeerUniverse(
     );
 
   const peerCandidates =
-    eligibleConstituents
-      .filter(
-        (constituent) =>
-          normalizeSymbol(
-            constituent.symbol
-          ) !== symbol &&
-          normalizeIndustry(
-            constituent.industry
-          ) ===
-            normalizedSelectedIndustry
-      )
-      .map(toPeerCandidate)
-      .sort(
-        (first, second) =>
-          first.companyName
-            .localeCompare(
-              second.companyName
-            )
-      );
+    uniquePeerCandidates(
+      eligibleNiftyConstituents
+        .filter(
+          (constituent) =>
+            normalizeSymbol(
+              constituent.symbol
+            ) !== symbol &&
+            normalizeIndustry(
+              constituent.industry
+            ) ===
+              normalizedSelectedIndustry
+        )
+        .map(
+          niftyToPeerCandidate
+        )
+    ).sort(
+      (first, second) =>
+        first.companyName
+          .localeCompare(
+            second.companyName
+          )
+    );
 
   return {
     available:
@@ -265,15 +622,18 @@ export async function getNifty500PeerUniverse(
 
     suitabilityReason:
       peerCandidates.length > 0
-        ? `${peerCandidates.length} Nifty 500 peer candidates were found in the ${selectedIndustry} industry.`
-        : `No other Nifty 500 companies were found in the ${selectedIndustry} industry.`,
+        ? `No curated direct-business group was available. ${peerCandidates.length} broad-industry Nifty 500 candidates were found in ${selectedIndustry}.`
+        : `No other Nifty 500 companies were found in the published ${selectedIndustry} industry.`,
 
     universe:
       "NIFTY_500",
 
+    selectionScope:
+      "PUBLISHED_INDUSTRY",
+
     selectedCompany:
-      toPeerCandidate(
-        selectedConstituent
+      niftyToPeerCandidate(
+        selectedNiftyConstituent
       ),
 
     selectedIndustry,
@@ -290,7 +650,7 @@ export async function getNifty500PeerUniverse(
         "Nifty Indices",
 
       methodology:
-        "Peer candidates are Nifty 500 equity constituents with the same published industry classification. The selected company is excluded.",
+        "No curated direct-business group was available. Candidates therefore share the selected company's published Nifty 500 industry classification. These candidates require manual business-model validation.",
     },
   };
 }

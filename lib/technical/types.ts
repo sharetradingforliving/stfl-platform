@@ -275,22 +275,42 @@ export interface TechnicalResearchResult {
   symbol: string;
 
   currentPrice: number;
-  
+
   generatedAt: string;
 
-  trend: TrendResult;
+  /*
+   * Raw calculated indicator values
+   * used by the analysis modules.
+   */
+  movingAverages:
+    MovingAverageData;
 
-  momentum: MomentumResult;
+  oscillators:
+    OscillatorData;
 
-  volume: VolumeResult;
+  volumeData:
+    VolumeData;
 
-  supportResistance: SupportResistanceResult;
+  trend:
+    TrendResult;
 
-  entryQuality: EntryQualityResult;
+  momentum:
+    MomentumResult;
 
-  riskReward: RiskRewardResult;
+  volume:
+    VolumeResult;
 
-  technicalScore: TechnicalScoreResult;
+  supportResistance:
+    SupportResistanceResult;
+
+  entryQuality:
+    EntryQualityResult;
+
+  riskReward:
+    RiskRewardResult;
+
+  technicalScore:
+    TechnicalScoreResult;
 
   aiSummary: string;
 }

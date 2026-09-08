@@ -3,10 +3,12 @@ import "server-only";
 import {
   getNifty500PeerUniverse,
   type Nifty500PeerCandidate,
+  type PeerSelectionScope,
+  type PeerUniverse,
 } from "./nifty500PeerUniverse";
 
-const MINIMUM_PEERS = 3;
-const MAXIMUM_PEERS = 8;
+const MINIMUM_PEERS = 1;
+const MAXIMUM_PEERS = 5;
 
 export type RejectedPeerSelection = {
   symbol: string;
@@ -15,10 +17,12 @@ export type RejectedPeerSelection = {
 
 export type Nifty500PeerSelectionResult = {
   available: boolean;
-
   suitabilityReason: string;
 
-  universe: "NIFTY_500";
+  universe: PeerUniverse;
+
+  selectionScope:
+    PeerSelectionScope;
 
   selectedCompany:
     Nifty500PeerCandidate | null;
@@ -30,7 +34,6 @@ export type Nifty500PeerSelectionResult = {
     Nifty500PeerCandidate[];
 
   selectedPeerCount: number;
-
   candidateCount: number;
 
   rejectedPeers:
@@ -64,6 +67,35 @@ function uniqueSymbols(
   );
 }
 
+function getMethodology(
+  universe: PeerUniverse,
+  selectionScope:
+    PeerSelectionScope
+): string {
+  if (
+    selectionScope ===
+    "DIRECT_BUSINESS"
+  ) {
+    return (
+      "Peers belong to the same curated direct-business " +
+      "group. Candidates may come from the complete " +
+      "eligible NSE-listed cash-equity universe. " +
+      "Nifty 500 membership is not compulsory. " +
+      "The selected company and duplicate symbols are " +
+      "excluded. Between one and five peers are permitted."
+    );
+  }
+
+  return (
+    "No curated direct-business group was available. " +
+    `Candidates were discovered from the ${universe} ` +
+    "universe using the same published industry. " +
+    "Industry membership does not guarantee identical " +
+    "business-model comparability. Between one and five " +
+    "peers are permitted."
+  );
+}
+
 export async function selectNifty500Peers(
   requestedSymbol: string,
 
@@ -88,12 +120,17 @@ export async function selectNifty500Peers(
       symbol
     );
 
+  const methodology =
+    getMethodology(
+      peerUniverse.universe,
+      peerUniverse
+        .selectionScope
+    );
+
   if (
     !peerUniverse.available ||
     !peerUniverse
-      .selectedCompany ||
-    !peerUniverse
-      .selectedIndustry
+      .selectedCompany
   ) {
     return {
       available: false,
@@ -103,7 +140,11 @@ export async function selectNifty500Peers(
           .suitabilityReason,
 
       universe:
-        "NIFTY_500",
+        peerUniverse.universe,
+
+      selectionScope:
+        peerUniverse
+          .selectionScope,
 
       selectedCompany:
         peerUniverse
@@ -125,8 +166,7 @@ export async function selectNifty500Peers(
 
       warnings: [],
 
-      methodology:
-        "Peer selection is limited to Nifty 500 companies with the same published industry classification.",
+      methodology,
     };
   }
 
@@ -139,18 +179,20 @@ export async function selectNifty500Peers(
     new Map<
       string,
       Nifty500PeerCandidate
-    >(
-      peerUniverse
-        .peerCandidates
-        .map(
-          (candidate) => [
-            normalizeSymbol(
-              candidate.symbol
-            ),
-            candidate,
-          ]
-        )
+    >();
+
+  for (
+    const candidate
+    of peerUniverse
+      .peerCandidates
+  ) {
+    candidateBySymbol.set(
+      normalizeSymbol(
+        candidate.symbol
+      ),
+      candidate
     );
+  }
 
   const selectedPeers:
     Nifty500PeerCandidate[] = [];
@@ -176,6 +218,21 @@ export async function selectNifty500Peers(
       continue;
     }
 
+    if (
+      selectedPeers.length >=
+      MAXIMUM_PEERS
+    ) {
+      rejectedPeers.push({
+        symbol:
+          requestedPeer,
+
+        reason:
+          `A maximum of ${MAXIMUM_PEERS} peers can be selected.`,
+      });
+
+      continue;
+    }
+
     const candidate =
       candidateBySymbol.get(
         requestedPeer
@@ -187,22 +244,11 @@ export async function selectNifty500Peers(
           requestedPeer,
 
         reason:
-          `${requestedPeer} is not a same-industry Nifty 500 peer candidate for ${symbol}.`,
-      });
-
-      continue;
-    }
-
-    if (
-      selectedPeers.length >=
-      MAXIMUM_PEERS
-    ) {
-      rejectedPeers.push({
-        symbol:
-          requestedPeer,
-
-        reason:
-          `A maximum of ${MAXIMUM_PEERS} peers can be selected.`,
+          peerUniverse
+            .selectionScope ===
+            "DIRECT_BUSINESS"
+            ? `${requestedPeer} is not a verified direct-business peer candidate for ${symbol}.`
+            : `${requestedPeer} is not an eligible same-industry peer candidate for ${symbol}.`,
       });
 
       continue;
@@ -219,7 +265,7 @@ export async function selectNifty500Peers(
     normalizedRequests.length === 0
   ) {
     warnings.push(
-      "No peer symbols were selected. Choose between two and eight same-industry Nifty 500 companies."
+      "No peer was selected. Choose between one and five eligible comparable companies."
     );
   }
 
@@ -228,7 +274,17 @@ export async function selectNifty500Peers(
     MINIMUM_PEERS
   ) {
     warnings.push(
-      `At least ${MINIMUM_PEERS} valid peers are required for peer valuation.`
+      `At least ${MINIMUM_PEERS} valid peer is required for peer comparison.`
+    );
+  }
+
+  if (
+    peerUniverse
+      .selectionScope ===
+      "PUBLISHED_INDUSTRY"
+  ) {
+    warnings.push(
+      "The candidates share a published industry classification, but this does not guarantee direct business-model comparability."
     );
   }
 
@@ -238,16 +294,37 @@ export async function selectNifty500Peers(
     selectedPeers.length <=
       MAXIMUM_PEERS;
 
+  let suitabilityReason:
+    string;
+
+  if (!available) {
+    suitabilityReason =
+      `Select between ${MINIMUM_PEERS} and ${MAXIMUM_PEERS} eligible peers for comparison.`;
+  } else if (
+    peerUniverse
+      .selectionScope ===
+      "DIRECT_BUSINESS"
+  ) {
+    suitabilityReason =
+      `${selectedPeers.length} direct-business NSE-listed peer${selectedPeers.length === 1 ? "" : "s"} ` +
+      `were validated for ${symbol}.`;
+  } else {
+    suitabilityReason =
+      `${selectedPeers.length} published-industry peer candidate${selectedPeers.length === 1 ? "" : "s"} ` +
+      `were selected for ${symbol}. Manual comparability validation is recommended.`;
+  }
+
   return {
     available,
 
-    suitabilityReason:
-      available
-        ? `${selectedPeers.length} same-industry Nifty 500 peers were validated for ${symbol}.`
-        : `Peer valuation requires between ${MINIMUM_PEERS} and ${MAXIMUM_PEERS} valid same-industry Nifty 500 peers.`,
+    suitabilityReason,
 
     universe:
-      "NIFTY_500",
+      peerUniverse.universe,
+
+    selectionScope:
+      peerUniverse
+        .selectionScope,
 
     selectedCompany:
       peerUniverse
@@ -270,7 +347,6 @@ export async function selectNifty500Peers(
 
     warnings,
 
-    methodology:
-      "Selected peers must be Nifty 500 equity constituents from the same published industry as the selected company. Duplicate symbols are removed, the selected company is excluded, and two to eight peers are permitted.",
+    methodology,
   };
 }

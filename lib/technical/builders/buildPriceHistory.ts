@@ -1,4 +1,12 @@
-import type { PriceData } from "../types";
+import type {
+  PriceData,
+} from "../types";
+
+export interface BusinessDayInput {
+  year: number;
+  month: number;
+  day: number;
+}
 
 export interface CandleInput {
   open: number;
@@ -6,21 +14,72 @@ export interface CandleInput {
   low: number;
   close: number;
   volume: number;
-  time: number | string;
+
+  /*
+   * Lightweight Charts can provide
+   * epoch seconds, an ISO date string,
+   * or a BusinessDay object.
+   */
+  time:
+    | number
+    | string
+    | BusinessDayInput;
+}
+
+function convertCandleTimeToDate(
+  time:
+    CandleInput["time"]
+): string {
+  if (
+    typeof time === "number"
+  ) {
+    return new Date(
+      time * 1000
+    ).toISOString();
+  }
+
+  if (
+    typeof time === "string"
+  ) {
+    return new Date(
+      time
+    ).toISOString();
+  }
+
+  return new Date(
+    Date.UTC(
+      time.year,
+      time.month - 1,
+      time.day
+    )
+  ).toISOString();
 }
 
 export function buildPriceHistory(
-  candles: CandleInput[]
+  candles:
+    CandleInput[]
 ): PriceData[] {
-  return candles.map((candle) => ({
-    open: candle.open,
-    high: candle.high,
-    low: candle.low,
-    close: candle.close,
-    volume: candle.volume,
-    date:
-      typeof candle.time === "number"
-        ? new Date(candle.time * 1000).toISOString()
-        : new Date(candle.time).toISOString(),
-  }));
+  return candles.map(
+    (candle) => ({
+      open:
+        candle.open,
+
+      high:
+        candle.high,
+
+      low:
+        candle.low,
+
+      close:
+        candle.close,
+
+      volume:
+        candle.volume,
+
+      date:
+        convertCandleTimeToDate(
+          candle.time
+        ),
+    })
+  );
 }

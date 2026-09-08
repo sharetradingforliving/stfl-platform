@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import Image from "next/image";
+import HeaderIndexPrices from "./HeaderIndexPrices";
 
 type NavigationItem = {
   label: string;
@@ -83,21 +84,25 @@ export default function MainNavigation() {
     <header className="sticky top-0 z-[100] border-b border-slate-800 bg-[#020817]/95 backdrop-blur-xl">
       <div className="mx-auto flex min-h-[84px] max-w-7xl items-center justify-between gap-6 px-6">
 
-        <Link
-  href="/"
-  onClick={closeMenu}
-  className="flex shrink-0 items-center"
-  aria-label="Share Trading For Living Home"
->
-  <Image
-    src="/sharetradingforlivingwithoutbg.png"
-    alt="Share Trading For Living"
-    width={105}
-    height={72}
-    priority
-    className="h-[68px] w-auto object-contain"
-  />
-</Link>
+        <div className="flex min-w-0 items-center gap-5">
+  <Link
+    href="/"
+    onClick={closeMenu}
+    className="flex shrink-0 items-center"
+    aria-label="Share Trading For Living Home"
+  >
+    <Image
+      src="/sharetradingforlivingwithoutbg.png"
+      alt="Share Trading For Living"
+      width={105}
+      height={72}
+      priority
+      className="h-[68px] w-auto object-contain"
+    />
+  </Link>
+
+  <HeaderIndexPrices />
+</div>
 
         <nav className="hidden items-center gap-1 lg:flex">
 

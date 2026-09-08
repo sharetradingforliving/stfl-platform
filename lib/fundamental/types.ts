@@ -294,6 +294,7 @@ export type BankSpecificMetrics = {
   netInterestMargin: NullableNumber;
   grossNpa: NullableNumber;
   netNpa: NullableNumber;
+  returnOnAssets:  NullableNumber;
   provisionCoverageRatio:
     NullableNumber;
   capitalAdequacyRatio:

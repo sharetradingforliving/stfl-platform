@@ -508,6 +508,18 @@ advances:
     .financialPeriod
     .advances,
 
+    equityShareCapital:
+  marchQuarter.financialPeriod
+    .equityShareCapital,
+
+faceValuePerShare:
+  marchQuarter.financialPeriod
+    .faceValuePerShare,
+
+sharesOutstanding:
+  marchQuarter.financialPeriod
+    .sharesOutstanding,
+    
       cashAndEquivalents:
         marchQuarter
           .financialPeriod
