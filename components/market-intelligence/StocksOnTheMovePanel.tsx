@@ -7,6 +7,10 @@ import {
   useState,
 } from "react";
 
+import {
+  fetchMarketSnapshot,
+} from "@/lib/market/marketSnapshotCache";
+
 type StockItem = {
   companyName: string;
   symbol: string;
@@ -26,8 +30,9 @@ type AllStocksResponse = {
   status?: "success";
 
   marketDataStatus?:
-    | "live"
-    | "unavailable";
+  | "live"
+  | "previous_session"
+  | "unavailable";
 
   universe?: {
     eligibleInstruments: number;
@@ -326,49 +331,43 @@ export default function StocksOnTheMovePanel() {
     let requestIsActive = true;
 
     async function loadStocks() {
-      try {
-        const response =
-          await fetch(
-            "/api/market/all-stocks",
-            {
-              method: "GET",
-              cache: "no-store",
-            }
-          );
+  try {
+    const result =
+      await fetchMarketSnapshot<AllStocksResponse>();
 
-        const result =
-          (await response.json()) as
-            AllStocksResponse;
-
-        if (!response.ok) {
-          throw new Error(
-            result.error ??
-              result.details ??
-              "Market movement data is unavailable"
-          );
-        }
-
-        if (requestIsActive) {
-          setData(result);
-          setError("");
-        }
-      } catch (requestError) {
-        console.error(
-          "Stocks on the move error:",
-          requestError
-        );
-
-        if (requestIsActive) {
-          setError(
-            "Live stocks-on-the-move data is temporarily unavailable."
-          );
-        }
-      } finally {
-        if (requestIsActive) {
-          setIsLoading(false);
-        }
-      }
+    if (
+      !result.universe ||
+      !result.topGainers ||
+      !result.topLosers
+    ) {
+      throw new Error(
+        result.error ??
+          result.details ??
+          "Market movement data is unavailable"
+      );
     }
+
+    if (requestIsActive) {
+      setData(result);
+      setError("");
+    }
+  } catch (requestError) {
+    console.error(
+      "Stocks on the move error:",
+      requestError
+    );
+
+    if (requestIsActive) {
+      setError(
+        "Stocks-on-the-move data is temporarily unavailable."
+      );
+    }
+  } finally {
+    if (requestIsActive) {
+      setIsLoading(false);
+    }
+  }
+}
 
     loadStocks();
 
@@ -398,6 +397,10 @@ export default function StocksOnTheMovePanel() {
           ? data?.mostActiveVolume
           : data?.mostActiveValue;
 
+          const isPreviousSession =
+  data?.marketDataStatus ===
+  "previous_session";
+
   return (
     <section className="rounded-3xl border border-slate-800 bg-slate-950/70 p-6 md:p-8">
       <div className="flex flex-wrap items-end justify-between gap-5">
@@ -419,9 +422,17 @@ export default function StocksOnTheMovePanel() {
         </div>
 
         <div className="text-right">
-          <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-semibold text-emerald-400">
-            LIVE · AUTO REFRESH
-          </span>
+          <span
+  className={`rounded-full border px-4 py-2 text-xs font-semibold ${
+    isPreviousSession
+      ? "border-amber-500/30 bg-amber-500/10 text-amber-300"
+      : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+  }`}
+>
+  {isPreviousSession
+    ? "PREVIOUS SESSION"
+    : "LIVE · AUTO REFRESH"}
+</span>
 
           <p className="mt-3 text-xs text-slate-500">
             {formatSessionDate(
@@ -448,7 +459,9 @@ export default function StocksOnTheMovePanel() {
 
           <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
             <p className="text-xs uppercase tracking-wider text-slate-500">
-              Live quotes
+              {isPreviousSession
+  ? "Quoted equities"
+  : "Live quotes"}
             </p>
 
             <p className="mt-2 text-xl font-bold text-white">

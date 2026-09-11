@@ -37,20 +37,6 @@ export async function GET(
       await getNseIntegratedFinancialFilings(
         stockSymbol
       );
-
-    return NextResponse.json(
-      {
-        status: "success",
-        symbol: stockSymbol,
-        ...result,
-      },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      }
-    );
   } catch (error) {
     console.error(
       "NSE integrated financial filings route error:",

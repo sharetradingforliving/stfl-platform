@@ -6,8 +6,17 @@ type JsonRecord = Record<
 >;
 
 export type NseCorporateActionType =
-  | "STOCK_SPLIT"
+  | "DIVIDEND"
+    | "DISTRIBUTION"
   | "BONUS"
+  | "STOCK_SPLIT"
+  | "RIGHTS"
+  | "BUYBACK"
+  | "MERGER"
+  | "DEMERGER"
+  | "CAPITAL_REDUCTION"
+  | "INTEREST_PAYMENT"
+  | "AGM"
   | "OTHER";
 
 export type NseCorporateAction = {
@@ -366,26 +375,101 @@ function parseStockSplit(
 }
 
 function identifyActionType(
-  description:
-    string | null
+  description: string | null
 ): NseCorporateActionType {
   if (!description) {
     return "OTHER";
   }
 
+  const normalized = description
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+
   if (
-    /SPLIT|SUB[\s-]?DIVISION/i
-      .test(description)
+    /\bSTOCK\s+SPLIT\b/.test(normalized) ||
+    /\bSUB[\s-]?DIVISION\b/.test(normalized) ||
+    /\bSPLIT\s+FROM\b/.test(normalized)
   ) {
     return "STOCK_SPLIT";
   }
 
+  if (/\bBONUS\b/.test(normalized)) {
+    return "BONUS";
+  }
+
   if (
-    /\bBONUS\b/i.test(
-      description
+    /\bBUY[\s-]?BACK\b/.test(normalized) ||
+    /\bBUYBACK\b/.test(normalized)
+  ) {
+    return "BUYBACK";
+  }
+
+    if (
+    /\bRIGHTS?\s+(?:ISSUE|ENTITLEMENT)\b/.test(
+      normalized
+    ) ||
+    /\bRIGHTS?\s*[-:]?\s*\d+[\s\S]*:\s*\d+\b/.test(
+      normalized
     )
   ) {
-    return "BONUS";
+    return "RIGHTS";
+  }
+
+  if (
+    /\bDEMERGER\b/.test(normalized) ||
+    /\bDE-MERGER\b/.test(normalized) ||
+    /\bDEMERGED\b/.test(normalized)
+  ) {
+    return "DEMERGER";
+  }
+
+  if (
+    /\bMERGER\b/.test(normalized) ||
+    /\bAMALGAMATION\b/.test(normalized) ||
+    /\bMERGED\b/.test(normalized)
+  ) {
+    return "MERGER";
+  }
+
+  if (
+    /\bCAPITAL\s+REDUCTION\b/.test(normalized) ||
+    /\bREDUCTION\s+OF\s+(?:SHARE\s+)?CAPITAL\b/.test(
+      normalized
+    )
+  ) {
+    return "CAPITAL_REDUCTION";
+  }
+
+  if (
+    /\bDIVIDEND\b/.test(normalized) ||
+    /\bINTERIM\s+DIVIDEND\b/.test(normalized) ||
+    /\bFINAL\s+DIVIDEND\b/.test(normalized)
+  ) {
+    return "DIVIDEND";
+  }
+
+  if (
+    /\bINTEREST\s+(?:PAYMENT|ON)\b/.test(normalized)
+  ) {
+    return "INTEREST_PAYMENT";
+  }
+
+    if (
+    /\bDISTRIBUTION\b/.test(
+      normalized
+    ) &&
+    /\bPER\s+UNIT\b/.test(
+      normalized
+    )
+  ) {
+    return "DISTRIBUTION";
+  }
+  if (
+    /\bANNUAL\s+GENERAL\s+MEETING\b/.test(normalized) ||
+    /\bAGM\b/.test(normalized)
+  ) {
+    return "AGM";
   }
 
   return "OTHER";
@@ -904,6 +988,264 @@ export async function getNseCorporateActions(
         error instanceof Error
           ? error.message
           : "Unable to retrieve NSE corporate actions",
+      ],
+
+      source: {
+        name:
+          "NSE Corporate Actions",
+
+        pageUrl,
+
+        fetchedAt:
+          new Date()
+            .toISOString(),
+      },
+    };
+  }
+}
+function formatNseCorporateActionDate(
+  date: Date
+): string {
+  const parts = new Intl.DateTimeFormat(
+    "en-GB",
+    {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }
+  ).formatToParts(date);
+
+  const day =
+    parts.find(
+      (part) => part.type === "day"
+    )?.value ?? "";
+
+  const month =
+    parts.find(
+      (part) => part.type === "month"
+    )?.value ?? "";
+
+  const year =
+    parts.find(
+      (part) => part.type === "year"
+    )?.value ?? "";
+
+  return `${day}-${month}-${year}`;
+}
+
+async function fetchMarketCorporateActionsJson(
+  fromDate: Date,
+  toDate: Date,
+  cookieHeader: string
+): Promise<unknown> {
+  const query =
+    new URLSearchParams({
+      index: "equities",
+
+      from_date:
+        formatNseCorporateActionDate(
+          fromDate
+        ),
+
+      to_date:
+        formatNseCorporateActionDate(
+          toDate
+        ),
+    });
+
+  const response =
+    await fetch(
+      `${NSE_BASE_URL}/api/corporates-corporateActions?${query.toString()}`,
+      {
+        method: "GET",
+
+        headers: {
+          ...DEFAULT_HEADERS,
+
+          ...(cookieHeader
+            ? {
+                Cookie:
+                  cookieHeader,
+              }
+            : {}),
+        },
+
+        cache: "no-store",
+      }
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      "NSE market corporate-actions " +
+        `request failed with status ${response.status}`
+    );
+  }
+
+  const contentType =
+    response.headers.get(
+      "content-type"
+    ) ?? "";
+
+  if (
+    !contentType.includes(
+      "application/json"
+    )
+  ) {
+    throw new Error(
+      "NSE returned an unexpected market corporate-actions response format"
+    );
+  }
+
+  return response.json();
+}
+
+export async function getNseMarketCorporateActions(
+  fromDate: Date,
+  toDate: Date
+): Promise<NseCorporateActionsResponse> {
+  const pageUrl =
+    `${NSE_BASE_URL}${NSE_CORPORATE_ACTIONS_PAGE}`;
+
+  if (
+    Number.isNaN(
+      fromDate.getTime()
+    ) ||
+    Number.isNaN(
+      toDate.getTime()
+    )
+  ) {
+    throw new Error(
+      "Valid corporate-action dates are required"
+    );
+  }
+
+  if (
+    fromDate.getTime() >
+    toDate.getTime()
+  ) {
+    throw new Error(
+      "Corporate-action start date cannot be after the end date"
+    );
+  }
+
+  try {
+    const cookieHeader =
+      await createNseSession();
+
+    const payload =
+      await fetchMarketCorporateActionsJson(
+        fromDate,
+        toDate,
+        cookieHeader
+      );
+
+    const rows =
+      extractRows(payload);
+
+    const actions =
+      deduplicateActions(
+        rows
+          .map(
+            (row) =>
+              normaliseAction(
+                row,
+                "UNKNOWN"
+              )
+          )
+          .filter(
+            (action) =>
+              action.symbol !==
+                "UNKNOWN" &&
+              Boolean(
+                action.purpose ??
+                  action.subject
+              )
+          )
+      );
+
+    actions.sort(
+      (
+        first,
+        second
+      ) =>
+        parseNseDate(
+          first.exDate ??
+            first.recordDate ??
+            first.broadcastDate
+        ) -
+        parseNseDate(
+          second.exDate ??
+            second.recordDate ??
+            second.broadcastDate
+        )
+    );
+
+    const warnings:
+      string[] = [];
+
+    const unparsedSplits =
+      actions.filter(
+        (action) =>
+          action.actionType ===
+            "STOCK_SPLIT" &&
+          action
+            .shareAdjustmentFactor ===
+            null
+      );
+
+    if (
+      unparsedSplits.length >
+      0
+    ) {
+      warnings.push(
+        `${unparsedSplits.length} stock split action(s) were identified, but their adjustment factors could not be parsed safely.`
+      );
+    }
+
+    return {
+      status:
+        actions.length === 0
+          ? "unavailable"
+          : warnings.length > 0
+            ? "partial"
+            : "success",
+
+      symbol: "ALL",
+
+      actions,
+
+      warnings:
+        actions.length > 0
+          ? warnings
+          : [
+              "No NSE corporate actions were found for the selected period.",
+            ],
+
+      source: {
+        name:
+          "NSE Corporate Actions",
+
+        pageUrl,
+
+        fetchedAt:
+          new Date()
+            .toISOString(),
+      },
+    };
+  } catch (error) {
+    return {
+      status:
+        "unavailable",
+
+      symbol: "ALL",
+
+      actions: [],
+
+      warnings: [
+        error instanceof Error
+          ? error.message
+          : "Unable to retrieve NSE market corporate actions",
       ],
 
       source: {

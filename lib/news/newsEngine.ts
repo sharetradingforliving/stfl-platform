@@ -2,252 +2,240 @@ import { fetchAllNews } from "./providers/providerManager";
 import { normalizeFinnhubNews } from "./normalizer";
 import { normalizeNewsApiNews } from "./newsApiNormalizer";
 import { indianMarketFilter } from "./filters/indianMarketFilter";
-import { isIndianCompany } from "./filters/companyMapper";
+import { configureIndianCompanyUniverse,  isIndianCompany,} from "./filters/companyMapper";
 import { isIndianNews } from "./filters/countryDetector";
-import { NewsArticle } from "./types";
-import { NewsEngineResult } from "./types";
 import { duplicateFilter } from "./filters/duplicateFilter";
 import { mergeNewsSources } from "./engines/mergeEngine";
 import { rankNews } from "./engines/rankingEngine";
+import { buildInvestorIntelligence } from "./investorIntelligence";
+import {
+  getAllNseEquities,
+} from "@/lib/market/allNseEquities";
+import type {
+  Impact,
+  NewsArticle,
+  NewsEngineResult,
+  NewsEvent,
+  NewsSummary,
+  Sentiment,
+  SentimentResult,
+} from "./types";
 
+const DASHBOARD_LIMIT = 10;
 
-import { classifyEvents } from "./eventClassifier";
-import { analyzeOverallSentiment } from "./sentiment";
-import { analyzeOverallImpact } from "./impactAnalyzer";
-import { generateNewsSummary } from "./newsSummary";
+function uniqueArticles(articles: NewsArticle[]): NewsArticle[] {
+  const seen = new Set<string>();
 
-
-export async function runNewsEngine(): Promise<NewsEngineResult> {
-
-  // Fetch all providers
-  const providers = await fetchAllNews();
-
-  // Normalize news
-  
-
-const finnhubArticles =
-  normalizeFinnhubNews(
-    providers.finnhub
-  );
-
-const newsApiArticles =
-  normalizeNewsApiNews(
-    providers.newsApi
-  );
-
-const mergedArticles =
-mergeNewsSources(
-
-    finnhubArticles,
-
-    newsApiArticles,
-
-);
-
-const filteredArticles =
-duplicateFilter(
-  indianMarketFilter(
-    mergedArticles
-  )
-);
-
-const articles =
-rankNews(
-  filteredArticles
-);
-
-console.log("===== PROVIDERS =====");
-
-console.log(
-  "Finnhub:",
-  finnhubArticles.length
-);
-
-console.log(
-  "NewsAPI:",
-  newsApiArticles.length
-);
-
-console.log(
-  "Combined:",
-  articles.length
-);
-
-  // Intelligence
-  const events = classifyEvents(articles);
-
-  const sentiment = analyzeOverallSentiment(articles);
-
-  const impact = analyzeOverallImpact(events);
-
-  const summary = generateNewsSummary(
-    articles,
-    events,
-    sentiment,
-    impact
-  );
-
- 
-  // Dashboard Data
-
-const latestMarketNews = articles
-  .filter(
-    (article: NewsArticle) =>
-      isIndianNews(article) &&
-      (
-        article.category === "Market" ||
-        article.category === "Economy"
-      )
-  )
-  .slice(0,10);
-
-const companyNews = articles
-  .filter(
-    (article: NewsArticle) =>
-      article.category === "Company" &&
-      isIndianCompany(article)
-  )
-  .slice(0,10);
-    
-const sectorNews = [] as NewsArticle[];
-
-const globalNews = articles.filter(
-  (article: NewsArticle) => article.category === "Global"
-);
-
-// Fallback: if no Market/Economy news is available,
-// show the latest news instead.
-if (latestMarketNews.length === 0) {
-  latestMarketNews.push(...articles.slice(0, 10));
+  return articles.filter((article) => {
+    const key = article.id || article.url || article.headline.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
-  const positiveNews = articles.filter((article: NewsArticle, index: number) =>
-    index < summary.keyPositives.length
-  );
 
-  const negativeNews = articles.filter((article: NewsArticle, index: number) =>
-    index < summary.keyNegatives.length
-  );
-
-  const neutralNews = articles.filter(
-    (article) =>
-      !positiveNews.includes(article) &&
-      !negativeNews.includes(article)
-  );
-
-  // ======================================================
-// DEBUG (Development Only)
-// ======================================================
-
-if (process.env.NODE_ENV === "development") {
-
-  console.log("==========================================");
-  console.log("       STFL NEWS ENGINE DEBUG");
-  console.log("==========================================");
-
-  console.log("Providers");
-
-  console.log(
-    "Finnhub Articles :",
-    finnhubArticles.length
-  );
-
-  console.log(
-    "NewsAPI Articles :",
-    newsApiArticles.length
-  );
-
-  console.log("");
-
-  console.log(
-    "Articles After Merge & Filter :",
-    articles.length
-  );
-
-  console.log("");
-
-  console.log("Top 10 Articles");
-
-  console.table(
-    articles.slice(0, 10).map((article) => ({
-      Headline: article.headline,
-      Source: article.source,
-      Category: article.category,
-      Relevance: article.marketRelevance,
-      Published: article.publishedAt,
-    }))
-  );
-
-  console.log("");
-
-  console.log("Dashboard");
-
-  console.log(
-    "Latest Market News :",
-    latestMarketNews.length
-  );
-
-  console.log(
-    "Company News :",
-    companyNews.length
-  );
-
-  console.log(
-    "Sector News :",
-    sectorNews.length
-  );
-
-  console.log(
-    "Global News :",
-    globalNews.length
-  );
-
-  console.log("");
-
-  console.log("==========================================");
-}
-  console.log("===== FINAL NEWS ENGINE =====");
-
-console.log({
-  latestMarketNews: latestMarketNews.length,
-  companyNews: companyNews.length,
-  sectorNews: sectorNews.length,
-  globalNews: globalNews.length,
-  positiveNews: positiveNews.length,
-  negativeNews: negativeNews.length,
-});
+function toOverallSentiment(
+  label: "Positive" | "Negative" | "Neutral" | "Mixed" | "Cautious",
+  score: number,
+  confidence: number
+): SentimentResult {
+  const sentiment: Sentiment =
+  label === "Positive"
+    ? "Bullish"
+    : label === "Negative"
+      ? "Bearish"
+      : label === "Cautious"
+        ? "Neutral"
+        : label;
 
   return {
-
-    articles,
-
-    events,
-
     sentiment,
+    score: Math.max(-100, Math.min(100, (score - 50) * 2)),
+    confidence,
+    explanation:
+      "Calculated from the highest-priority, deduplicated news-event clusters.",
+  };
+}
 
+function toOverallImpact(scores: number[]): {
+  impact: Impact;
+  score: number;
+  explanation: string;
+} {
+  if (scores.length === 0) {
+    return {
+      impact: "Low",
+      score: 0,
+      explanation: "No classified news events are available.",
+    };
+  }
+
+  const score = Math.round(
+    scores.reduce((sum, value) => sum + value, 0) / scores.length
+  );
+
+  const impact: Impact =
+    score >= 85
+      ? "Critical"
+      : score >= 65
+        ? "High"
+        : score >= 42
+          ? "Medium"
+          : "Low";
+
+  return {
     impact,
+    score,
+    explanation: `Calculated from ${scores.length} high-priority event cluster(s).`,
+  };
+}
 
+export async function runNewsEngine(): Promise<NewsEngineResult> {
+  const [
+    providers,
+    nseUniverse,
+  ] = await Promise.all([
+    fetchAllNews(),
+    getAllNseEquities(),
+  ]);
+
+  configureIndianCompanyUniverse(
+    nseUniverse.equities
+  );
+  const finnhubArticles = normalizeFinnhubNews(providers.finnhub);
+  const newsApiArticles = normalizeNewsApiNews(providers.newsApi);
+
+  const mergedArticles = mergeNewsSources(
+    finnhubArticles,
+    newsApiArticles
+  );
+
+  const articles = rankNews(
+    duplicateFilter(indianMarketFilter(mergedArticles))
+  );
+
+  const {
+    intelligence,
+    clusters,
+    whatMattersNow,
+    sectorImpact,
+    marketBriefing,
+  } = buildInvestorIntelligence(articles);
+
+  const events: NewsEvent[] = intelligence.map((item) => ({
+    eventType: item.primaryEvent,
+    confidence: item.impact.confidence,
+    explanation: item.whyItMatters,
+  }));
+
+  const sentiment = toOverallSentiment(
+    marketBriefing.label,
+    marketBriefing.score,
+    marketBriefing.confidence
+  );
+
+  const impact = toOverallImpact(
+    whatMattersNow.map((item) => item.impact.score)
+  );
+
+  const summary: NewsSummary = {
+    overallSentiment: sentiment.sentiment,
+    keyPositives: marketBriefing.keyPositives,
+    keyNegatives: marketBriefing.keyNegatives,
+    risks: marketBriefing.keyRisks,
+    opportunities: marketBriefing.opportunities,
+    aiSummary: marketBriefing.summary,
+  };
+
+  const priorityArticles = whatMattersNow.map((item) => item.article);
+
+  let latestMarketNews = uniqueArticles(
+    priorityArticles.filter(
+      (article) =>
+        isIndianNews(article) &&
+        (article.category === "Market" || article.category === "Economy")
+    )
+  ).slice(0, DASHBOARD_LIMIT);
+
+  if (latestMarketNews.length === 0) {
+    latestMarketNews = priorityArticles.slice(0, DASHBOARD_LIMIT);
+  }
+
+  const companyNews = uniqueArticles(
+    intelligence
+      .filter(
+        (item) =>
+          item.article.category === "Company" &&
+          isIndianCompany(item.article)
+      )
+      .map((item) => item.article)
+  ).slice(0, DASHBOARD_LIMIT);
+
+  const sectorNews = uniqueArticles(
+    intelligence
+      .filter((item) => item.affectedSectors.length > 0)
+      .map((item) => item.article)
+  ).slice(0, DASHBOARD_LIMIT);
+
+  const globalNews = uniqueArticles(
+    intelligence
+      .filter((item) => item.article.category === "Global")
+      .map((item) => item.article)
+  ).slice(0, DASHBOARD_LIMIT);
+
+  const positiveNews = intelligence
+    .filter((item) => item.impact.direction === "Positive")
+    .map((item) => item.article)
+    .slice(0, DASHBOARD_LIMIT);
+
+  const negativeNews = intelligence
+    .filter((item) => item.impact.direction === "Negative")
+    .map((item) => item.article)
+    .slice(0, DASHBOARD_LIMIT);
+
+  const neutralNews = intelligence
+    .filter(
+      (item) =>
+        item.impact.direction === "Neutral" ||
+        item.impact.direction === "Mixed"
+    )
+    .map((item) => item.article)
+    .slice(0, DASHBOARD_LIMIT);
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("===== STFL INVESTOR NEWS ENGINE =====");
+    console.table({
+      finnhub: finnhubArticles.length,
+      newsApi: newsApiArticles.length,
+      filteredArticles: articles.length,
+      eventClusters: clusters.length,
+      whatMattersNow: whatMattersNow.length,
+      companyNews: companyNews.length,
+      sectorNews: sectorNews.length,
+      globalNews: globalNews.length,
+    });
+  }
+
+  return {
+    articles,
+    events,
+    sentiment,
+    impact,
     summary,
-
     latestMarketNews,
-
     companyNews,
-
     sectorNews,
-
     globalNews,
-
     positiveNews,
-
     negativeNews,
-
     neutralNews,
-
-    overallScore:
-      Math.round(
-        (
-          sentiment.score +
-          impact.score
-        ) / 2
-      ),
+    overallScore: marketBriefing.score,
+    intelligence,
+    clusters,
+    marketBriefing,
+    sectorImpact,
+    whatMattersNow,
+    engineVersion: "2.0.0",
+    generatedAt: new Date().toISOString(),
   };
 }

@@ -38,8 +38,42 @@ const IMPACT_MAP: Record<
   Regulatory: { impact: "High", score: 90 },
   Litigation: { impact: "High", score: 85 },
   Guidance: { impact: "Medium", score: 70 },
-  "Product Launch": { impact: "Medium", score: 65 },
-  Other: { impact: "Low", score: 30 },
+    "Product Launch": { impact: "Medium", score: 65 },
+
+  "Brokerage Call": {
+    impact: "Medium",
+    score: 70,
+  },
+
+  "Index Inclusion": {
+    impact: "High",
+    score: 85,
+  },
+
+  "Index Exclusion": {
+    impact: "High",
+    score: 85,
+  },
+
+  "Index Rebalance": {
+    impact: "High",
+    score: 80,
+  },
+
+  Macro: {
+    impact: "High",
+    score: 80,
+  },
+
+  "Market Movement": {
+    impact: "Medium",
+    score: 60,
+  },
+
+  Other: {
+    impact: "Low",
+    score: 30,
+  },
 };
 
 /**

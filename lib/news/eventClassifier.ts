@@ -36,6 +36,65 @@ const EVENT_KEYWORDS: Record<NewsEventType, string[]> = {
   Litigation: ["court", "lawsuit", "litigation"],
   Guidance: ["guidance", "outlook", "forecast"],
   "Product Launch": ["launch", "introduces", "new product"],
+    "Brokerage Call": [
+    "brokerage",
+    "broker call",
+    "research call",
+    "target price",
+    "price target",
+    "initiates coverage",
+    "maintains rating",
+    "reiterates rating",
+  ],
+
+  "Index Inclusion": [
+    "index inclusion",
+    "included in index",
+    "added to index",
+    "index addition",
+    "to enter index",
+  ],
+
+  "Index Exclusion": [
+    "index exclusion",
+    "excluded from index",
+    "removed from index",
+    "index deletion",
+    "to exit index",
+  ],
+
+  "Index Rebalance": [
+    "index rebalance",
+    "index rebalancing",
+    "index reshuffle",
+    "index revision",
+    "constituent changes",
+  ],
+
+  Macro: [
+    "inflation",
+    "gdp",
+    "interest rate",
+    "repo rate",
+    "rbi policy",
+    "monetary policy",
+    "fiscal policy",
+    "trade deficit",
+    "economic growth",
+  ],
+
+  "Market Movement": [
+    "market rises",
+    "market falls",
+    "market rally",
+    "market decline",
+    "stocks rise",
+    "stocks fall",
+    "sensex gains",
+    "sensex falls",
+    "nifty gains",
+    "nifty falls",
+  ],
   Other: [],
 };
 

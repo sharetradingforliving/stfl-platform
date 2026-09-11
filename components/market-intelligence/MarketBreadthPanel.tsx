@@ -5,10 +5,15 @@ import {
   useState,
 } from "react";
 
+import {
+  fetchMarketSnapshot,
+} from "@/lib/market/marketSnapshotCache";
+
 type MarketBreadthResponse = {
   marketDataStatus?:
-    | "live"
-    | "unavailable";
+  | "live"
+  | "previous_session"
+  | "unavailable";
 
   universe?: {
     eligibleInstruments: number;
@@ -199,29 +204,16 @@ export default function MarketBreadthPanel() {
 
     async function loadBreadth() {
       try {
-        const response =
-          await fetch(
-            "/api/market/all-stocks",
-            {
-              method: "GET",
-              cache: "no-store",
-            }
-          );
-
         const result =
-          (await response.json()) as
-            MarketBreadthResponse;
+  await fetchMarketSnapshot<MarketBreadthResponse>();
 
-        if (
-          !response.ok ||
-          !result.breadth
-        ) {
-          throw new Error(
-            result.error ??
-              result.details ??
-              "Market breadth is unavailable"
-          );
-        }
+if (!result.breadth) {
+  throw new Error(
+    result.error ??
+      result.details ??
+      "Market breadth is unavailable"
+  );
+}
 
         if (requestIsActive) {
           setData(result);
@@ -268,11 +260,16 @@ export default function MarketBreadthPanel() {
   const circuits =
     data?.circuits;
 
-  const interpretation =
-    getBreadthInterpretation(
-      breadth
-        ?.advancePercentage
-    );
+  const hasTradingData =
+  (data?.universe?.stocksTraded ??
+    0) > 0;
+
+const interpretation =
+  getBreadthInterpretation(
+    hasTradingData
+      ? breadth?.advancePercentage
+      : undefined
+  );
 
   const advanceDeclineRatio =
     breadth &&
@@ -466,11 +463,15 @@ export default function MarketBreadthPanel() {
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 pt-5 text-xs text-slate-500">
             <span>
-              Session:{" "}
-              {data?.universe
-                ?.marketSessionDate ??
-                "Unavailable"}
-            </span>
+  {data?.marketDataStatus ===
+  "previous_session"
+    ? "Previous session"
+    : "Session"}
+  :{" "}
+  {data?.universe
+    ?.marketSessionDate ??
+    "Unavailable"}
+</span>
 
             <span>
               Source:{" "}

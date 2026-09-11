@@ -310,13 +310,17 @@ function calculateWeightedValue(
             method.method
           ];
 
-        const selectedValue =
-          isPositiveNumber(
-            overrideValue ??
-              null
-          )
-            ? overrideValue
-            : method.fairValue;
+        const normalizedOverrideValue:
+  NullableNumber =
+    overrideValue ?? null;
+
+const selectedValue:
+  NullableNumber =
+    isPositiveNumber(
+      normalizedOverrideValue
+    )
+      ? normalizedOverrideValue
+      : method.fairValue;
 
         if (
           !isPositiveNumber(

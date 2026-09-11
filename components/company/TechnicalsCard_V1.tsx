@@ -33,7 +33,7 @@ const summary = research?.investmentSummary;
       </p>
 
       <p className="mt-1 text-3xl font-bold text-emerald-400">
-  {summary?.trend ?? "Loading..."}
+  {summary?.pattern ?? "Loading..."}
 </p>
     </div>
 
