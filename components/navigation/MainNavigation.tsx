@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  SignOutButton,
+  useAuth,
+} from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -83,6 +87,11 @@ export default function MainNavigation() {
     setIsMobileMenuOpen,
   ] = useState(false);
 
+  const {
+    isLoaded,
+    isSignedIn,
+  } = useAuth();
+
   function closeMenu() {
     setOpenMenu(null);
     setIsMobileMenuOpen(false);
@@ -125,25 +134,25 @@ export default function MainNavigation() {
               <div
                 key={group.label}
                 className="relative"
-                onMouseEnter={() =>
+                onMouseEnter={() => {
                   setOpenMenu(
                     group.label
-                  )
-                }
-                onMouseLeave={() =>
-                  setOpenMenu(null)
-                }
+                  );
+                }}
+                onMouseLeave={() => {
+                  setOpenMenu(null);
+                }}
               >
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
                     setOpenMenu(
                       openMenu ===
                         group.label
                         ? null
                         : group.label
-                    )
-                  }
+                    );
+                  }}
                   className={`rounded-xl px-4 py-3 text-sm font-medium transition ${
                     openMenu ===
                     group.label
@@ -154,7 +163,7 @@ export default function MainNavigation() {
                   {group.label}
 
                   <span className="ml-2 text-xs">
-                    ▾
+                    ▼
                   </span>
                 </button>
 
@@ -205,13 +214,28 @@ export default function MainNavigation() {
             Learn
           </Link>
 
-          <Link
-            href="/login"
-            onClick={closeMenu}
-            className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-emerald-400"
-          >
-            Login
-          </Link>
+          {isLoaded &&
+            !isSignedIn && (
+              <Link
+                href="/login"
+                onClick={closeMenu}
+                className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+              >
+                Login
+              </Link>
+            )}
+
+          {isLoaded &&
+            isSignedIn && (
+              <SignOutButton>
+                <button
+                  type="button"
+                  className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+                >
+                  Logout
+                </button>
+              </SignOutButton>
+            )}
 
           <Link
             href="/premium-research"
@@ -224,12 +248,12 @@ export default function MainNavigation() {
 
         <button
           type="button"
-          onClick={() =>
+          onClick={() => {
             setIsMobileMenuOpen(
               (current) =>
                 !current
-            )
-          }
+            );
+          }}
           aria-expanded={
             isMobileMenuOpen
           }
@@ -237,7 +261,7 @@ export default function MainNavigation() {
           className="rounded-xl border border-slate-700 px-4 py-3 text-sm text-slate-300 transition hover:border-emerald-500 hover:text-emerald-400 lg:hidden"
         >
           {isMobileMenuOpen
-            ? "✕ Close"
+            ? "× Close"
             : "☰ Menu"}
         </button>
       </div>
@@ -303,13 +327,29 @@ export default function MainNavigation() {
               Learning Centre
             </Link>
 
-            <Link
-              href="/login"
-              onClick={closeMenu}
-              className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-emerald-400"
-            >
-              Login / Member Access
-            </Link>
+            {isLoaded &&
+              !isSignedIn && (
+                <Link
+                  href="/login"
+                  onClick={closeMenu}
+                  className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+                >
+                  Login / Member Access
+                </Link>
+              )}
+
+            {isLoaded &&
+              isSignedIn && (
+                <SignOutButton>
+                  <button
+                    type="button"
+                    onClick={closeMenu}
+                    className="rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+                  >
+                    Logout
+                  </button>
+                </SignOutButton>
+              )}
 
             <Link
               href="/premium-research"

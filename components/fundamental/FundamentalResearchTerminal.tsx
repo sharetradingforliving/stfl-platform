@@ -22,6 +22,58 @@ type SearchApiResponse = {
   error?: string;
 };
 
+type NullableNumber =
+  | number
+  | null;
+
+type ScreenerResult = {
+  symbol: string;
+  companyName: string;
+  exchange: string;
+
+  sector: string | null;
+  industry: string | null;
+
+  marketCapCr: NullableNumber;
+  marketCapCategory: string | null;
+
+  fundamentalScore: NullableNumber;
+  valuationScore: NullableNumber;
+  compositeScore: NullableNumber;
+  dataQualityScore: NullableNumber;
+
+  latestAnnualPeriod: string | null;
+
+  metrics: {
+    revenueCagrPercent: NullableNumber;
+    patCagrPercent: NullableNumber;
+    roePercent: NullableNumber;
+    rocePercent: NullableNumber;
+    debtToEquity: NullableNumber;
+    operatingCashFlowToPat: NullableNumber;
+    priceToEarnings: NullableNumber;
+    priceToBook: NullableNumber;
+  };
+
+  valuation: {
+    method: string;
+    currentPrice: NullableNumber;
+    fairValue: NullableNumber;
+    upsidePercent: NullableNumber;
+    classification: string | null;
+  } | null;
+
+  reasons: string[];
+  warnings: string[];
+};
+
+type ScreenerApiResponse = {
+  results?: ScreenerResult[];
+  total?: number;
+  generatedAt?: string;
+  error?: string;
+};
+
 type ValuationMethod =
   | "composite"
   | "dcf"
@@ -197,6 +249,31 @@ const [
     "composite"
   );
 
+  const [
+    screenerResults,
+    setScreenerResults,
+  ] = useState<ScreenerResult[]>([]);
+
+  const [
+    isScreening,
+    setIsScreening,
+  ] = useState(false);
+
+  const [
+    hasRunScreener,
+    setHasRunScreener,
+  ] = useState(false);
+
+  const [
+    screenerError,
+    setScreenerError,
+  ] = useState("");
+
+  const [
+    screenerGeneratedAt,
+    setScreenerGeneratedAt,
+  ] = useState<string | null>(null);
+
   const industries = useMemo(
     () =>
       sectorIndustries[selectedSector] ?? [
@@ -217,6 +294,19 @@ const [
       "All Industries"
     );
   }, [selectedSector]);
+
+  useEffect(() => {
+    setHasRunScreener(false);
+    setScreenerResults([]);
+    setScreenerError("");
+    setScreenerGeneratedAt(null);
+  }, [
+    selectedSector,
+    selectedIndustry,
+    selectedMarketCap,
+    selectedInvestmentStyle,
+    selectedValuationMethod,
+  ]);
 
   useEffect(() => {
     const query = searchQuery.trim();
@@ -385,6 +475,75 @@ function handleSearchKeyDown(
     event.preventDefault();
     setSearchResults([]);
     setHighlightedResultIndex(-1);
+  }
+}
+
+async function runScreener() {
+  if (isScreening) {
+    return;
+  }
+
+  try {
+    setIsScreening(true);
+    setHasRunScreener(true);
+    setScreenerError("");
+    setScreenerResults([]);
+    setScreenerGeneratedAt(null);
+
+    const query =
+      new URLSearchParams({
+        sector: selectedSector,
+        industry: selectedIndustry,
+        marketCap:
+          selectedMarketCap,
+        investmentStyle:
+          selectedInvestmentStyle,
+        valuationMethod:
+          selectedValuationMethod,
+        limit: "50",
+      });
+
+    const response = await fetch(
+      `/api/fundamental/screener?${query.toString()}`,
+      {
+        method: "GET",
+        cache: "no-store",
+      }
+    );
+
+    const data =
+      (await response.json()) as
+        ScreenerApiResponse;
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ??
+          "Unable to run the stock screener."
+      );
+    }
+
+    setScreenerResults(
+      Array.isArray(data.results)
+        ? data.results
+        : []
+    );
+
+    setScreenerGeneratedAt(
+      data.generatedAt ?? null
+    );
+  } catch (error) {
+    console.error(
+      "Fundamental screener error:",
+      error
+    );
+
+    setScreenerError(
+      error instanceof Error
+        ? error.message
+        : "The stock screener is temporarily unavailable."
+    );
+  } finally {
+    setIsScreening(false);
   }
 }
 
@@ -680,12 +839,54 @@ function handleSearchKeyDown(
 
               <button
                 type="button"
-                disabled
-                className="cursor-not-allowed rounded-xl bg-slate-800 px-6 py-3 text-sm font-semibold text-slate-500"
+                onClick={runScreener}
+                disabled={isScreening}
+                className="rounded-xl bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-wait disabled:bg-slate-800 disabled:text-slate-500"
               >
-                Screener integration next
+                {isScreening
+                  ? "Screening companies…"
+                  : "Run Stock Discovery"}
               </button>
             </div>
+
+            {screenerError && (
+              <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+                {screenerError}
+              </div>
+            )}
+
+            {hasRunScreener &&
+              !isScreening &&
+              !screenerError &&
+              screenerResults.length ===
+                0 && (
+                <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-6 text-center">
+                  <p className="font-semibold text-white">
+                    No companies matched
+                    the selected criteria.
+                  </p>
+
+                  <p className="mt-2 text-sm text-slate-500">
+                    Try a broader sector,
+                    market-cap category or
+                    investment style.
+                  </p>
+                </div>
+              )}
+
+            {screenerResults.length > 0 && (
+              <ScreenerResultsTable
+                results={
+                  screenerResults
+                }
+                valuationMethod={
+                  selectedValuationMethod
+                }
+                generatedAt={
+                  screenerGeneratedAt
+                }
+              />
+            )}
           </div>
 
           <div className="mt-8 border-y border-slate-800 py-8">
@@ -712,6 +913,264 @@ function handleSearchKeyDown(
         </div>
       </section>
     </main>
+  );
+}
+
+function ScreenerResultsTable({
+  results,
+  valuationMethod,
+  generatedAt,
+}: {
+  results: ScreenerResult[];
+  valuationMethod: ValuationMethod;
+  generatedAt: string | null;
+}) {
+  return (
+    <div className="mt-8 overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
+      <div className="flex flex-col justify-between gap-3 border-b border-slate-800 p-5 md:flex-row md:items-center">
+        <div>
+          <p className="font-semibold text-white">
+            Ranked discovery results
+          </p>
+
+          <p className="mt-1 text-sm text-slate-500">
+            {results.length} verified
+            {results.length === 1
+              ? " company"
+              : " companies"}
+            {generatedAt
+              ? ` · Updated ${formatDateTime(
+                  generatedAt
+                )}`
+              : ""}
+          </p>
+        </div>
+
+        <span className="w-fit rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-300">
+          {valuationMethod}
+        </span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-[1180px] w-full border-collapse text-sm">
+          <thead className="bg-slate-900 text-left text-xs uppercase tracking-wider text-slate-500">
+            <tr>
+              <th className="px-5 py-4">
+                Rank
+              </th>
+              <th className="px-5 py-4">
+                Company
+              </th>
+              <th className="px-5 py-4">
+                Market cap
+              </th>
+              <th className="px-5 py-4">
+                Fundamental
+              </th>
+              <th className="px-5 py-4">
+                Valuation
+              </th>
+              <th className="px-5 py-4">
+                Composite
+              </th>
+              <th className="px-5 py-4">
+                Data quality
+              </th>
+              <th className="px-5 py-4">
+                Valuation view
+              </th>
+              <th className="px-5 py-4">
+                Why selected
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {results.map(
+              (company, index) => (
+                <tr
+                  key={`${company.exchange}:${company.symbol}`}
+                  className="border-t border-slate-800 align-top"
+                >
+                  <td className="px-5 py-5 font-bold text-emerald-400">
+                    {index + 1}
+                  </td>
+
+                  <td className="px-5 py-5">
+                    <Link
+                      href={`/fundamental-research/${encodeURIComponent(
+                        company.symbol
+                      )}?exchange=${encodeURIComponent(
+                        company.exchange ||
+                          "NSE"
+                      )}&method=${valuationMethod}`}
+                      className="font-bold text-white transition hover:text-emerald-300"
+                    >
+                      {company.symbol}
+                    </Link>
+
+                    <p className="mt-1 max-w-56 text-xs leading-5 text-slate-500">
+                      {company.companyName}
+                    </p>
+
+                    <p className="mt-2 text-xs text-slate-600">
+                      {company.industry ??
+                        company.sector ??
+                        "Industry unavailable"}
+                    </p>
+                  </td>
+
+                  <td className="px-5 py-5 text-slate-300">
+                    {formatCrores(
+                      company.marketCapCr
+                    )}
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      {company.marketCapCategory ??
+                        "Unclassified"}
+                    </p>
+                  </td>
+
+                  <ScoreCell
+                    value={
+                      company.fundamentalScore
+                    }
+                  />
+
+                  <ScoreCell
+                    value={
+                      company.valuationScore
+                    }
+                  />
+
+                  <ScoreCell
+                    value={
+                      company.compositeScore
+                    }
+                    highlight
+                  />
+
+                  <ScoreCell
+                    value={
+                      company.dataQualityScore
+                    }
+                  />
+
+                  <td className="px-5 py-5">
+                    <p className="font-semibold text-white">
+                      {company.valuation
+                        ?.classification ??
+                        "Insufficient data"}
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      {formatPercent(
+                        company.valuation
+                          ?.upsidePercent ??
+                          null
+                      )} upside
+                    </p>
+                  </td>
+
+                  <td className="px-5 py-5">
+                    {company.reasons.length >
+                    0 ? (
+                      <ul className="max-w-72 space-y-1 text-xs leading-5 text-slate-400">
+                        {company.reasons
+                          .slice(0, 3)
+                          .map((reason) => (
+                            <li key={reason}>
+                              • {reason}
+                            </li>
+                          ))}
+                      </ul>
+                    ) : (
+                      <span className="text-xs text-slate-600">
+                        No explanation
+                        available
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function ScoreCell({
+  value,
+  highlight = false,
+}: {
+  value: NullableNumber;
+  highlight?: boolean;
+}) {
+  return (
+    <td className="px-5 py-5">
+      {value === null ? (
+        <span className="text-slate-600">
+          Not available
+        </span>
+      ) : (
+        <span
+          className={`font-bold ${
+            highlight
+              ? "text-emerald-300"
+              : "text-white"
+          }`}
+        >
+          {value.toFixed(1)}
+        </span>
+      )}
+    </td>
+  );
+}
+
+function formatCrores(
+  value: NullableNumber
+): string {
+  if (value === null) {
+    return "Not available";
+  }
+
+  return `₹${value.toLocaleString(
+    "en-IN",
+    {
+      maximumFractionDigits: 0,
+    }
+  )} Cr`;
+}
+
+function formatPercent(
+  value: NullableNumber
+): string {
+  if (value === null) {
+    return "Not available";
+  }
+
+  return `${
+    value >= 0 ? "+" : ""
+  }${value.toFixed(1)}%`;
+}
+
+function formatDateTime(
+  value: string
+): string {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleString(
+    "en-IN",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }
   );
 }
 

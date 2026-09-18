@@ -1,0 +1,274 @@
+app\api\fundamental\analytics\[symbol]\route.ts:236: equityRiskPremium:
+app\api\fundamental\analytics\[symbol]\route.ts:238: "equityRiskPremium"
+app\api\market\all-stocks\route.ts:58: marketSessionDate: string | null;
+app\api\market\all-stocks\route.ts:441: const marketSessionDate =
+app\api\market\all-stocks\route.ts:454: marketSessionDate &&
+app\api\market\all-stocks\route.ts:456: marketSessionDate
+app\api\market\all-stocks\route.ts:573: marketSessionDate,
+app\api\market\vix-sentiment\route.ts:302: sessions: horizon,
+app\api\market\vix-sentiment\route.ts:325: const vixFiveSessionsAgo = vixCandles.at(-6)?.close ?? latestVix;
+app\api\market\vix-sentiment\route.ts:327: const niftyTwentySessionsAgo = niftyCandles.at(-21)?.close ?? latestNifty;
+app\api\market\vix-sentiment\route.ts:330: vixFiveSessionsAgo > 0
+app\api\market\vix-sentiment\route.ts:331: ? ((latestVix - vixFiveSessionsAgo) / vixFiveSessionsAgo) * 100
+app\api\market\vix-sentiment\route.ts:335: niftyTwentySessionsAgo > 0
+app\api\market\vix-sentiment\route.ts:336: ? ((latestNifty - niftyTwentySessionsAgo) / niftyTwentySessionsAgo) * 100
+app\api\market\vix-sentiment\route.ts:364: vixFiveSessionChangePercent: round(vixTrendPercent),
+app\api\market\vix-sentiment\route.ts:365: niftyTwentySessionChangePercent: round(niftyTrendPercent),
+app\api\market\vix-sentiment\route.ts:407: | "previous_session"
+app\api\market\vix-sentiment\route.ts:448: : "previous_session";
+app\api\market\vix-sentiment\route.ts:492: sessionDate: vixCandles.at(-1)?.date ?? null,
+app\dashboard\page.tsx:46: title: "Premium Membership",
+app\dashboard\page.tsx:48: "View subscription status and access premium research, model portfolios and market ideas.",
+app\dashboard\page.tsx:49: href: "/premium-research",
+app\dashboard\page.tsx:85: and premium market insights.
+app\development-status\page.tsx:158: "Build IPO calendar, financial analysis, valuation, subscription and listing-performance modules.",
+app\development-status\page.tsx:188: module: "Premium Research",
+app\development-status\page.tsx:192: "Dedicated route and planned premium-research capabilities.",
+app\development-status\page.tsx:194: "Design subscription plans, research access, recommendations and transparent performance records.",
+app\development-status\page.tsx:203: "Connect registration, authentication, password recovery, sessions and user profiles.",
+app\ipo\[slug]\page.tsx:86: * FORMAT SUBSCRIPTION MULTIPLE
+app\ipo\[slug]\page.tsx:279: subscription trends, valuation inputs, GMP,
+app\ipo\[slug]\page.tsx:362: label="Total Subscription"
+app\ipo\[slug]\page.tsx:365: ipo.subscription?.total
+app\ipo\[slug]\page.tsx:502: {/* SUBSCRIPTION */}
+app\ipo\[slug]\page.tsx:509: title="Subscription Analysis"
+app\ipo\[slug]\page.tsx:515: <SubscriptionCard
+app\ipo\[slug]\page.tsx:518: ipo.subscription?.qib
+app\ipo\[slug]\page.tsx:523: <SubscriptionCard
+app\ipo\[slug]\page.tsx:526: ipo.subscription?.nii
+app\ipo\[slug]\page.tsx:531: <SubscriptionCard
+app\ipo\[slug]\page.tsx:534: ipo.subscription?.retail
+app\ipo\[slug]\page.tsx:539: <SubscriptionCard
+app\ipo\[slug]\page.tsx:542: ipo.subscription?.total
+app\ipo\[slug]\page.tsx:551: Subscription figures are sourced from NSE bid data
+app\ipo\[slug]\page.tsx:799: Grey Market Premium is unofficial market information
+app\ipo\[slug]\page.tsx:922: * SUBSCRIPTION CARD
+app\ipo\[slug]\page.tsx:926: function SubscriptionCard({
+app\ipo-research\page.tsx:30: dates, market status, pricing and subscription
+app\ipo-research\page.tsx:48: Grey Market Premium is unofficial market information
+app\login\page.tsx:24: saved research, premium reports and personalized market
+app\login\page.tsx:34: "View premium research and market ideas",
+app\premium-research\page.tsx:6: eyebrow="STFL PREMIUM"
+app\premium-research\page.tsx:7: title="Premium Research"
+app\premium-research\page.tsx:8: description="Access structured research ideas, model portfolios, transparent performance records and premium market intelligence."
+app\premium-research\page.tsx:9: features={["Long Term Ideas", "Stocks on the Move", "Trading Ideas", "Model Portfolios", "Research Reports", "Past Recommendations", "Performance Records", "Premium Alerts", "Subscription Plans"]}
+app\profile-settings\page.tsx:10: features={["Personal Profile", "Account Information", "Change Password", "Notification Settings", "Market Preferences", "Research Preferences", "Subscription Management", "Privacy Settings", "Account Security"]}
+app\page.tsx:725: {/* Premium Membership CTA */}
+app\page.tsx:727: id="premium"
+app\page.tsx:741: STFL Premium
+app\page.tsx:752: Unlock premium research, curated investment ideas, advanced
+app\page.tsx:761: Premium Access Includes
+app\page.tsx:782: <span>Premium research reports and market commentary</span>
+app\page.tsx:787: Explore Premium Membership ?
+components\fundamental\FundamentalCompanyResearch.tsx:423: equityRiskPremium: "6",
+components\fundamental\PeerValuationPanel.tsx:63: premiumDiscountToPeers:
+components\fundamental\PeerValuationPanel.tsx:245: function getPremiumDescription(
+components\fundamental\PeerValuationPanel.tsx:256: return "Premium to peer-implied value";
+components\fundamental\PeerValuationPanel.tsx:820: label="Premium / Discount"
+components\fundamental\PeerValuationPanel.tsx:823: .premiumDiscountToPeers
+components\fundamental\PeerValuationPanel.tsx:825: detail={getPremiumDescription(
+components\fundamental\PeerValuationPanel.tsx:827: .premiumDiscountToPeers
+components\home\PlatformModules.tsx:37: "Research upcoming IPOs using issue details, financial performance, valuation, subscription data and listing trends.",
+components\ipo\IPOHero.tsx:36: Track active and upcoming IPOs, subscription trends,
+components\ipo\IPOHero.tsx:37: issue pricing, Grey Market Premium and listing activity.
+components\ipo\IPOHero.tsx:72: Subscription
+components\ipo\IPOTable.tsx:632: {/* Subscription block */}
+components\ipo\IPOTable.tsx:636: ipo.subscription?.qib
+components\ipo\IPOTable.tsx:642: ipo.subscription?.nii
+components\ipo\IPOTable.tsx:648: ipo.subscription?.retail
+components\ipo\IPOTable.tsx:654: ipo.subscription?.total
+components\market\AllNseMarketStats.tsx:16: marketSessionDate: string | null;
+components\market\AllNseMarketStats.tsx:60: function formatSessionDate(
+components\market\AllNseMarketStats.tsx:229: market session.
+components\market\AllNseMarketStats.tsx:241: Session:{" "}
+components\market\AllNseMarketStats.tsx:242: {formatSessionDate(
+components\market\AllNseMarketStats.tsx:243: universe?.marketSessionDate
+components\market\LiveMarketOverview.tsx:631: Latest session:{" "}
+components\market-astrology\HistoricalMarketEventsPanel.tsx:17: "1_session"?: number | null;
+components\market-astrology\HistoricalMarketEventsPanel.tsx:18: "5_session"?: number | null;
+components\market-astrology\HistoricalMarketEventsPanel.tsx:19: "10_session"?: number | null;
+components\market-astrology\HistoricalMarketEventsPanel.tsx:20: "20_session"?: number | null;
+components\market-astrology\HistoricalMarketEventsPanel.tsx:21: "60_session"?: number | null;
+components\market-astrology\HistoricalMarketEventsPanel.tsx:42: peak_to_trough_sessions: number;
+components\market-astrology\HistoricalMarketEventsPanel.tsx:43: recovery_sessions: number | null;
+components\market-astrology\HistoricalMarketEventsPanel.tsx:44: total_event_sessions: number;
+components\market-astrology\HistoricalMarketEventsPanel.tsx:106: key: "1_session",
+components\market-astrology\HistoricalMarketEventsPanel.tsx:110: key: "5_session",
+components\market-astrology\HistoricalMarketEventsPanel.tsx:114: key: "10_session",
+components\market-astrology\HistoricalMarketEventsPanel.tsx:118: key: "20_session",
+components\market-astrology\HistoricalMarketEventsPanel.tsx:122: key: "60_session",
+components\market-astrology\HistoricalMarketEventsPanel.tsx:447: trading sessions analysed
+components\market-astrology\HistoricalMarketEventsPanel.tsx:720: value={`${event.peak_to_trough_sessions} sessions`}
+components\market-astrology\HistoricalMarketEventsPanel.tsx:726: event.recovery_sessions !==
+components\market-astrology\HistoricalMarketEventsPanel.tsx:728: ? `${event.recovery_sessions} sessions`
+components\market-astrology\HistoricalMarketEventsPanel.tsx:735: value={`${event.total_event_sessions} sessions`}
+components\market-intelligence\GlobalMarketCuesPanel.tsx:99: if (!value) return "Latest available session";
+components\market-intelligence\GlobalMarketCuesPanel.tsx:101: if (Number.isNaN(date.getTime())) return "Latest available session";
+components\market-intelligence\GlobalMarketCuesPanel.tsx:331: The current global cue score is <strong>{score.toFixed(0)} out of 100</strong>, indicating <strong>{data.sentiment.label.toLowerCase()}</strong> conditions. This is a contextual reading of the latest available global sessions; domestic breadth, India VIX and FII/DII activity should be used for confirmation.
+components\market-intelligence\GlobalMarketCuesPanel.tsx:341: <MarketGroup title="United States" description="Previous close or latest available US session." items={data.groups.us} />
+components\market-intelligence\IndiaVixSentimentPanel.tsx:26: sessions: number;
+components\market-intelligence\IndiaVixSentimentPanel.tsx:36: marketDataStatus: "live" | "previous_session" | "historical";
+components\market-intelligence\IndiaVixSentimentPanel.tsx:43: sessionDate: string | null;
+components\market-intelligence\IndiaVixSentimentPanel.tsx:69: vixFiveSessionChangePercent: number | null;
+components\market-intelligence\IndiaVixSentimentPanel.tsx:70: niftyTwentySessionChangePercent: number | null;
+components\market-intelligence\IndiaVixSentimentPanel.tsx:213: title: "VIX 20-session average",
+components\market-intelligence\IndiaVixSentimentPanel.tsx:320: const isPrevious = data?.marketDataStatus === "previous_session";
+components\market-intelligence\IndiaVixSentimentPanel.tsx:344: {isPrevious ? "PREVIOUS SESSION" : "LIVE · AUTO REFRESH"}
+components\market-intelligence\IndiaVixSentimentPanel.tsx:347: {formatDate(data?.current.sessionDate)}
+components\market-intelligence\IndiaVixSentimentPanel.tsx:376: description="Estimated one-session movement range, not direction."
+components\market-intelligence\IndiaVixSentimentPanel.tsx:422: <span className="text-cyan-300">? VIX 20-session average</span>
+components\market-intelligence\IndiaVixSentimentPanel.tsx:460: VIX 5-session trend
+components\market-intelligence\IndiaVixSentimentPanel.tsx:462: {formatPercent(data.direction.vixFiveSessionChangePercent, true)}
+components\market-intelligence\IndiaVixSentimentPanel.tsx:466: Nifty 20-session trend
+components\market-intelligence\IndiaVixSentimentPanel.tsx:468: {formatPercent(data.direction.niftyTwentySessionChangePercent, true)}
+components\market-intelligence\IndiaVixSentimentPanel.tsx:504: <tr key={result.sessions}>
+components\market-intelligence\IndiaVixSentimentPanel.tsx:505: <td className="px-5 py-4 font-semibold text-white">{result.sessions} session{result.sessions > 1 ? "s" : ""}</td>
+components\market-intelligence\InstitutionalFlowChart.tsx:351: ? "The latest five reporting sessions show net institutional buying."
+components\market-intelligence\InstitutionalFlowChart.tsx:353: ? "The latest five reporting sessions show net institutional selling."
+components\market-intelligence\MarketBreadthPanel.tsx:15: | "previous_session"
+components\market-intelligence\MarketBreadthPanel.tsx:22: marketSessionDate: string | null;
+components\market-intelligence\MarketBreadthPanel.tsx:467: "previous_session"
+components\market-intelligence\MarketBreadthPanel.tsx:468: ? "Previous session"
+components\market-intelligence\MarketBreadthPanel.tsx:469: : "Session"}
+components\market-intelligence\MarketBreadthPanel.tsx:472: ?.marketSessionDate ??
+components\market-intelligence\StocksOnTheMovePanel.tsx:34: | "previous_session"
+components\market-intelligence\StocksOnTheMovePanel.tsx:41: marketSessionDate: string | null;
+components\market-intelligence\StocksOnTheMovePanel.tsx:173: function formatSessionDate(
+components\market-intelligence\StocksOnTheMovePanel.tsx:177: return "Latest market session";
+components\market-intelligence\StocksOnTheMovePanel.tsx:400: const isPreviousSession =
+components\market-intelligence\StocksOnTheMovePanel.tsx:402: "previous_session";
+components\market-intelligence\StocksOnTheMovePanel.tsx:420: latest market session.
+components\market-intelligence\StocksOnTheMovePanel.tsx:427: isPreviousSession
+components\market-intelligence\StocksOnTheMovePanel.tsx:432: {isPreviousSession
+components\market-intelligence\StocksOnTheMovePanel.tsx:433: ? "PREVIOUS SESSION"
+components\market-intelligence\StocksOnTheMovePanel.tsx:438: {formatSessionDate(
+components\market-intelligence\StocksOnTheMovePanel.tsx:440: ?.marketSessionDate
+components\market-intelligence\StocksOnTheMovePanel.tsx:462: {isPreviousSession
+components\navigation\MainNavigation.tsx:217: href="/premium-research"
+components\navigation\MainNavigation.tsx:221: Premium
+components\navigation\MainNavigation.tsx:315: href="/premium-research"
+components\navigation\MainNavigation.tsx:319: Premium Research
+lib\fundamental\providers\nseCorporateActions.ts:581: async function createNseSession(): Promise<
+lib\fundamental\providers\nseCorporateActions.ts:602: `NSE session: ${response.status}`
+lib\fundamental\providers\nseCorporateActions.ts:868: await createNseSession();
+lib\fundamental\providers\nseCorporateActions.ts:1134: await createNseSession();
+lib\fundamental\providers\nseFinancialResults.ts:273: async function createNseSession(): Promise<
+lib\fundamental\providers\nseFinancialResults.ts:288: `NSE session: ${response.status}`
+lib\fundamental\providers\nseFinancialResults.ts:594: await createNseSession();
+lib\fundamental\providers\nseIntegratedFinancialResults.ts:256: async function createNseSession(): Promise<
+lib\fundamental\providers\nseIntegratedFinancialResults.ts:271: `NSE session: ${response.status}`
+lib\fundamental\providers\nseIntegratedFinancialResults.ts:698: await createNseSession();
+lib\fundamental\services\companyWacc.ts:26: equityRiskPremium:
+lib\fundamental\services\companyWacc.ts:154: equityRiskPremium:
+lib\fundamental\services\companyWacc.ts:157: .equityRiskPremium,
+lib\fundamental\services\companyWacc.ts:159: "Equity-risk premium supplied by the user or valuation API."
+lib\fundamental\services\compositeValuationCalculator.ts:527: * percentage haircut or premium is
+lib\fundamental\services\fundamentalAnalytics.ts:669: equityRiskPremium: null,
+lib\fundamental\services\peerValuationCalculator.ts:444: function calculatePremiumDiscount(
+lib\fundamental\services\peerValuationCalculator.ts:480: premiumDiscount:
+lib\fundamental\services\peerValuationCalculator.ts:485: premiumDiscount
+lib\fundamental\services\peerValuationCalculator.ts:492: premiumDiscount >= 25
+lib\fundamental\services\peerValuationCalculator.ts:500: premiumDiscount >= 10
+lib\fundamental\services\peerValuationCalculator.ts:506: premiumDiscount > -10
+lib\fundamental\services\peerValuationCalculator.ts:512: premiumDiscount > -25
+lib\fundamental\services\peerValuationCalculator.ts:595: function describePremiumDiscount(
+lib\fundamental\services\peerValuationCalculator.ts:596: premiumDiscount:
+lib\fundamental\services\peerValuationCalculator.ts:601: premiumDiscount
+lib\fundamental\services\peerValuationCalculator.ts:605: "The premium or discount could not be calculated because a valid current market price was unavailable."
+lib\fundamental\services\peerValuationCalculator.ts:611: premiumDiscount
+lib\fundamental\services\peerValuationCalculator.ts:615: premiumDiscount > 0
+lib\fundamental\services\peerValuationCalculator.ts:623: premiumDiscount < 0
+lib\fundamental\services\peerValuationCalculator.ts:681: premiumDiscountToPeers:
+lib\fundamental\services\peerValuationCalculator.ts:945: const premiumDiscountToPeers =
+lib\fundamental\services\peerValuationCalculator.ts:946: calculatePremiumDiscount(
+lib\fundamental\services\peerValuationCalculator.ts:975: premiumDiscountToPeers
+lib\fundamental\services\peerValuationCalculator.ts:997: describePremiumDiscount(
+lib\fundamental\services\peerValuationCalculator.ts:998: premiumDiscountToPeers
+lib\fundamental\services\peerValuationCalculator.ts:1005: describePremiumDiscount(
+lib\fundamental\services\peerValuationCalculator.ts:1006: premiumDiscountToPeers
+lib\fundamental\services\peerValuationCalculator.ts:1033: premiumDiscountToPeers,
+lib\fundamental\services\waccCalculator.ts:24: equityRiskPremium: WaccInput;
+lib\fundamental\services\waccCalculator.ts:159: const equityRiskPremium =
+lib\fundamental\services\waccCalculator.ts:160: inputs.equityRiskPremium.value;
+lib\fundamental\services\waccCalculator.ts:183: equityRiskPremium
+lib\fundamental\services\waccCalculator.ts:187: equityRiskPremium
+lib\fundamental\services\waccCalculator.ts:325: equityRiskPremium
+lib\fundamental\services\waccCalculator.ts:329: "Equity risk premium is unavailable."
+lib\fundamental\types.ts:486: premiumDiscountToPeers:
+lib\ipo\providers\gmp.ts:7: * Fetch Grey Market Premium data from IPO Guru.
+lib\ipo\providers\ipoOfferDetails.ts:42: subscription?:
+lib\ipo\providers\ipoOfferDetails.ts:43: IPORecord["subscription"];
+lib\ipo\providers\ipoOfferDetails.ts:517: function parseSubscription(
+lib\ipo\providers\ipoOfferDetails.ts:519: ): IPORecord["subscription"] {
+lib\ipo\providers\ipoOfferDetails.ts:554: "(?:total\\s+subscription|total)"
+lib\ipo\providers\ipoOfferDetails.ts:627: const subscription =
+lib\ipo\providers\ipoOfferDetails.ts:628: parseSubscription(text);
+lib\ipo\providers\ipoOfferDetails.ts:635: subscription === undefined
+lib\ipo\providers\ipoOfferDetails.ts:654: subscription,
+lib\ipo\providers\ipoOfferDetails.ts:800: subscription:
+lib\ipo\providers\ipoOfferDetails.ts:801: details.subscription
+lib\ipo\providers\ipoOfferDetails.ts:804: ipo.subscription?.qib ??
+lib\ipo\providers\ipoOfferDetails.ts:805: details.subscription.qib,
+lib\ipo\providers\ipoOfferDetails.ts:808: ipo.subscription?.nii ??
+lib\ipo\providers\ipoOfferDetails.ts:809: details.subscription.nii,
+lib\ipo\providers\ipoOfferDetails.ts:812: ipo.subscription?.retail ??
+lib\ipo\providers\ipoOfferDetails.ts:813: details.subscription
+lib\ipo\providers\ipoOfferDetails.ts:817: ipo.subscription?.total ??
+lib\ipo\providers\ipoOfferDetails.ts:818: details.subscription.total,
+lib\ipo\providers\ipoOfferDetails.ts:820: : ipo.subscription,
+lib\ipo\providers\nse.ts:9: * - Category-wise subscription
+lib\ipo\providers\nse.ts:23: * SUBSCRIPTION TYPE
+lib\ipo\providers\nse.ts:27: export interface NSEIPOSubscription {
+lib\ipo\providers\nse.ts:80: subscription?: NSEIPOSubscription;
+lib\ipo\providers\nse.ts:232: * CALCULATE SUBSCRIPTION MULTIPLE
+lib\ipo\providers\nse.ts:234: * Subscription = Shares Bid / Shares Offered
+lib\ipo\providers\nse.ts:238: function calculateSubscription(
+lib\ipo\providers\nse.ts:469: * ACTIVE IPO SUBSCRIPTION
+lib\ipo\providers\nse.ts:473: export async function fetchNSEIPOSubscription(
+lib\ipo\providers\nse.ts:476: NSEIPOSubscription | undefined
+lib\ipo\providers\nse.ts:585: calculateSubscription(
+lib\ipo\providers\nse.ts:591: calculateSubscription(
+lib\ipo\providers\nse.ts:597: calculateSubscription(
+lib\ipo\providers\nse.ts:603: calculateSubscription(
+lib\ipo\providers\nse.ts:612: `Unable to fetch NSE IPO subscription for ${symbol}:`,
+lib\ipo\providers\nse.ts:821: subscriptionResult,
+lib\ipo\providers\nse.ts:827: ? fetchNSEIPOSubscription(
+lib\ipo\providers\nse.ts:842: const categorySubscription =
+lib\ipo\providers\nse.ts:843: subscriptionResult.status ===
+lib\ipo\providers\nse.ts:845: ? subscriptionResult.value
+lib\ipo\providers\nse.ts:862: const subscription =
+lib\ipo\providers\nse.ts:867: categorySubscription
+lib\ipo\providers\nse.ts:871: categorySubscription
+lib\ipo\providers\nse.ts:875: categorySubscription
+lib\ipo\providers\nse.ts:879: categorySubscription
+lib\ipo\providers\nse.ts:894: subscription:
+lib\ipo\providers\nse.ts:895: subscription ??
+lib\ipo\providers\nse.ts:896: ipo.subscription,
+lib\ipo\providers\nse.ts:933: * subscription and lot information.
+lib\ipo\providers\nse.ts:1110: subscription:
+lib\ipo\providers\nse.ts:1112: .subscription ??
+lib\ipo\providers\nse.ts:1114: .subscription,
+lib\ipo\providers\nse.ts:1148: "Subscription enriched:",
+lib\ipo\providers\nse.ts:1151: ipo.subscription !==
+lib\ipo\providers\sebiFinancials.ts:2762: * development server session.
+lib\ipo\ipoNormalizer.ts:8: * Preserves enriched subscription data from the NSE provider.
+lib\ipo\ipoNormalizer.ts:351: * Normalize subscription
+lib\ipo\ipoNormalizer.ts:358: function normalizeSubscription(
+lib\ipo\ipoNormalizer.ts:360: ): IPORecord["subscription"] {
+lib\ipo\ipoNormalizer.ts:363: record.subscription?.qib;
+lib\ipo\ipoNormalizer.ts:366: record.subscription?.nii;
+lib\ipo\ipoNormalizer.ts:369: record.subscription?.retail;
+lib\ipo\ipoNormalizer.ts:372: record.subscription?.total;
+lib\ipo\ipoNormalizer.ts:505: subscription:
+lib\ipo\ipoNormalizer.ts:506: normalizeSubscription(
+lib\ipo\types.ts:25: export interface IPOSubscriptionData {
+lib\ipo\types.ts:106: * Subscription
+lib\ipo\types.ts:108: subscription?: IPOSubscriptionData;
+lib\market\marketSnapshotCache.ts:8: marketSessionDate?: string | null;
+lib\market\marketSnapshotCache.ts:53: snapshot.universe.marketSessionDate
+lib\market\marketSnapshotCache.ts:131: "previous_session",
+lib\market\marketSnapshotCache.ts:135: "The market is closed or current-session trading data is unavailable. Showing the latest saved trading session.",
+lib\market\marketSnapshotCache.ts:156: "previous_session",
+lib\market\marketSnapshotCache.ts:160: "The latest refresh failed. Showing the latest saved trading session.",
+lib\news\investorIntelligence.ts:350: "session lows",
+lib\news\investorIntelligence.ts:468: "session lows": 2,

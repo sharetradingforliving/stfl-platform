@@ -1,0 +1,470 @@
+   1: import type { Metadata } from "next";
+   2: import PlanetaryPositionsPanel from "@/components/market-astrology/PlanetaryPositionsPanel";
+   3: import AstrologyPrimer from "@/components/market-astrology/AstrologyPrimer";
+   4: import HistoricalMarketEventsPanel from "@/components/market-astrology/HistoricalMarketEventsPanel";
+   5: 
+   6: export const metadata: Metadata = {
+   7:   title: "Market Astrology Research | STFL",
+   8:   description:
+   9:     "Experimental research exploring planetary events, historical market behaviour, sector rotation and technical confirmation.",
+  10: };
+  11: 
+  12: const planetaryFramework = [
+  13:   {
+  14:     body: "Jupiter",
+  15:     hypothesis:
+  16:       "Expansion, liquidity, optimism and broad risk appetite",
+  17:     markets:
+  18:       "Financials, consumption, metals and broad-market participation",
+  19:   },
+  20:   {
+  21:     body: "Saturn",
+  22:     hypothesis:
+  23:       "Restriction, discipline, consolidation and structural pressure",
+  24:     markets:
+  25:       "Infrastructure, commodities, capital expenditure and defensive rotation",
+  26:   },
+  27:   {
+  28:     body: "Mars",
+  29:     hypothesis:
+  30:       "Momentum, aggression, volatility and rapid price movement",
+  31:     markets:
+  32:       "Energy, defence, metals and high-beta segments",
+  33:   },
+  34:   {
+  35:     body: "Mercury",
+  36:     hypothesis:
+  37:       "Communication, trading activity, information flow and reversals",
+  38:     markets:
+  39:       "Technology, media, exchanges and short-term market sentiment",
+  40:   },
+  41:   {
+  42:     body: "Rahu / Ketu",
+  43:     hypothesis:
+  44:       "Speculation, disruption, detachment and unusual market behaviour",
+  45:     markets:
+  46:       "Emerging themes, technology and speculative market segments",
+  47:   },
+  48: ];
+  49: 
+  50: const researchModules = [
+  51:   {
+  52:     title: "Planetary Event Calendar",
+  53:     description:
+  54:       "Chronological view of conjunctions, oppositions, ingress, stations, eclipses and other selected astronomical events.",
+  55:     status: "Foundation ready",
+  56:   },
+  57:   {
+  58:     title: "Historical Analogues",
+  59:     description:
+  60:       "Compare current configurations with prior occurrences and measure subsequent index and sector performance.",
+  61:     status: "Data integration pending",
+  62:   },
+  63:   {
+  64:     title: "Sector Support Matrix",
+  65:     description:
+  66:       "Combine planetary hypotheses with price trend, breadth, momentum, India VIX and institutional-flow confirmation.",
+  67:     status: "Model pending",
+  68:   },
+  69:   {
+  70:     title: "Statistical Backtesting",
+  71:     description:
+  72:       "Measure 1, 5, 10, 20 and 60-session returns, drawdowns, volatility, hit rates and sample sizes.",
+  73:     status: "Engine pending",
+  74:   },
+  75:   {
+  76:     title: "Index Research",
+  77:     description:
+  78:       "Research Nifty 50, Bank Nifty, broad-market indices and sector indices around documented events.",
+  79:     status: "Market data available",
+  80:   },
+  81:   {
+  82:     title: "AI Research Agent",
+  83:     description:
+  84:       "Explain planetary events, retrieve historical comparisons and present evidence with limitations.",
+  85:     status: "Planned",
+  86:   },
+  87: ];
+  88: 
+  89: const evidenceLevels = [
+  90:   {
+  91:     level: "Insufficient",
+  92:     meaning:
+  93:       "Too few historical observations to form a responsible interpretation.",
+  94:     colour:
+  95:       "border-slate-700 bg-slate-800/50 text-slate-300",
+  96:   },
+  97:   {
+  98:     level: "Weak",
+  99:     meaning:
+ 100:       "Limited or inconsistent historical relationship.",
+ 101:     colour:
+ 102:       "border-rose-500/30 bg-rose-500/10 text-rose-300",
+ 103:   },
+ 104:   {
+ 105:     level: "Moderate",
+ 106:     meaning:
+ 107:       "Recurring observation requiring technical confirmation.",
+ 108:     colour:
+ 109:       "border-amber-500/30 bg-amber-500/10 text-amber-300",
+ 110:   },
+ 111:   {
+ 112:     level: "Strong",
+ 113:     meaning:
+ 114:       "Repeated historical observation with an adequate sample size.",
+ 115:     colour:
+ 116:       "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+ 117:   },
+ 118:   {
+ 119:     level: "Conflicting",
+ 120:     meaning:
+ 121:       "Planetary, technical or market evidence points in different directions.",
+ 122:     colour:
+ 123:       "border-violet-500/30 bg-violet-500/10 text-violet-300",
+ 124:   },
+ 125: ];
+ 126: 
+ 127: export default function MarketAstrologyPage() {
+ 128:   return (
+ 129:     <main className="min-h-screen bg-[#020817] text-slate-100">
+ 130:       <section className="border-b border-slate-800 bg-gradient-to-b from-indigo-950/30 to-[#020817]">
+ 131:         <div className="mx-auto max-w-7xl px-6 py-14">
+ 132:           <div className="max-w-4xl">
+ 133:             <div className="mb-5 flex flex-wrap items-center gap-3">
+ 134:               <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">
+ 135:                 Experimental Research
+ 136:               </span>
+ 137: 
+ 138:               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300">
+ 139:                 No active signal published
+ 140:               </span>
+ 141:             </div>
+ 142: 
+ 143:             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+ 144:               STFL Planetary Market Research Terminal
+ 145:             </p>
+ 146: 
+ 147:             <h1 className="mt-4 text-4xl font-bold tracking-tight text-white md:text-6xl">
+ 148:               Market Astrology Research
+ 149:             </h1>
+ 150: 
+ 151:             <p className="mt-6 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
+ 152:               Explore astronomical events alongside historical
+ 153:               market behaviour, volatility, sector rotation,
+ 154:               institutional activity and technical confirmation.
+ 155:               Every future observation will be separated from
+ 156:               verified market data and supported by transparent
+ 157:               evidence.
+ 158:             </p>
+ 159:           </div>
+ 160:         </div>
+ 161:       </section>
+ 162: 
+ 163:       <div className="mx-auto max-w-7xl space-y-8 px-6 py-10">
+ 164:         <section>
+ 165:           <div className="mb-5">
+ 166:             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-400">
+ 167:               Current research state
+ 168:             </p>
+ 169: 
+ 170:             <h2 className="mt-2 text-2xl font-bold text-white">
+ 171:               Planetary Market Climate
+ 172:             </h2>
+ 173:           </div>
+ 174: 
+ 175:           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+ 176:             <ResearchStateCard
+ 177:               label="Market bias"
+ 178:               value="Not calculated"
+ 179:               note="Requires planetary and technical model"
+ 180:             />
+ 181: 
+ 182:             <ResearchStateCard
+ 183:               label="Volatility risk"
+ 184:               value="Not calculated"
+ 185:               note="India VIX confirmation required"
+ 186:             />
+ 187: 
+ 188:             <ResearchStateCard
+ 189:   label="Reversal window"
+ 190:   value="Not calculated"
+ 191:   note="Planetary event engine pending"
+ 192: />
+ 193: 
+ 194:             <ResearchStateCard
+ 195:               label="Evidence quality"
+ 196:               value="Insufficient"
+ 197:               note="Backtesting must be completed"
+ 198:             />
+ 199:           </div>
+ 200: 
+ 201:           <div className="mt-4 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+ 202:             <p className="text-sm leading-7 text-cyan-100">
+ 203:               STFL will publish a market-climate interpretation
+ 204:               only after astronomical calculations, historical
+ 205:               testing and current technical indicators are
+ 206:               available. Artificial intelligence will explain
+ 207:               evidence; it will not create unsupported signals.
+ 208:             </p>
+ 209:           </div>
+ 210:         </section>
+ 211: <PlanetaryPositionsPanel />
+ 212: <AstrologyPrimer />
+ 213: <HistoricalMarketEventsPanel />
+ 214:         <section className="rounded-3xl border border-slate-800 bg-slate-950/60">
+ 215:           <div className="border-b border-slate-800 px-6 py-6">
+ 216:             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-400">
+ 217:               Research framework
+ 218:             </p>
+ 219: 
+ 220:             <h2 className="mt-2 text-2xl font-bold text-white">
+ 221:               Planetary Alignment Framework
+ 222:             </h2>
+ 223: 
+ 224:             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+ 225:               These are research hypotheses, not conclusions.
+ 226:               Each hypothesis must be tested against historical
+ 227:               market data before receiving an evidence rating.
+ 228:             </p>
+ 229:           </div>
+ 230: 
+ 231:           <div className="overflow-x-auto">
+ 232:             <table className="w-full min-w-[820px] text-left">
+ 233:               <thead className="border-b border-slate-800 bg-slate-900/40">
+ 234:                 <tr className="text-xs uppercase tracking-wider text-slate-500">
+ 235:                   <th className="px-6 py-4">Planetary body</th>
+ 236:                   <th className="px-6 py-4">
+ 237:                     Research hypothesis
+ 238:                   </th>
+ 239:                   <th className="px-6 py-4">
+ 240:                     Market areas to examine
+ 241:                   </th>
+ 242:                   <th className="w-36 px-6 py-4">
+ 243:   Evidence
+ 244: </th>
+ 245:                 </tr>
+ 246:               </thead>
+ 247: 
+ 248:               <tbody className="divide-y divide-slate-800">
+ 249:                 {planetaryFramework.map((item) => (
+ 250:                   <tr
+ 251:                     key={item.body}
+ 252:                     className="transition hover:bg-slate-900/50"
+ 253:                   >
+ 254:                     <td className="px-6 py-5 font-semibold text-white">
+ 255:                       {item.body}
+ 256:                     </td>
+ 257: 
+ 258:                     <td className="px-6 py-5 text-sm leading-6 text-slate-300">
+ 259:                       {item.hypothesis}
+ 260:                     </td>
+ 261: 
+ 262:                     <td className="px-6 py-5 text-sm leading-6 text-slate-400">
+ 263:                       {item.markets}
+ 264:                     </td>
+ 265: 
+ 266:                     <td className="w-36 px-6 py-5">
+ 267:   <span className="inline-flex whitespace-nowrap rounded-full border border-slate-700 bg-slate-800/60 px-3 py-1 text-xs text-slate-300">
+ 268:     Not tested
+ 269:   </span>
+ 270: </td>
+ 271:                   </tr>
+ 272:                 ))}
+ 273:               </tbody>
+ 274:             </table>
+ 275:           </div>
+ 276:         </section>
+ 277: 
+ 278:         <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+ 279:           <div className="rounded-3xl border border-slate-800 bg-slate-950/60 p-6">
+ 280:             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-400">
+ 281:               Upcoming research
+ 282:             </p>
+ 283: 
+ 284:             <h2 className="mt-2 text-2xl font-bold text-white">
+ 285:               Planetary Event Calendar
+ 286:             </h2>
+ 287: 
+ 288:             <div className="mt-6 rounded-2xl border border-dashed border-slate-700 bg-slate-900/30 px-6 py-10 text-center">
+ 289:               <p className="font-semibold text-slate-200">
+ 290:                 Ephemeris integration pending
+ 291:               </p>
+ 292: 
+ 293:               <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-400">
+ 294:                 Verified event dates will appear here after the
+ 295:                 astronomical data source is connected. Dates,
+ 296:                 positions and event times will be normalized to
+ 297:                 Indian Standard Time while retaining their
+ 298:                 original timestamps.
+ 299:               </p>
+ 300:             </div>
+ 301:           </div>
+ 302: 
+ 303:           <div className="rounded-3xl border border-slate-800 bg-slate-950/60 p-6">
+ 304:             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-400">
+ 305:   Market validation
+ 306: </p>
+ 307: 
+ 308: <h2 className="mt-2 text-2xl font-bold text-white">
+ 309:   Confirmation Before Interpretation
+ 310: </h2>
+ 311: 
+ 312: <p className="mt-3 text-sm leading-6 text-slate-400">
+ 313:   Planetary observations must be supported by current
+ 314:   market evidence before STFL publishes a research view.
+ 315: </p>
+ 316: 
+ 317:             <div className="mt-6 space-y-3">
+ 318:               {[
+ 319:                 "Price trend and market structure",
+ 320:                 "Momentum and volume confirmation",
+ 321:                 "Market breadth and sector participation",
+ 322:                 "India VIX and volatility regime",
+ 323:                 "FII and DII institutional activity",
+ 324:                 "Historical sample size and drawdown",
+ 325:               ].map((item) => (
+ 326:                 <div
+ 327:                   key={item}
+ 328:                   className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-3"
+ 329:                 >
+ 330:                   <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
+ 331:                   <span className="text-sm text-slate-300">
+ 332:                     {item}
+ 333:                   </span>
+ 334:                 </div>
+ 335:               ))}
+ 336:             </div>
+ 337:           </div>
+ 338:         </section>
+ 339: 
+ 340:         <section>
+ 341:           <div className="mb-5">
+ 342:             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-400">
+ 343:               Terminal roadmap
+ 344:             </p>
+ 345: 
+ 346:             <h2 className="mt-2 text-2xl font-bold text-white">
+ 347:               Research Modules
+ 348:             </h2>
+ 349:           </div>
+ 350: 
+ 351:           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+ 352:             {researchModules.map((module) => (
+ 353:               <article
+ 354:                 key={module.title}
+ 355:                 className="rounded-2xl border border-slate-800 bg-slate-950/60 p-6 transition hover:border-slate-700"
+ 356:               >
+ 357:                 <div className="flex items-start justify-between gap-4">
+ 358:                   <h3 className="text-lg font-semibold text-white">
+ 359:                     {module.title}
+ 360:                   </h3>
+ 361: 
+ 362:                   <span className="shrink-0 rounded-full border border-slate-700 bg-slate-800/60 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-slate-400">
+ 363:                     Research
+ 364:                   </span>
+ 365:                 </div>
+ 366: 
+ 367:                 <p className="mt-4 text-sm leading-6 text-slate-400">
+ 368:                   {module.description}
+ 369:                 </p>
+ 370: 
+ 371:                 <p className="mt-5 text-xs font-semibold text-amber-300">
+ 372:                   {module.status}
+ 373:                 </p>
+ 374:               </article>
+ 375:             ))}
+ 376:           </div>
+ 377:         </section>
+ 378: 
+ 379:                 <section className="grid gap-6 lg:grid-cols-2">
+ 380:           <div className="rounded-3xl border border-slate-800 bg-slate-950/60 p-6">
+ 381:             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-400">
+ 382:               Historical analogues
+ 383:             </p>
+ 384: 
+ 385:             <h2 className="mt-2 text-2xl font-bold text-white">
+ 386:               Evidence Before Interpretation
+ 387:             </h2>
+ 388: 
+ 389:             <p className="mt-4 text-sm leading-7 text-slate-400">
+ 390:               Historical comparisons will include successful,
+ 391:               neutral and failed cases. Each event study will
+ 392:               disclose its sample size, test period, forward
+ 393:               returns, maximum drawdown, volatility and method
+ 394:               version.
+ 395:             </p>
+ 396: 
+ 397:             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
+ 398:               {["1 Day", "5 Days", "10 Days", "20 Days", "60 Days"].map(
+ 399:                 (period) => (
+ 400:                   <div
+ 401:                     key={period}
+ 402:                     className="rounded-xl border border-slate-800 bg-slate-900/40 px-3 py-4 text-center"
+ 403:                   >
+ 404:                     <p className="text-sm font-semibold text-slate-200">
+ 405:                       {period}
+ 406:                     </p>
+ 407:                     <p className="mt-1 text-xs text-slate-500">
+ 408:                       Return
+ 409:                     </p>
+ 410:                   </div>
+ 411:                 )
+ 412:               )}
+ 413:             </div>
+ 414:           </div>
+ 415: 
+ 416:           <div className="rounded-3xl border border-violet-500/20 bg-violet-500/5 p-6">
+ 417:             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+ 418:               Explainable intelligence
+ 419:             </p>
+ 420: 
+ 421:             <h2 className="mt-2 text-2xl font-bold text-white">
+ 422:               AI Astrology Research Agent
+ 423:             </h2>
+ 424: 
+ 425:             <p className="mt-4 text-sm leading-7 text-slate-300">
+ 426:               The future research agent will answer questions
+ 427:               using documented planetary events, historical
+ 428:               outcomes and current market evidence. Its answers
+ 429:               will cite the underlying observation and disclose
+ 430:               uncertainty.
+ 431:             </p>
+ 432: 
+ 433:             <div className="mt-5 rounded-2xl border border-violet-500/20 bg-[#020817]/60 p-4">
+ 434:               <p className="text-sm text-slate-400">
+ 435:                 Example research question
+ 436:               </p>
+ 437: 
+ 438:               <p className="mt-2 font-medium text-violet-200">
+ 439:                 How did Bank Nifty behave during previous
+ 440:                 occurrences of this alignment, and does the
+ 441:                 current technical structure confirm the pattern?
+ 442:               </p>
+ 443:             </div>
+ 444: 
+ 445:             <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-amber-300">
+ 446:               In development
+ 447:             </p>
+ 448:           </div>
+ 449:         </section>
+ 450: 
+ 451:         <section className="rounded-3xl border border-amber-500/20 bg-amber-500/5 p-6">
+ 452:           <h2 className="text-lg font-semibold text-amber-200">
+ 453:             Research Disclaimer
+ 454:           </h2>
+ 455: 
+ 456:           <p className="mt-3 text-sm leading-7 text-slate-300">
+ 457:             Market Astrology is an experimental research area.
+ 458:             Planetary observations do not establish causation and
+ 459:             must not be treated as guaranteed predictions or
+ 460:             standalone trading signals. Information presented by
+ 461:             STFL is for education and research only. Always
+ 462:             evaluate market risk, conduct independent research
+ 463:             and consult a qualified financial adviser where
+ 464:             appropriate.
+ 465:           </p>
+ 466:         </section>
+ 467:       </div>
+ 468:     </main>
+ 469:   );
+ 470: }

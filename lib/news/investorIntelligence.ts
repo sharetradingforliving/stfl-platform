@@ -1316,7 +1316,8 @@ function whyItMatters(
 
     "Index Rebalance":
       "The index change may create passive buying and selling around the effective date, affecting short-term volumes and prices.",
-      Regulatory:
+      
+    Regulatory:
       "Regulatory action can affect operations, reputation, compliance costs and valuation.",
 
     Litigation:

@@ -39,12 +39,18 @@ type FinancialPeriod = {
   periodType: string;
   endDate: string | null;
   revenue: number | null;
+  operatingIncome: number | null;
   ebitda: number | null;
   netProfit: number | null;
   epsDiluted: number | null;
   totalAssets: number | null;
   totalEquity: number | null;
   totalDebt: number | null;
+  deposits?: number | null;
+  advances?: number | null;
+  grossNpaPercent?: number | null;
+  netNpaPercent?: number | null;
+  returnOnAssetsPercent?: number | null;
   operatingCashFlow: number | null;
   freeCashFlow: number | null;
 };
@@ -514,6 +520,12 @@ export default function FundamentalCompanyResearch({
     [analytics]
   );
 
+  const isBankingCompany =
+    Boolean(
+      analytics?.metrics
+        ?.industrySpecific?.bank
+    );
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-slate-950 px-6 py-20 text-white">
@@ -634,7 +646,11 @@ export default function FundamentalCompanyResearch({
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-              label="Revenue"
+              label={
+                isBankingCompany
+                  ? "Total Income"
+                  : "Revenue"
+              }
               value={
                 latestAnnual?.revenue !==
                 null &&
@@ -676,12 +692,26 @@ export default function FundamentalCompanyResearch({
             />
 
             <MetricCard
-              label="ROCE"
+              label={
+                isBankingCompany
+                  ? "Return on Assets"
+                  : "ROCE"
+              }
               value={formatPercent(
-                metrics?.profitability
-                  ?.returnOnCapitalEmployed
+                isBankingCompany
+                  ? metrics
+                      ?.industrySpecific
+                      ?.bank
+                      ?.returnOnAssets
+                  : metrics
+                      ?.profitability
+                      ?.returnOnCapitalEmployed
               )}
-              detail="Capital efficiency"
+              detail={
+                isBankingCompany
+                  ? "Bank profitability"
+                  : "Capital efficiency"
+              }
             />
           </div>
 
@@ -810,6 +840,9 @@ export default function FundamentalCompanyResearch({
           <AnnualFinancialTable
             periods={
               analytics.annualFinancials
+            }
+            isBankingCompany={
+              isBankingCompany
             }
           />
 
@@ -1170,17 +1203,33 @@ function buildAnnualInterpretation(
   period: FinancialPeriod,
   previousPeriod:
     | FinancialPeriod
-    | null
+    | null,
+  isBankingCompany: boolean
 ): string {
   if (!previousPeriod) {
-    const availableValues = [
-      period.revenue,
-      period.ebitda,
-      period.netProfit,
-      period.epsDiluted,
-      period.totalDebt,
-      period.freeCashFlow,
-    ].filter(isUsableNumber).length;
+    const availableValues =
+      (
+        isBankingCompany
+          ? [
+              period.revenue,
+              period.operatingIncome,
+              period.netProfit,
+              period.epsDiluted,
+              period.deposits,
+              period.advances,
+              period.grossNpaPercent,
+              period.netNpaPercent,
+              period.returnOnAssetsPercent,
+            ]
+          : [
+              period.revenue,
+              period.ebitda,
+              period.netProfit,
+              period.epsDiluted,
+              period.totalDebt,
+              period.freeCashFlow,
+            ]
+      ).filter(isUsableNumber).length;
 
     if (availableValues === 0) {
       return "Insufficient verified data is available for an automated interpretation.";
@@ -1194,7 +1243,9 @@ function buildAnnualInterpretation(
 
   const revenueObservation =
     describeChange(
-      "Revenue",
+      isBankingCompany
+        ? "Total income"
+        : "Revenue",
       calculateChangePercent(
         period.revenue,
         previousPeriod.revenue
@@ -1237,40 +1288,72 @@ function buildAnnualInterpretation(
     );
   }
 
-  const cashFlowObservation =
-    describeChange(
-      "free cash flow",
+  if (isBankingCompany) {
+    const depositObservation =
+      describeChange(
+        "deposits",
+        calculateChangePercent(
+          period.deposits,
+          previousPeriod.deposits
+        )
+      );
+
+    if (depositObservation) {
+      observations.push(
+        depositObservation
+      );
+    }
+
+    const advancesObservation =
+      describeChange(
+        "advances",
+        calculateChangePercent(
+          period.advances,
+          previousPeriod.advances
+        )
+      );
+
+    if (advancesObservation) {
+      observations.push(
+        advancesObservation
+      );
+    }
+  } else {
+    const cashFlowObservation =
+      describeChange(
+        "free cash flow",
+        calculateChangePercent(
+          period.freeCashFlow,
+          previousPeriod.freeCashFlow
+        )
+      );
+
+    if (cashFlowObservation) {
+      observations.push(
+        cashFlowObservation
+      );
+    }
+
+    const debtChange =
       calculateChangePercent(
-        period.freeCashFlow,
-        previousPeriod.freeCashFlow
-      )
-    );
-
-  if (cashFlowObservation) {
-    observations.push(
-      cashFlowObservation
-    );
-  }
-
-  const debtChange =
-    calculateChangePercent(
-      period.totalDebt,
-      previousPeriod.totalDebt
-    );
-
-  if (debtChange !== null) {
-    if (debtChange <= -5) {
-      observations.push(
-        `debt reduced by ${Math.abs(
-          debtChange
-        ).toFixed(1)}%`
+        period.totalDebt,
+        previousPeriod.totalDebt
       );
-    } else if (debtChange >= 5) {
-      observations.push(
-        `debt increased by ${debtChange.toFixed(
-          1
-        )}%`
-      );
+
+    if (debtChange !== null) {
+      if (debtChange <= -5) {
+        observations.push(
+          `debt reduced by ${Math.abs(
+            debtChange
+          ).toFixed(1)}%`
+        );
+      } else if (debtChange >= 5) {
+        observations.push(
+          `debt increased by ${debtChange.toFixed(
+            1
+          )}%`
+        );
+      }
     }
   }
 
@@ -1288,8 +1371,10 @@ function buildAnnualInterpretation(
 
 function AnnualFinancialTable({
   periods,
+  isBankingCompany,
 }: {
   periods: FinancialPeriod[];
+  isBankingCompany: boolean;
 }) {
   const sortedPeriods =
     periods
@@ -1337,7 +1422,11 @@ function AnnualFinancialTable({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-[1250px] border-collapse text-sm">
+        <table className={`${
+          isBankingCompany
+            ? "min-w-[1550px]"
+            : "min-w-[1250px]"
+        } border-collapse text-sm`}>
           <thead className="bg-slate-950 text-left text-slate-400">
             <tr>
               <th className="px-5 py-4">
@@ -1345,11 +1434,15 @@ function AnnualFinancialTable({
               </th>
 
               <th className="px-5 py-4">
-                Revenue
+                {isBankingCompany
+                  ? "Total Income"
+                  : "Revenue"}
               </th>
 
               <th className="px-5 py-4">
-                EBITDA
+                {isBankingCompany
+                  ? "PPOP"
+                  : "EBITDA"}
               </th>
 
               <th className="px-5 py-4">
@@ -1360,13 +1453,34 @@ function AnnualFinancialTable({
                 EPS
               </th>
 
-              <th className="px-5 py-4">
-                Debt
-              </th>
-
-              <th className="px-5 py-4">
-                Free Cash Flow
-              </th>
+              {isBankingCompany ? (
+                <>
+                  <th className="px-5 py-4">
+                    Deposits
+                  </th>
+                  <th className="px-5 py-4">
+                    Advances
+                  </th>
+                  <th className="px-5 py-4">
+                    Gross NPA
+                  </th>
+                  <th className="px-5 py-4">
+                    Net NPA
+                  </th>
+                  <th className="px-5 py-4">
+                    ROA
+                  </th>
+                </>
+              ) : (
+                <>
+                  <th className="px-5 py-4">
+                    Debt
+                  </th>
+                  <th className="px-5 py-4">
+                    Free Cash Flow
+                  </th>
+                </>
+              )}
 
               <th className="min-w-80 px-5 py-4">
                 STFL AI Interpretation
@@ -1406,7 +1520,9 @@ function AnnualFinancialTable({
 
                     <td className="whitespace-nowrap px-5 py-4">
                       {formatNumber(
-                        period.ebitda
+                        isBankingCompany
+                          ? period.operatingIncome
+                          : period.ebitda
                       )}
                     </td>
 
@@ -1422,23 +1538,55 @@ function AnnualFinancialTable({
                       )}
                     </td>
 
-                    <td className="whitespace-nowrap px-5 py-4">
-                      {formatNumber(
-                        period.totalDebt
-                      )}
-                    </td>
-
-                    <td className="whitespace-nowrap px-5 py-4">
-                      {formatNumber(
-                        period.freeCashFlow
-                      )}
-                    </td>
+                    {isBankingCompany ? (
+                      <>
+                        <td className="whitespace-nowrap px-5 py-4">
+                          {formatNumber(
+                            period.deposits
+                          )}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-4">
+                          {formatNumber(
+                            period.advances
+                          )}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-4">
+                          {formatPercent(
+                            period.grossNpaPercent
+                          )}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-4">
+                          {formatPercent(
+                            period.netNpaPercent
+                          )}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-4">
+                          {formatPercent(
+                            period.returnOnAssetsPercent
+                          )}
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="whitespace-nowrap px-5 py-4">
+                          {formatNumber(
+                            period.totalDebt
+                          )}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-4">
+                          {formatNumber(
+                            period.freeCashFlow
+                          )}
+                        </td>
+                      </>
+                    )}
 
                     <td className="max-w-md px-5 py-4 leading-6 text-slate-300">
                       {
                         buildAnnualInterpretation(
                           period,
-                          previousPeriod
+                          previousPeriod,
+                          isBankingCompany
                         )
                       }
                     </td>
@@ -1451,7 +1599,11 @@ function AnnualFinancialTable({
               0 && (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={
+                    isBankingCompany
+                      ? 11
+                      : 8
+                  }
                   className="px-5 py-10 text-center text-slate-500"
                 >
                   No verified annual

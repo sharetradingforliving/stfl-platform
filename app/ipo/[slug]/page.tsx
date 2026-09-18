@@ -770,7 +770,8 @@ export default async function Page({
                 <DetailRow
                   label="GMP %"
                   value={
-                    ipo.gmpPercent !== undefined
+                    typeof ipo.gmpPercent === "number" &&
+Number.isFinite(ipo.gmpPercent)
                       ? `${ipo.gmpPercent.toFixed(
                           2
                         )}%`

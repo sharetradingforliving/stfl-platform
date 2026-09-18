@@ -609,26 +609,23 @@ export default function IPOTable() {
 
                   {/* GMP % */}
 
-                  <td className="px-3 py-5">
-
-                    {ipo.gmpPercent !== undefined ? (
-                      <span className="font-semibold text-emerald-400">
-                        {ipo.gmpPercent >= 0
-                          ? "+"
-                          : ""}
-                        {ipo.gmpPercent.toFixed(
-                          1
-                        )}
-                        %
-                      </span>
-                    ) : (
-                      <span className="text-slate-600">
-                        —
-                      </span>
-                    )}
-
-                  </td>
-
+<td className="px-3 py-5">
+  {typeof ipo.gmpPercent === "number" &&
+  Number.isFinite(ipo.gmpPercent) ? (
+    <span
+      className={`font-semibold ${
+        ipo.gmpPercent >= 0
+          ? "text-emerald-400"
+          : "text-rose-400"
+      }`}
+    >
+      {ipo.gmpPercent >= 0 ? "+" : ""}
+      {ipo.gmpPercent.toFixed(1)}%
+    </span>
+  ) : (
+    <span className="text-slate-500">—</span>
+  )}
+</td>
                   {/* Subscription block */}
 
                   <td className="border-l border-slate-800 px-3 py-5 text-center text-sm text-slate-300">

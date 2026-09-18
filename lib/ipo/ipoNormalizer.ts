@@ -20,16 +20,9 @@ import type {
 } from "./providers/nse";
 
 
-/**
- * ------------------------------------------------
- * Create URL-safe slug
- * ------------------------------------------------
- */
-
 function createSlug(
   value: string
 ): string {
-
   return value
     .toLowerCase()
     .trim()
@@ -39,16 +32,9 @@ function createSlug(
 }
 
 
-/**
- * ------------------------------------------------
- * Parse numbers safely
- * ------------------------------------------------
- */
-
 function parseNumber(
   value?: string | number | null
 ): number | undefined {
-
   if (
     value === undefined ||
     value === null
@@ -72,8 +58,7 @@ function parseNumber(
     return undefined;
   }
 
-  const result =
-    Number(cleaned);
+  const result = Number(cleaned);
 
   return Number.isFinite(result)
     ? result
@@ -81,25 +66,12 @@ function parseNumber(
 }
 
 
-/**
- * ------------------------------------------------
- * Parse NSE price band
- *
- * Examples:
- * Rs.285 to Rs.300
- * ₹285 - ₹300
- * 285-300
- * 300
- * ------------------------------------------------
- */
-
 function parsePriceBand(
   value?: string | number
 ): {
   low?: number;
   high?: number;
 } {
-
   if (
     value === undefined ||
     value === null
@@ -126,9 +98,7 @@ function parsePriceBand(
   }
 
   if (matches.length === 1) {
-
-    const price =
-      Number(matches[0]);
+    const price = Number(matches[0]);
 
     return {
       low: price,
@@ -143,19 +113,10 @@ function parsePriceBand(
 }
 
 
-/**
- * ------------------------------------------------
- * Calculate estimated issue size in ₹ crore
- *
- * Shares offered × upper price band ÷ 1 crore
- * ------------------------------------------------
- */
-
 function calculateIssueSizeCr(
   record: NSEIPORecord,
   upperPrice?: number
 ): number | undefined {
-
   if (!upperPrice) {
     return undefined;
   }
@@ -184,16 +145,9 @@ function calculateIssueSizeCr(
 }
 
 
-/**
- * ------------------------------------------------
- * Determine IPO type
- * ------------------------------------------------
- */
-
 function determineIPOType(
   record: NSEIPORecord
 ): IPOType {
-
   const text = [
     record.series,
     record.companyName,
@@ -216,25 +170,159 @@ function determineIPOType(
 
 
 /**
- * ------------------------------------------------
- * Determine IPO status
- * ------------------------------------------------
+ * Convert a provider date into YYYYMMDD for date-only comparison.
+ * Explicit numeric formats are handled before Date.parse so that
+ * server timezone does not move an IPO into another lifecycle day.
  */
+function parseDateKey(
+  value?: string | null
+): number | undefined {
+  if (!value) {
+    return undefined;
+  }
 
+  const text = value.trim();
+  if (!text) {
+    return undefined;
+  }
+
+  const yearFirst =
+    text.match(/^(\d{4})[-/]([01]?\d)[-/]([0-3]?\d)/);
+
+  if (yearFirst) {
+    return (
+      Number(yearFirst[1]) * 10_000 +
+      Number(yearFirst[2]) * 100 +
+      Number(yearFirst[3])
+    );
+  }
+
+  const dayFirst =
+    text.match(/^([0-3]?\d)[-/]([01]?\d)[-/](\d{4})/);
+
+  if (dayFirst) {
+    return (
+      Number(dayFirst[3]) * 10_000 +
+      Number(dayFirst[2]) * 100 +
+      Number(dayFirst[1])
+    );
+  }
+
+  const parsed = new Date(text);
+  if (Number.isNaN(parsed.getTime())) {
+    return undefined;
+  }
+
+  return (
+    parsed.getUTCFullYear() * 10_000 +
+    (parsed.getUTCMonth() + 1) * 100 +
+    parsed.getUTCDate()
+  );
+}
+
+
+function indiaTodayKey(): number {
+  const parts =
+    new Intl.DateTimeFormat(
+      "en-US",
+      {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }
+    ).formatToParts(new Date());
+
+  const values =
+    Object.fromEntries(
+      parts.map(
+        (part) => [
+          part.type,
+          part.value,
+        ]
+      )
+    );
+
+  return (
+    Number(values.year) * 10_000 +
+    Number(values.month) * 100 +
+    Number(values.day)
+  );
+}
+
+
+/**
+ * Determine lifecycle from dates first. Provider status is a fallback
+ * because upstream labels may remain Open after the issue has closed.
+ */
 function determineIPOStatus(
   record: NSEIPORecord
 ): IPOStatus {
-
-  if (
-    record.sourceType === "upcoming"
-  ) {
-    return "Upcoming";
-  }
-
   const rawStatus =
     record.status
       ?.toLowerCase()
       .trim() || "";
+
+  const today = indiaTodayKey();
+  const openDate =
+    parseDateKey(record.issueStartDate);
+  const closeDate =
+    parseDateKey(record.issueEndDate);
+  const listingDate =
+    parseDateKey(record.listingDate);
+
+  if (
+    listingDate !== undefined &&
+    today >= listingDate
+  ) {
+    return "Listed";
+  }
+
+  if (
+    openDate !== undefined &&
+    today < openDate
+  ) {
+    return "Upcoming";
+  }
+
+  if (
+    openDate !== undefined &&
+    closeDate !== undefined &&
+    today >= openDate &&
+    today <= closeDate
+  ) {
+    return "Open";
+  }
+
+  if (
+    closeDate !== undefined &&
+    today > closeDate
+  ) {
+    if (rawStatus.includes("listed")) {
+      return "Listed";
+    }
+
+    if (rawStatus.includes("allot")) {
+      return "Allotment";
+    }
+
+    return "Closed";
+  }
+
+  if (rawStatus.includes("listed")) {
+    return "Listed";
+  }
+
+  if (rawStatus.includes("allot")) {
+    return "Allotment";
+  }
+
+  if (
+    rawStatus.includes("closed") ||
+    rawStatus.includes("close")
+  ) {
+    return "Closed";
+  }
 
   if (
     rawStatus.includes("open") ||
@@ -245,120 +333,19 @@ function determineIPOStatus(
 
   if (
     rawStatus.includes("upcoming") ||
-    rawStatus.includes("forthcoming")
+    rawStatus.includes("forthcoming") ||
+    record.sourceType === "upcoming"
   ) {
     return "Upcoming";
-  }
-
-  if (
-    rawStatus.includes("allot")
-  ) {
-    return "Allotment";
-  }
-
-  if (
-    rawStatus.includes("listed")
-  ) {
-    return "Listed";
-  }
-
-  if (
-    rawStatus.includes("closed") ||
-    rawStatus.includes("close")
-  ) {
-    return "Closed";
-  }
-
-  /**
-   * Date fallback
-   */
-
-  const now =
-    new Date();
-
-  const openDate =
-    record.issueStartDate
-      ? new Date(
-          record.issueStartDate
-        )
-      : undefined;
-
-  const closeDate =
-    record.issueEndDate
-      ? new Date(
-          record.issueEndDate
-        )
-      : undefined;
-
-  const listingDate =
-    record.listingDate
-      ? new Date(
-          record.listingDate
-        )
-      : undefined;
-
-  if (
-    listingDate &&
-    !Number.isNaN(
-      listingDate.getTime()
-    ) &&
-    now >= listingDate
-  ) {
-    return "Listed";
-  }
-
-  if (
-    openDate &&
-    !Number.isNaN(
-      openDate.getTime()
-    ) &&
-    now < openDate
-  ) {
-    return "Upcoming";
-  }
-
-  if (
-    openDate &&
-    closeDate &&
-    !Number.isNaN(
-      openDate.getTime()
-    ) &&
-    !Number.isNaN(
-      closeDate.getTime()
-    ) &&
-    now >= openDate &&
-    now <= closeDate
-  ) {
-    return "Open";
-  }
-
-  if (
-    closeDate &&
-    !Number.isNaN(
-      closeDate.getTime()
-    ) &&
-    now > closeDate
-  ) {
-    return "Closed";
   }
 
   return "Upcoming";
 }
 
 
-/**
- * ------------------------------------------------
- * Normalize subscription
- *
- * Preserve provider-enriched category values.
- * Fall back to NSE noOfTime for Total.
- * ------------------------------------------------
- */
-
 function normalizeSubscription(
   record: NSEIPORecord
 ): IPORecord["subscription"] {
-
   const qib =
     record.subscription?.qib;
 
@@ -380,7 +367,6 @@ function normalizeSubscription(
     providerTotal ??
     fallbackTotal;
 
-
   if (
     qib === undefined &&
     nii === undefined &&
@@ -390,15 +376,10 @@ function normalizeSubscription(
     return undefined;
   }
 
-
   return {
-
     qib,
-
     nii,
-
     retail,
-
     total:
       total !== undefined
         ? Number(
@@ -409,16 +390,9 @@ function normalizeSubscription(
 }
 
 
-/**
- * ------------------------------------------------
- * Normalize one NSE IPO record
- * ------------------------------------------------
- */
-
 export function normalizeNSEIPO(
   record: NSEIPORecord
 ): IPORecord | null {
-
   const companyName =
     record.companyName?.trim();
 
@@ -426,24 +400,16 @@ export function normalizeNSEIPO(
     return null;
   }
 
-
-  /**
-   * NSE uses issuePrice for
-   * current issue price-band data.
-   */
-
   const priceBand =
     parsePriceBand(
       record.issuePrice ??
       record.priceBand
     );
 
-
   const slug =
     createSlug(
       companyName
     );
-
 
   const issueSizeCr =
     calculateIssueSizeCr(
@@ -451,10 +417,7 @@ export function normalizeNSEIPO(
       priceBand.high
     );
 
-
-  const normalized:
-    IPORecord = {
-
+  const normalized: IPORecord = {
     id:
       record.symbol?.trim() ||
       slug,
@@ -497,8 +460,8 @@ export function normalizeNSEIPO(
     issuePrice:
       priceBand.high,
 
-      lotSize:
-    record.lotSize,
+    lotSize:
+      record.lotSize,
 
     issueSizeCr,
 
@@ -517,27 +480,16 @@ export function normalizeNSEIPO(
       new Date().toISOString(),
   };
 
-
   return normalized;
 }
 
 
-/**
- * ------------------------------------------------
- * Normalize complete NSE IPO response
- * ------------------------------------------------
- */
-
 export function normalizeNSEIPOData(
   records: NSEIPORecord[]
 ): IPORecord[] {
-
-  if (
-    !Array.isArray(records)
-  ) {
+  if (!Array.isArray(records)) {
     return [];
   }
-
 
   return records
     .map(

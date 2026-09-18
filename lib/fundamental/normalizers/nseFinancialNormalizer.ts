@@ -32,45 +32,51 @@ const RUPEES_PER_CRORE =
   10_000_000;
 
 const METRIC_TAGS = {
-  revenue: [
-  "RevenueFromOperations",
-  "RevenueFromOperationsNet",
-  "IncomeFromOperations",
-  "Revenue",
+  corporateRevenue: [
+    "RevenueFromOperations",
+    "RevenueFromOperationsNet",
+    "IncomeFromOperations",
+    "Revenue",
+  ],
 
-  // BANKING taxonomy
-  "Income",
-  "TotalIncome",
-  "InterestEarned",
-  "TotalInterestEarned",
-],
+  bankTotalIncome: [
+    "TotalIncome",
+  ],
+
+  bankInterestEarned: [
+    "TotalInterestEarned",
+    "InterestEarned",
+  ],
 
   otherIncome: [
     "OtherIncome",
   ],
 
-  operatingIncome: [
-  "ProfitFromOperationsBeforeOtherIncomeFinanceCostsAndExceptionalItems",
-  "OperatingProfit",
+  corporateOperatingIncome: [
+    "ProfitFromOperationsBeforeOtherIncomeFinanceCostsAndExceptionalItems",
+    "OperatingProfit",
+  ],
 
-  // BANKING taxonomy
-  "OperatingProfitBeforeProvisionsAndContingencies",
-],
+  bankOperatingProfit: [
+    "OperatingProfitBeforeProvisionAndContingencies",
+    "OperatingProfitBeforeProvisionsAndContingencies",
+  ],
 
   ebit: [
     "ProfitBeforeFinanceCostsExceptionalItemsAndTax",
     "EarningsBeforeInterestAndTax",
   ],
 
-  financeCosts: [
-  "FinanceCosts",
-  "FinanceCost",
-  "InterestExpense",
+  corporateFinanceCosts: [
+    "FinanceCosts",
+    "FinanceCost",
+    "InterestExpense",
+  ],
 
-  // BANKING taxonomy
-  "InterestExpended",
-  "InterestExpenseOnDeposits",
-],
+  bankInterestExpended: [
+    "InterestExpended",
+    "InterestExpenseOnDeposits",
+  ],
 
   depreciation: [
     "DepreciationDepletionAndAmortisationExpense",
@@ -609,14 +615,30 @@ function convertMoneyToCrores(
 function getDurationMetric(
   document: ParsedNseXbrl,
   contextId: string | null,
-  aliases: readonly string[]
+  aliases: readonly string[],
+  assumeRupeesWhenUnitMissing = false
 ): NullableNumber {
-  return convertMoneyToCrores(
+  const fact =
     findFact(
       document,
       contextId,
       aliases
-    )
+    );
+
+  if (
+    assumeRupeesWhenUnitMissing &&
+    fact?.numericValue !== null &&
+    fact?.numericValue !== undefined &&
+    !fact.unitRef?.trim()
+  ) {
+    return (
+      fact.numericValue /
+      RUPEES_PER_CRORE
+    );
+  }
+
+  return convertMoneyToCrores(
+    fact
   );
 }
 
@@ -757,6 +779,36 @@ export function normalizeNseXbrlPeriod(
 ): NormalizedNsePeriodResult {
   const warnings: string[] = [];
 
+  const bankingFactNames =
+    new Set([
+      "deposits",
+      "advances",
+      "interestearned",
+      "totalinterestearned",
+      "interestexpended",
+      "percentageofgrossnpa",
+      "percentageofnpa",
+      "operatingprofitbeforeprovisionsandcontingencies",
+    ]);
+
+  /*
+   * Legacy NSE bank filings do not
+   * consistently expose the modern
+   * banking taxonomy prefix or a
+   * /BANKING_ URL. Strong bank-only
+   * facts therefore provide a safe
+   * fallback classification signal.
+   */
+  const hasBankingFacts =
+    document.facts.some(
+      (fact) =>
+        bankingFactNames.has(
+          normalizeName(
+            fact.localName
+          )
+        )
+    );
+
   const isBankingTaxonomy =
   document.taxonomyPrefixes.some(
     (prefix) =>
@@ -767,7 +819,8 @@ export function normalizeNseXbrlPeriod(
   ) ||
   document.sourceUrl
     .toUpperCase()
-    .includes("/BANKING_");
+    .includes("/BANKING_") ||
+  hasBankingFacts;
 
   const durationContext =
     selectDurationContext(
@@ -800,25 +853,70 @@ export function normalizeNseXbrlPeriod(
   const instantContextId =
     instantContext?.id ?? null;
 
-  const revenue =
-    getDurationMetric(
-      document,
-      durationContextId,
-      METRIC_TAGS.revenue
-    );
-
   const otherIncome =
     getDurationMetric(
       document,
       durationContextId,
-      METRIC_TAGS.otherIncome
+      METRIC_TAGS.otherIncome,
+      isBankingTaxonomy
     );
+
+  const corporateRevenue =
+    isBankingTaxonomy
+      ? null
+      : getDurationMetric(
+          document,
+          durationContextId,
+          METRIC_TAGS
+            .corporateRevenue
+        );
+
+  const reportedBankTotalIncome =
+    isBankingTaxonomy
+      ? getDurationMetric(
+          document,
+          durationContextId,
+          METRIC_TAGS
+            .bankTotalIncome,
+          true
+        )
+      : null;
+
+  const bankInterestEarned =
+    isBankingTaxonomy
+      ? getDurationMetric(
+          document,
+          durationContextId,
+          METRIC_TAGS
+            .bankInterestEarned,
+          true
+        )
+      : null;
+
+  const derivedBankTotalIncome =
+    isBankingTaxonomy
+      ? addValues([
+          bankInterestEarned,
+          otherIncome,
+        ])
+      : null;
+
+  const revenue =
+    isBankingTaxonomy
+      ? reportedBankTotalIncome ??
+        derivedBankTotalIncome
+      : corporateRevenue;
 
   const reportedOperatingIncome =
     getDurationMetric(
       document,
       durationContextId,
-      METRIC_TAGS.operatingIncome
+      isBankingTaxonomy
+        ? METRIC_TAGS
+            .bankOperatingProfit
+        : METRIC_TAGS
+            .corporateOperatingIncome,
+      isBankingTaxonomy
     );
 
   const reportedEbit =
@@ -832,7 +930,12 @@ export function normalizeNseXbrlPeriod(
     getDurationMetric(
       document,
       durationContextId,
-      METRIC_TAGS.financeCosts
+      isBankingTaxonomy
+        ? METRIC_TAGS
+            .bankInterestExpended
+        : METRIC_TAGS
+            .corporateFinanceCosts,
+      isBankingTaxonomy
     );
 
   const depreciation =
@@ -922,7 +1025,19 @@ export function normalizeNseXbrlPeriod(
 
   if (revenue === null) {
     warnings.push(
-      "Revenue was not found in the selected context."
+      isBankingTaxonomy
+        ? "Bank total income was not found and could not be derived consistently from interest earned plus other income."
+        : "Revenue was not found in the selected context."
+    );
+  }
+
+  if (
+    isBankingTaxonomy &&
+    reportedBankTotalIncome === null &&
+    derivedBankTotalIncome !== null
+  ) {
+    warnings.push(
+      "Bank total income was derived consistently as interest earned plus other income."
     );
   }
 
@@ -942,18 +1057,24 @@ export function normalizeNseXbrlPeriod(
   }
 
   const operatingCashFlow =
-    getDurationMetric(
-      document,
-      durationContextId,
-      METRIC_TAGS.operatingCashFlow
-    );
+    isBankingTaxonomy
+      ? null
+      : getDurationMetric(
+          document,
+          durationContextId,
+          METRIC_TAGS
+            .operatingCashFlow
+        );
 
   const capitalExpenditure =
-    getDurationMetric(
-      document,
-      durationContextId,
-      METRIC_TAGS.capitalExpenditure
-    );
+    isBankingTaxonomy
+      ? null
+      : getDurationMetric(
+          document,
+          durationContextId,
+          METRIC_TAGS
+            .capitalExpenditure
+        );
 
   const freeCashFlow =
     operatingCashFlow !== null &&
@@ -992,11 +1113,13 @@ export function normalizeNseXbrlPeriod(
    * one TotalDebt fact.
    */
   const totalDebt =
-    reportedTotalDebt ??
-    addValues([
-      currentBorrowings,
-      noncurrentBorrowings,
-    ]);
+    isBankingTaxonomy
+      ? null
+      : reportedTotalDebt ??
+        addValues([
+          currentBorrowings,
+          noncurrentBorrowings,
+        ]);
 
   const equityShareCapitalTags =
   isBankingTaxonomy
@@ -1076,7 +1199,7 @@ const advances =
       )
     : null;
 
-    const grossNpaPercent =
+    const reportedGrossNpaPercent =
   isBankingTaxonomy
     ? (
         getPercentageMetric(
@@ -1094,7 +1217,7 @@ const advances =
       )
     : null;
 
-const netNpaPercent =
+const reportedNetNpaPercent =
   isBankingTaxonomy
     ? (
         getPercentageMetric(
@@ -1112,7 +1235,7 @@ const netNpaPercent =
       )
     : null;
 
-const returnOnAssetsPercent =
+const reportedReturnOnAssetsPercent =
   isBankingTaxonomy
     ? (
         getPercentageMetric(
@@ -1129,6 +1252,44 @@ const returnOnAssetsPercent =
         )
       )
     : null;
+
+  /*
+   * Some legacy BANKING result documents
+   * publish 0.00 simultaneously for GNPA,
+   * NNPA and ROA as non-disclosure
+   * placeholders. Treat the complete
+   * zero triplet as unavailable instead
+   * of presenting it as verified data.
+   *
+   * A genuine zero in only one metric is
+   * preserved.
+   */
+  const hasLegacyZeroRatioTriplet =
+    isBankingTaxonomy &&
+    reportedGrossNpaPercent === 0 &&
+    reportedNetNpaPercent === 0 &&
+    reportedReturnOnAssetsPercent === 0;
+
+  const grossNpaPercent =
+    hasLegacyZeroRatioTriplet
+      ? null
+      : reportedGrossNpaPercent;
+
+  const netNpaPercent =
+    hasLegacyZeroRatioTriplet
+      ? null
+      : reportedNetNpaPercent;
+
+  const returnOnAssetsPercent =
+    hasLegacyZeroRatioTriplet
+      ? null
+      : reportedReturnOnAssetsPercent;
+
+  if (hasLegacyZeroRatioTriplet) {
+    warnings.push(
+      "Legacy BANKING GNPA, NNPA and ROA values were all reported as 0.00 and were treated as unavailable disclosure placeholders."
+    );
+  }
 
   const faceValuePerShare =
     getPerShareMetric(
@@ -1261,18 +1422,24 @@ returnOnAssetsPercent,
       operatingCashFlow,
 
       investingCashFlow:
-        getDurationMetric(
-          document,
-          durationContextId,
-          METRIC_TAGS.investingCashFlow
-        ),
+        isBankingTaxonomy
+          ? null
+          : getDurationMetric(
+              document,
+              durationContextId,
+              METRIC_TAGS
+                .investingCashFlow
+            ),
 
       financingCashFlow:
-        getDurationMetric(
-          document,
-          durationContextId,
-          METRIC_TAGS.financingCashFlow
-        ),
+        isBankingTaxonomy
+          ? null
+          : getDurationMetric(
+              document,
+              durationContextId,
+              METRIC_TAGS
+                .financingCashFlow
+            ),
 
       capitalExpenditure,
       freeCashFlow,
@@ -1314,4 +1481,3 @@ returnOnAssetsPercent,
     warnings,
   };
 }
-

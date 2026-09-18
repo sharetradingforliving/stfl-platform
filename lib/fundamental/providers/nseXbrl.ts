@@ -745,15 +745,20 @@ function addMissingBankingContexts(
   }
 
   /*
-   * NSE BANKING quarterly documents
-   * sometimes reference OneD without
-   * defining it. When ReportingQuarter
-   * confirms a quarter, reconstruct a
-   * standalone three-month duration.
+   * Legacy NSE BANKING documents can
+   * reference OneD/FourD without defining
+   * either context.
    *
-   * Otherwise use the verified financial
-   * year start, which supports annual
-   * BANKING documents.
+   * For a quarterly document:
+   * OneD = the reported quarter.
+   *
+   * For a yearly document:
+   * OneD  = the March quarter only.
+   * FourD = the complete financial year.
+   *
+   * Reconstructing OneD as a full-year
+   * duration makes the normalizer select
+   * quarterly values as annual values.
    */
   const isQuarterlyReport =
     reportingQuarter !== null &&
@@ -761,11 +766,21 @@ function addMissingBankingContexts(
       reportingQuarter
     );
 
-  const durationStartDate =
-    isQuarterlyReport
-      ? getQuarterStartDate(
-          reportingPeriodEnd
-        )
+  const isAnnualReport =
+    reportingQuarter !== null &&
+    /(yearly|annual)/i.test(
+      reportingQuarter
+    );
+
+  const quarterStartDate =
+    getQuarterStartDate(
+      reportingPeriodEnd
+    );
+
+  const oneDurationStartDate =
+    isQuarterlyReport ||
+    isAnnualReport
+      ? quarterStartDate
       : financialYearStart;
 
   if (
@@ -775,7 +790,7 @@ function addMissingBankingContexts(
     !existingContextIds.has(
       "OneD"
     ) &&
-    durationStartDate
+    oneDurationStartDate
   ) {
     contexts.push({
       id:
@@ -787,7 +802,7 @@ function addMissingBankingContexts(
         "DURATION",
 
       startDate:
-        durationStartDate,
+        oneDurationStartDate,
 
       endDate:
         reportingPeriodEnd,
@@ -799,7 +814,48 @@ function addMissingBankingContexts(
     });
 
     warnings.push(
-      `Reconstructed missing BANKING duration context OneD from verified reporting metadata (${durationStartDate} to ${reportingPeriodEnd}).`
+      `Reconstructed missing BANKING duration context OneD from verified reporting metadata (${oneDurationStartDate} to ${reportingPeriodEnd}).`
+    );
+  }
+
+  /*
+   * FourD carries complete financial-year
+   * flow values in legacy yearly BANKING
+   * result documents.
+   */
+  if (
+    isAnnualReport &&
+    referencedContextIds.has(
+      "FourD"
+    ) &&
+    !existingContextIds.has(
+      "FourD"
+    ) &&
+    financialYearStart
+  ) {
+    contexts.push({
+      id:
+        "FourD",
+
+      entityIdentifier,
+
+      periodType:
+        "DURATION",
+
+      startDate:
+        financialYearStart,
+
+      endDate:
+        reportingPeriodEnd,
+
+      instant:
+        null,
+
+      dimensions: {},
+    });
+
+    warnings.push(
+      `Reconstructed missing BANKING annual duration context FourD from verified reporting metadata (${financialYearStart} to ${reportingPeriodEnd}).`
     );
   }
 
@@ -838,6 +894,46 @@ function addMissingBankingContexts(
 
     warnings.push(
       `Reconstructed missing BANKING instant context OneI from the verified reporting-period end ${reportingPeriodEnd}.`
+    );
+  }
+
+  /*
+   * FourI is the matching annual instant
+   * context used by some legacy BANKING
+   * facts and segment disclosures.
+   */
+  if (
+    isAnnualReport &&
+    referencedContextIds.has(
+      "FourI"
+    ) &&
+    !existingContextIds.has(
+      "FourI"
+    )
+  ) {
+    contexts.push({
+      id:
+        "FourI",
+
+      entityIdentifier,
+
+      periodType:
+        "INSTANT",
+
+      startDate:
+        null,
+
+      endDate:
+        null,
+
+      instant:
+        reportingPeriodEnd,
+
+      dimensions: {},
+    });
+
+    warnings.push(
+      `Reconstructed missing BANKING annual instant context FourI from the verified reporting-period end ${reportingPeriodEnd}.`
     );
   }
 }
