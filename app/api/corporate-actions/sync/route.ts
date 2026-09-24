@@ -1,4 +1,7 @@
 import {
+  timingSafeEqual,
+} from "node:crypto";
+import {
   NextResponse,
 } from "next/server";
 
@@ -20,6 +23,29 @@ type SyncRequestBody = {
   from?: string;
   to?: string;
 };
+
+function tokensMatch(
+  suppliedToken: string,
+  configuredToken: string
+): boolean {
+  const supplied =
+    Buffer.from(suppliedToken);
+
+  const configured =
+    Buffer.from(configuredToken);
+
+  if (
+    supplied.length !==
+    configured.length
+  ) {
+    return false;
+  }
+
+  return timingSafeEqual(
+    supplied,
+    configured
+  );
+}
 
 function addDays(
   date: Date,
@@ -128,6 +154,46 @@ export async function POST(
   request: Request
 ) {
   try {
+        const configuredToken =
+      process.env
+        .STFL_CORPORATE_ACTION_SYNC_TOKEN;
+
+    if (!configuredToken) {
+      return NextResponse.json(
+        {
+          status: "error",
+          error:
+            "Corporate-action synchronization is not configured.",
+        },
+        {
+          status: 503,
+        }
+      );
+    }
+
+    const suppliedToken =
+      request.headers.get(
+        "X-STFL-Corporate-Action-Sync-Token"
+      );
+
+    if (
+      !suppliedToken ||
+      !tokensMatch(
+        suppliedToken,
+        configuredToken
+      )
+    ) {
+      return NextResponse.json(
+        {
+          status: "error",
+          error:
+            "Corporate-action synchronization authorization failed.",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
     const body =
       await request
         .json()
@@ -299,12 +365,15 @@ export async function POST(
           method: "POST",
 
           headers: {
-            Accept:
-              "application/json",
+  Accept:
+    "application/json",
 
-            "Content-Type":
-              "application/json",
-          },
+  "Content-Type":
+    "application/json",
+
+  "X-STFL-Corporate-Action-Sync-Token":
+    configuredToken,
+},
 
           body:
             JSON.stringify({
