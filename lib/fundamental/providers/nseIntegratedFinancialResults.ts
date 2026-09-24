@@ -359,28 +359,37 @@ function cleanDocumentUrl(
   const normalized =
     value.trim();
 
+  const lowerValue =
+    normalized.toLowerCase();
+
   if (
-    normalized.toLowerCase() ===
-      "null" ||
-    normalized.toLowerCase() ===
-      "undefined" ||
-    normalized.endsWith("/null") ||
-    normalized.endsWith(
-      "/undefined"
-    )
+    lowerValue === "null" ||
+    lowerValue === "undefined" ||
+    lowerValue.endsWith("/null") ||
+    lowerValue.endsWith("/undefined")
   ) {
     return null;
   }
 
   if (
-    !normalized.startsWith(
-      "https://"
-    )
+    normalized.startsWith("https://") ||
+    normalized.startsWith("http://")
   ) {
-    return null;
+    return normalized;
   }
 
-  return normalized;
+  /*
+   * Some NSE responses provide document
+   * locations as relative paths.
+   */
+  if (normalized.startsWith("/")) {
+    return new URL(
+      normalized,
+      NSE_BASE_URL
+    ).toString();
+  }
+
+  return null;
 }
 
 function getXbrlUrl(
@@ -412,41 +421,65 @@ function getIxbrlUrl(
 function isIndasFinancialFiling(
   row: JsonRecord
 ): boolean {
-  const xbrlUrl =
-    getXbrlUrl(row);
+  /*
+   * NSE has used several descriptions for
+   * the same integrated financial filing:
+   *
+   * - Integrated Filing INDAS
+   * - Integrated Filing - Financials
+   * - Integrated Financial Results
+   *
+   * Normalize punctuation and spacing before
+   * identifying the filing.
+   */
+  const metadataValues = [
+    getXbrlUrl(row),
+    getIxbrlUrl(row),
 
-  const ixbrlUrl =
-    getIxbrlUrl(row);
-
-  const searchableText = [
-    xbrlUrl,
-    ixbrlUrl,
     firstString(row, [
       "subject",
       "category",
       "filingType",
       "documentType",
+      "type",
+      "purpose",
+      "description",
+      "desc",
+      "name",
+      "title",
+      "regulation",
+      "fileName",
+      "xbrlFileName",
     ]),
-  ]
-    .filter(
-      (
-        value
-      ): value is string =>
-        Boolean(value)
-    )
-    .join(" ")
-    .toUpperCase();
+  ].filter(
+    (value): value is string =>
+      Boolean(value)
+  );
+
+  const searchableText =
+    normalizeText(
+      metadataValues.join(" ")
+    );
+
+  const isIntegratedFiling =
+    searchableText.includes(
+      "INTEGRATEDFILING"
+    );
+
+  const isFinancialFiling =
+    searchableText.includes(
+      "FINANCIAL"
+    ) ||
+    searchableText.includes(
+      "INDAS"
+    ) ||
+    searchableText.includes(
+      "FINANCIALRESULT"
+    );
 
   return (
-    searchableText.includes(
-      "INTEGRATED FILING INDAS"
-    ) ||
-    searchableText.includes(
-      "INTEGRATED_FILING_INDAS"
-    ) ||
-    searchableText.includes(
-      "INTEGRATED%20FILING%20INDAS"
-    )
+    isIntegratedFiling &&
+    isFinancialFiling
   );
 }
 
@@ -733,6 +766,25 @@ export async function getNseIntegratedFinancialFilings(
               symbol
             )
           );
+
+          if (
+  (
+    symbol === "BANDHANBNK" ||
+    symbol === "HDFCBANK"
+  ) &&
+  matchingRows.length > 0
+) {
+   console.log(
+    `${symbol} INTEGRATED FILING SAMPLE:`
+  );
+
+  console.dir(
+    matchingRows[0],
+    {
+      depth: null,
+    }
+  );
+}
 
         const financialRows =
           matchingRows.filter(

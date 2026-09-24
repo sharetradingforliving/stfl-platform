@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import PeerValuationPanel from "./PeerValuationPanel";
+import PremiumValuationGate from "./PremiumValuationGate";
 
 import {
   useEffect,
@@ -422,15 +423,16 @@ export default function FundamentalCompanyResearch({
       setAnalytics(null);
 
       const assumptions =
-        new URLSearchParams({
-          forecastYears: "5",
-          riskFreeRate: "6.8",
-          beta: "1.05",
-          equityRiskPremium: "6",
-          freeCashFlowGrowthRate:
-            "8",
-          terminalGrowthRate: "5",
-        });
+  new URLSearchParams({
+    exchange,
+    forecastYears: "5",
+    riskFreeRate: "6.8",
+    beta: "1.05",
+    equityRiskPremium: "6",
+    freeCashFlowGrowthRate:
+      "8",
+    terminalGrowthRate: "5",
+  });
 
       const response = await fetch(
         `/api/fundamental/analytics/${encodeURIComponent(
@@ -760,50 +762,50 @@ export default function FundamentalCompanyResearch({
         />
 
         <MetricCard
-          label="Credit Growth"
+          label="Credit Growth (YoY)"
           value={formatPercent(
             metrics.industrySpecific.bank
               .creditGrowth
           )}
-          detail="Latest comparable growth"
+          detail="Latest annual period vs previous annual period"
         />
 
         <MetricCard
-          label="Deposit Growth"
+          label="Deposit Growth (YoY)"
           value={formatPercent(
             metrics.industrySpecific.bank
               .depositGrowth
           )}
-          detail="Latest comparable growth"
+          detail="Latest annual period vs previous annual period"
         />
       </>
     ) : (
       <>
         <MetricCard
-          label="Revenue Growth"
+          label="Revenue Growth (YoY)"
           value={formatPercent(
             metrics?.growth
               ?.revenueGrowth1Y
           )}
-          detail="Latest annual growth"
+          detail="Latest annual period vs previous annual period"
         />
 
         <MetricCard
-          label="EBITDA Growth"
+          label="EBITDA Growth (YoY)"
           value={formatPercent(
             metrics?.growth
               ?.ebitdaGrowth1Y
           )}
-          detail="Latest annual growth"
+          detail="Latest annual period vs previous annual period"
         />
 
         <MetricCard
-          label="PAT Growth"
+          label="PAT Growth (YoY)"
           value={formatPercent(
             metrics?.growth
               ?.patGrowth1Y
           )}
-          detail="Latest annual growth"
+          detail="Latest annual period vs previous annual period"
         />
 
         <MetricCard
@@ -835,6 +837,16 @@ export default function FundamentalCompanyResearch({
       </>
     )}
   </div>
+
+  <div className="mt-6 rounded-xl border border-sky-500/20 bg-slate-950 p-5">
+    <h3 className="font-semibold text-sky-300">
+      How to read these metrics
+    </h3>
+
+    <p className="mt-2 text-sm leading-6 text-slate-400">
+      YoY growth compares the latest complete annual period with the immediately preceding annual period. Profitability and leverage describe the latest annual financial position. Use the annual table below to verify the underlying trend and reporting periods.
+    </p>
+  </div>
 </div>
 
           <AnnualFinancialTable
@@ -845,6 +857,57 @@ export default function FundamentalCompanyResearch({
               isBankingCompany
             }
           />
+
+<PremiumValuationGate
+  symbol={analytics.symbol}
+>
+  <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6 md:p-8">
+    <div className="flex flex-wrap items-center gap-3">
+      <h2 className="text-2xl font-bold">
+        Company valuation
+      </h2>
+
+      <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-300">
+        STFL PREMIUM
+      </span>
+    </div>
+
+    <div className="mt-6 flex flex-wrap gap-3">
+      {valuationMethods.map(
+        (method) => (
+          <button
+            key={method.id}
+            type="button"
+            onClick={() =>
+              setSelectedMethod(
+                method.id
+              )
+            }
+            aria-pressed={
+              selectedMethod ===
+              method.id
+            }
+            className={`rounded-xl border px-4 py-2 text-sm font-semibold ${
+              selectedMethod ===
+              method.id
+                ? "border-emerald-500 bg-emerald-500/10 text-emerald-300"
+                : "border-slate-700 bg-slate-950 text-slate-300"
+            }`}
+          >
+            {method.label}
+          </button>
+        )
+      )}
+    </div>
+
+    <div className="mt-6">
+      <ValuationPanel
+        method={selectedMethod}
+        analytics={analytics}
+      />
+    </div>
+  </section>
+</PremiumValuationGate>
 
           {(analytics.warnings?.length ??
             0) > 0 && (

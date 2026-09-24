@@ -43,22 +43,26 @@ const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
-    label: "Research",
-    items: [
-      {
-        label: "Fundamental Research",
-        href: "/fundamental-research",
-      },
-      {
-        label: "Conviction Engine",
-        href: "/conviction-engine",
-      },
-      {
-        label: "Market Astrology",
-        href: "/market-astrology",
-      },
-    ],
-  },
+  label: "Research",
+  items: [
+    {
+      label: "Company Research & Valuation",
+      href: "/fundamental-research",
+    },
+    {
+      label: "Stock Discovery",
+      href: "/fundamental-research/discovery",
+    },
+    {
+      label: "Conviction Engine",
+      href: "/conviction-engine",
+    },
+    {
+      label: "Market Astrology",
+      href: "/market-astrology",
+    },
+  ],
+},
   {
     label: "Tools",
     items: [

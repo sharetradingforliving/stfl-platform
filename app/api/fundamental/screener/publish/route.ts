@@ -17,6 +17,17 @@ import { NextResponse } from "next/server";
 
 import { getAllNseEquities } from
   "@/lib/market/allNseEquities";
+import type { NseCashEquity } from
+  "@/lib/market/allNseEquities";
+
+import {
+  getNifty500Constituents,
+  type Nifty500Constituent,
+} from "@/lib/market/nifty500";
+
+import {
+  findDirectBusinessPeerGroup,
+} from "@/lib/fundamental/data/directBusinessPeerGroups";
 
 import type {
   FundamentalResearchResponse,
@@ -42,6 +53,14 @@ const MAXIMUM_BATCH_SIZE = 20;
 type PublishRequest = {
   cursor?: number;
   limit?: number;
+};
+
+// The live analytics API currently returns symbol and companyName at
+// the top level. Retain support for the earlier nested profile shape.
+type PublisherAnalytics = Omit<FundamentalResearchResponse, "company"> & {
+  company?: FundamentalResearchResponse["company"];
+  symbol?: string;
+  companyName?: string;
 };
 
 type ValuationSnapshot = {
@@ -78,6 +97,20 @@ type ScreenerSnapshot = {
   sourceUpdatedAt: string;
 };
 
+type MarketCapCategory =
+  | "LARGE_CAP"
+  | "MID_CAP"
+  | "SMALL_CAP"
+  | "MICRO_CAP";
+
+type ScreenerClassification = {
+  sector: string | null;
+  industry: string | null;
+  subIndustry: string | null;
+  marketCapCategory:
+    MarketCapCategory | null;
+};
+
 
 function finiteNumber(
   value: unknown
@@ -109,9 +142,9 @@ function calculateUpside(
 
 
 function newestAnnualPeriod(
-  analytics: FundamentalResearchResponse
+  analytics: PublisherAnalytics
 ) {
-  return analytics.annualFinancials
+  return (analytics.annualFinancials ?? [])
     .filter((period) => period.endDate)
     .slice()
     .sort((first, second) =>
@@ -143,7 +176,7 @@ function makeValuation(
 
 
 function buildValuations(
-  analytics: FundamentalResearchResponse
+  analytics: PublisherAnalytics
 ): Record<string, ValuationSnapshot> {
   const currentPrice = finiteNumber(
     analytics.market?.currentPrice
@@ -152,7 +185,11 @@ function buildValuations(
   const valuations:
     Record<string, ValuationSnapshot> = {};
 
-  const { valuation } = analytics;
+  const valuation = analytics.valuation;
+
+  if (!valuation) {
+    return valuations;
+  }
 
   if (valuation.composite) {
     valuations.composite = makeValuation(
@@ -249,15 +286,151 @@ function buildDataQualityScore(
 }
 
 
-function buildSnapshot(
-  analytics: FundamentalResearchResponse
-): ScreenerSnapshot | null {
+function normalizeSymbol(
+  value: string
+): string {
+  return value
+    .trim()
+    .toUpperCase();
+}
+
+
+function buildNifty500BySymbol(
+  constituents:
+    Nifty500Constituent[]
+): Map<string, Nifty500Constituent> {
+  return new Map(
+    constituents.map(
+      (constituent) => [
+        normalizeSymbol(
+          constituent.symbol
+        ),
+        constituent,
+      ]
+    )
+  );
+}
+
+
+/*
+ * STFL operational market-cap bands.
+ * Financial values in this service are
+ * stored in INR crores.
+ *
+ * These are deterministic screening
+ * bands, not the AMFI rank-based legal
+ * definition of large/mid/small cap.
+ */
+function getMarketCapCategory(
+  marketCapCr: number | null
+): MarketCapCategory | null {
   if (
-    analytics.status === "unavailable" ||
-    !analytics.company?.symbol
+    marketCapCr === null ||
+    marketCapCr < 0
   ) {
     return null;
   }
+
+  if (marketCapCr >= 20_000) {
+    return "LARGE_CAP";
+  }
+
+  if (marketCapCr >= 5_000) {
+    return "MID_CAP";
+  }
+
+  if (marketCapCr >= 500) {
+    return "SMALL_CAP";
+  }
+
+  return "MICRO_CAP";
+}
+
+
+function resolveClassification(
+  symbol: string,
+  analytics: PublisherAnalytics,
+  nifty500BySymbol:
+    Map<string, Nifty500Constituent>,
+  marketCapCr: number | null
+): ScreenerClassification {
+  const normalizedSymbol =
+    normalizeSymbol(symbol);
+
+  const directGroup =
+    findDirectBusinessPeerGroup(
+      normalizedSymbol
+    );
+
+  const nifty500Company =
+    nifty500BySymbol.get(
+      normalizedSymbol
+    );
+
+  const existingClassification =
+    analytics.company
+      ?.classification;
+
+  return {
+    sector:
+      directGroup?.sector ??
+      existingClassification
+        ?.sector ??
+      null,
+
+    industry:
+      directGroup?.industry ??
+      nifty500Company?.industry
+        ?.trim() ??
+      existingClassification
+        ?.industry ??
+      null,
+
+    subIndustry:
+      directGroup?.peerGroup ??
+      existingClassification
+        ?.subIndustry ??
+      null,
+
+    marketCapCategory:
+      getMarketCapCategory(
+        marketCapCr
+      ) ??
+      existingClassification
+        ?.marketCapCategory ??
+      null,
+  };
+}
+
+
+function buildSnapshot(
+  analytics: PublisherAnalytics,
+  instrument: NseCashEquity,
+  nifty500BySymbol:
+    Map<string, Nifty500Constituent>
+): ScreenerSnapshot | null {
+  const symbol =
+    analytics.symbol?.trim() ||
+    analytics.company?.symbol?.trim() ||
+    instrument.symbol;
+
+  // Do not attribute another company's filings to this instrument.
+  if (
+    analytics.status === "unavailable" ||
+    !symbol ||
+    symbol.toUpperCase() !== instrument.symbol
+  ) {
+    return null;
+  }
+
+  const companyName =
+    analytics.companyName?.trim() ||
+    analytics.company?.companyName?.trim() ||
+    instrument.companyName;
+
+  const sourceUpdatedAt =
+    analytics.generatedAt ||
+    new Date().toISOString();
 
   const metrics = analytics.metrics;
   const latestAnnual =
@@ -323,7 +496,7 @@ function buildSnapshot(
       : null;
 
   const dividendConsistencyYears =
-    analytics.annualFinancials
+    (analytics.annualFinancials ?? [])
       .slice()
       .sort((first, second) =>
         (second.endDate ?? "").localeCompare(
@@ -346,13 +519,21 @@ function buildSnapshot(
     analytics.market?.marketCapitalization
   );
 
+  const classification =
+    resolveClassification(
+      symbol,
+      analytics,
+      nifty500BySymbol,
+      marketCap
+    );
+
   const latestPeriod =
     latestAnnual?.endDate ?? null;
 
   const dataQualityScore =
     buildDataQualityScore([
-      analytics.company.classification.sector,
-      analytics.company.classification.industry,
+      classification.sector,
+      classification.industry,
       marketCap,
       latestPeriod,
       revenueCagr,
@@ -369,8 +550,8 @@ function buildSnapshot(
     ]);
 
   const fingerprintSource = JSON.stringify({
-    symbol: analytics.company.symbol,
-    generatedAt: analytics.generatedAt,
+    symbol,
+    generatedAt: sourceUpdatedAt,
     latestPeriod,
     marketCap,
     revenueCagr,
@@ -381,28 +562,21 @@ function buildSnapshot(
     ocfToPat,
     pe,
     pb,
+    classification,
     valuations,
   });
 
   return {
-    symbol:
-      analytics.company.symbol
-        .trim()
-        .toUpperCase(),
-    companyName:
-      analytics.company.companyName.trim(),
-    exchange: analytics.company.exchange,
-    sector:
-      analytics.company.classification.sector,
-    industry:
-      analytics.company.classification.industry,
+    symbol: symbol.toUpperCase(),
+    companyName,
+    exchange: instrument.exchange,
+    sector: classification.sector,
+    industry: classification.industry,
     subIndustry:
-      analytics.company.classification
-        .subIndustry,
+      classification.subIndustry,
     marketCapCr: marketCap,
     marketCapCategory:
-      analytics.company.classification
-        .marketCapCategory,
+      classification.marketCapCategory,
     latestAnnualPeriod: latestPeriod,
     revenueCagrPercent: revenueCagr,
     patCagrPercent: patCagr,
@@ -421,7 +595,7 @@ function buildSnapshot(
       createHash("sha256")
         .update(fingerprintSource)
         .digest("hex"),
-    sourceUpdatedAt: analytics.generatedAt,
+    sourceUpdatedAt,
   };
 }
 
@@ -509,6 +683,23 @@ export async function POST(
     const universe =
       await getAllNseEquities();
 
+    const nifty500Constituents =
+      await getNifty500Constituents()
+        .catch((error) => {
+          console.warn(
+            "Nifty 500 classification data unavailable:",
+            error
+          );
+
+          return [] as
+            Nifty500Constituent[];
+        });
+
+    const nifty500BySymbol =
+      buildNifty500BySymbol(
+        nifty500Constituents
+      );
+
     const companyEquities =
       universe.equities.filter(
         (instrument) =>
@@ -568,10 +759,14 @@ export async function POST(
 
         const analytics =
           await response.json() as
-            FundamentalResearchResponse;
+            PublisherAnalytics;
 
         const snapshot =
-          buildSnapshot(analytics);
+          buildSnapshot(
+            analytics,
+            instrument,
+            nifty500BySymbol
+          );
 
         if (!snapshot) {
           skipped.push({

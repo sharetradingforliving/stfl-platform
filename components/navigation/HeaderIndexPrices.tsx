@@ -136,39 +136,66 @@ export default function HeaderIndexPrices() {
     async function loadIndices() {
       try {
         const response =
-          await fetch(
-            "/api/upstox/indices",
-            {
-              method: "GET",
-              cache: "no-store",
-            }
-          );
+  await fetch(
+    "/api/upstox/indices",
+    {
+      method: "GET",
+      cache: "no-store",
+    }
+  );
 
-        const data =
-          (await response.json()) as
-            IndexApiResponse;
+if (!response.ok) {
+  console.warn(
+    "Header index prices unavailable:",
+    response.status
+  );
 
-        if (
-          !response.ok ||
-          !Array.isArray(
-            data.indices
-          )
-        ) {
-          throw new Error(
-            "Index data is unavailable"
-          );
-        }
+  return;
+}
 
-        if (requestIsActive) {
-          setIndices(
-            data.indices
-          );
-        }
-      } catch (error) {
-        console.error(
-          "Header index prices error:",
-          error
-        );
+const contentType =
+  response.headers.get(
+    "content-type"
+  ) ?? "";
+
+if (
+  !contentType.includes(
+    "application/json"
+  )
+) {
+  console.warn(
+    "Header index prices returned a non-JSON response."
+  );
+
+  return;
+}
+
+const data =
+  (await response.json()) as
+    IndexApiResponse;
+
+if (
+  !Array.isArray(
+    data.indices
+  )
+) {
+  console.warn(
+    "Header index prices response did not contain an indices array."
+  );
+
+  return;
+}
+
+if (requestIsActive) {
+  setIndices(
+    data.indices
+  );
+}
+} catch (error) {
+  console.warn(
+    "Header index prices unavailable:",
+    error
+  );
 
         /*
          * Retain the most recent valid

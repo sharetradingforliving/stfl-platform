@@ -1,3 +1,6 @@
+import {
+  auth,
+} from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 import type {
@@ -23,9 +26,96 @@ type UpstoxQuoteResponse = {
   source?: string | null;
 };
 
+type SubscriptionStatusResponse = {
+  authenticated?: boolean;
+  entitlement?: string;
+  is_premium?: boolean;
+};
+
+async function hasPremiumValuationAccess(): Promise<boolean> {
+  try {
+    const {
+      userId,
+      getToken,
+    } = await auth();
+
+    if (!userId) {
+      return false;
+    }
+
+    const token =
+      await getToken();
+
+    if (!token) {
+      return false;
+    }
+
+    const backendUrl =
+      process.env.STFL_BACKEND_URL;
+
+    if (!backendUrl) {
+      console.error(
+        "STFL_BACKEND_URL is missing. Valuation access was denied."
+      );
+
+      return false;
+    }
+
+    const response = await fetch(
+      `${backendUrl.replace(
+        /\/$/,
+        ""
+      )}/api/subscription/status`,
+      {
+        method: "GET",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          Authorization:
+            `Bearer ${token}`,
+        },
+
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const subscription =
+      (await response.json()) as
+        SubscriptionStatusResponse;
+
+    return (
+      subscription.is_premium ===
+        true ||
+      subscription.entitlement
+        ?.trim()
+        .toUpperCase() ===
+        "PREMIUM"
+    );
+  } catch (error) {
+    console.error(
+      "Valuation entitlement check failed:",
+      error
+    );
+
+    /*
+     * Fail closed. Public financial data
+     * remains available, but Premium
+     * valuation output is not exposed.
+     */
+    return false;
+  }
+}
+
 async function getMarketSnapshot(
   request: Request,
-  symbol: string
+  symbol: string,
+  exchange: "NSE" | "BSE"
 ): Promise<MarketSnapshot | null> {
   try {
     const requestUrl =
@@ -40,9 +130,9 @@ async function getMarketSnapshot(
       );
 
     quoteUrl.searchParams.set(
-      "exchange",
-      "NSE"
-    );
+  "exchange",
+  exchange
+);
 
     /*
      * Forward the browser cookie because
@@ -174,6 +264,16 @@ export async function GET(
 
     const { searchParams } =
       new URL(request.url);
+
+      const selectedExchange:
+  | "NSE"
+  | "BSE" =
+  searchParams
+    .get("exchange")
+    ?.trim()
+    .toUpperCase() === "BSE"
+    ? "BSE"
+    : "NSE";
 
     /*
      * Invalid or unavailable assumptions
@@ -350,35 +450,73 @@ export async function GET(
     };
 
     const marketSnapshot =
-      await getMarketSnapshot(
-        request,
-        stockSymbol
-      );
+  await getMarketSnapshot(
+    request,
+    stockSymbol,
+    selectedExchange
+  );
 
     const analytics =
-      await getFundamentalAnalytics(
-        stockSymbol,
-        marketSnapshot,
-        waccAssumptions,
-        dcfAssumptions,
-        relativeBenchmarks
-      );
+  await getFundamentalAnalytics(
+    stockSymbol,
+    marketSnapshot,
+    waccAssumptions,
+    dcfAssumptions,
+    relativeBenchmarks
+  );
 
-    return NextResponse.json(
-      analytics,
-      {
-        status:
-          analytics.status ===
-          "unavailable"
-            ? 404
-            : 200,
+const hasPremiumAccess =
+  await hasPremiumValuationAccess();
 
-        headers: {
-          "Cache-Control":
-            "no-store",
+/*
+ * Public financial statements remain
+ * available to everyone. Detailed
+ * valuation calculations are returned
+ * only to an active Premium subscriber.
+ */
+const responseAnalytics =
+  hasPremiumAccess
+    ? {
+        ...analytics,
+
+        valuationAccess: {
+          available: true,
+          entitlement: "PREMIUM",
+          reason:
+            "ACTIVE_PAID_SUBSCRIPTION",
         },
       }
-    );
+    : {
+        ...analytics,
+
+        valuation: null,
+
+        valuationAccess: {
+          available: false,
+          entitlement: "FREE",
+          reason:
+            "PREMIUM_REQUIRED",
+        },
+      };
+
+return NextResponse.json(
+  responseAnalytics,
+  {
+    status:
+      analytics.status ===
+      "unavailable"
+        ? 404
+        : 200,
+
+    headers: {
+      "Cache-Control":
+        "private, no-store, max-age=0",
+
+      Vary:
+        "Cookie, Authorization",
+    },
+  }
+);
   } catch (error) {
     console.error(
       "Fundamental analytics route error:",

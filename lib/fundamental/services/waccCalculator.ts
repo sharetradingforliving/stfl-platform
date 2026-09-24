@@ -22,10 +22,8 @@ export type WaccInputs = {
   riskFreeRate: WaccInput;
   beta: WaccInput;
   equityRiskPremium: WaccInput;
-
   marketCapitalization: WaccInput;
   totalDebt: WaccInput;
-
   financeCosts: WaccInput;
   profitBeforeTax: WaccInput;
   taxExpense: WaccInput;
@@ -34,30 +32,14 @@ export type WaccInputs = {
 export type WaccResult = {
   applicable: boolean;
   suitabilityReason: string;
-
   inputs: WaccInputs;
-
-  costOfEquity:
-    NullableNumber;
-
-  preTaxCostOfDebt:
-    NullableNumber;
-
-  effectiveTaxRate:
-    NullableNumber;
-
-  afterTaxCostOfDebt:
-    NullableNumber;
-
-  equityWeight:
-    NullableNumber;
-
-  debtWeight:
-    NullableNumber;
-
-  wacc:
-    NullableNumber;
-
+  costOfEquity: NullableNumber;
+  preTaxCostOfDebt: NullableNumber;
+  effectiveTaxRate: NullableNumber;
+  afterTaxCostOfDebt: NullableNumber;
+  equityWeight: NullableNumber;
+  debtWeight: NullableNumber;
+  wacc: NullableNumber;
   warnings: string[];
 };
 
@@ -79,6 +61,15 @@ function isPositiveNumber(
   );
 }
 
+function isAvailableInput(
+  input: WaccInput
+): boolean {
+  return (
+    input.source !== "UNAVAILABLE" &&
+    isFiniteNumber(input.value)
+  );
+}
+
 function safeDivide(
   numerator: NullableNumber,
   denominator: NullableNumber
@@ -97,11 +88,10 @@ function percentage(
   numerator: NullableNumber,
   denominator: NullableNumber
 ): NullableNumber {
-  const ratio =
-    safeDivide(
-      numerator,
-      denominator
-    );
+  const ratio = safeDivide(
+    numerator,
+    denominator
+  );
 
   return ratio === null
     ? null
@@ -119,10 +109,7 @@ function clampPercentage(
 
   return Math.min(
     maximum,
-    Math.max(
-      minimum,
-      value
-    )
+    Math.max(minimum, value)
   );
 }
 
@@ -152,53 +139,51 @@ export function calculateWacc(
 
   const riskFreeRate =
     inputs.riskFreeRate.value;
-
-  const beta =
-    inputs.beta.value;
-
+  const beta = inputs.beta.value;
   const equityRiskPremium =
     inputs.equityRiskPremium.value;
-
   const marketCapitalization =
     inputs.marketCapitalization.value;
-
   const totalDebt =
     inputs.totalDebt.value;
-
   const financeCosts =
     inputs.financeCosts.value;
-
   const profitBeforeTax =
     inputs.profitBeforeTax.value;
-
   const taxExpense =
     inputs.taxExpense.value;
 
   const costOfEquity =
-    isFiniteNumber(
-      riskFreeRate
-    ) &&
+    isFiniteNumber(riskFreeRate) &&
     isFiniteNumber(beta) &&
-    isFiniteNumber(
-      equityRiskPremium
-    )
+    isFiniteNumber(equityRiskPremium)
       ? riskFreeRate +
-        beta *
-          equityRiskPremium
+        beta * equityRiskPremium
       : null;
 
   /*
-   * Finance cost divided by closing
-   * debt is a practical approximation.
-   * A debt-average calculation can
-   * replace it when complete historical
-   * debt data is available.
+   * A reported zero debt balance is a
+   * valid debt-free capital structure,
+   * not missing data. In that case the
+   * cost of debt and debt weight are zero.
    */
+  const hasVerifiedZeroDebt =
+    isAvailableInput(inputs.totalDebt) &&
+    totalDebt === 0;
+
+  const hasPositiveDebt =
+    isAvailableInput(inputs.totalDebt) &&
+    isPositiveNumber(totalDebt);
+
   const preTaxCostOfDebt =
-    percentage(
-      financeCosts,
-      totalDebt
-    );
+    hasVerifiedZeroDebt
+      ? 0
+      : hasPositiveDebt
+        ? percentage(
+            financeCosts,
+            totalDebt
+          )
+        : null;
 
   const calculatedTaxRate =
     percentage(
@@ -206,10 +191,6 @@ export function calculateWacc(
       profitBeforeTax
     );
 
-  /*
-   * Prevent unusual tax items from
-   * creating an unusable WACC.
-   */
   const effectiveTaxRate =
     clampPercentage(
       calculatedTaxRate,
@@ -218,27 +199,24 @@ export function calculateWacc(
     );
 
   const afterTaxCostOfDebt =
-    isFiniteNumber(
-      preTaxCostOfDebt
-    ) &&
-    isFiniteNumber(
-      effectiveTaxRate
-    )
-      ? preTaxCostOfDebt *
-        (
-          1 -
-          effectiveTaxRate /
-            100
-        )
-      : null;
+    hasVerifiedZeroDebt
+      ? 0
+      : isFiniteNumber(
+            preTaxCostOfDebt
+          ) &&
+          isFiniteNumber(
+            effectiveTaxRate
+          )
+        ? preTaxCostOfDebt *
+          (1 - effectiveTaxRate / 100)
+        : null;
 
   const totalCapital =
-    isFiniteNumber(
+    isPositiveNumber(
       marketCapitalization
     ) &&
-    isFiniteNumber(
-      totalDebt
-    )
+    isFiniteNumber(totalDebt) &&
+    totalDebt >= 0
       ? marketCapitalization +
         totalDebt
       : null;
@@ -256,22 +234,14 @@ export function calculateWacc(
     );
 
   const wacc =
-    isFiniteNumber(
-      costOfEquity
-    ) &&
+    isFiniteNumber(costOfEquity) &&
     isFiniteNumber(
       afterTaxCostOfDebt
     ) &&
-    isFiniteNumber(
-      equityWeight
-    ) &&
-    isFiniteNumber(
-      debtWeight
-    )
-      ? costOfEquity *
-          equityWeight +
-        afterTaxCostOfDebt *
-          debtWeight
+    isFiniteNumber(equityWeight) &&
+    isFiniteNumber(debtWeight)
+      ? costOfEquity * equityWeight +
+        afterTaxCostOfDebt * debtWeight
       : null;
 
   if (
@@ -285,9 +255,9 @@ export function calculateWacc(
   }
 
   if (
-    !isPositiveNumber(
-      totalDebt
-    )
+    !isAvailableInput(inputs.totalDebt) ||
+    !isFiniteNumber(totalDebt) ||
+    totalDebt < 0
   ) {
     warnings.push(
       "Verified total debt is unavailable."
@@ -295,9 +265,8 @@ export function calculateWacc(
   }
 
   if (
-    !isPositiveNumber(
-      financeCosts
-    )
+    hasPositiveDebt &&
+    !isFiniteNumber(financeCosts)
   ) {
     warnings.push(
       "Verified finance cost is unavailable."
@@ -305,10 +274,15 @@ export function calculateWacc(
   }
 
   if (
-    !isFiniteNumber(
-      riskFreeRate
-    )
+    hasPositiveDebt &&
+    !isFiniteNumber(effectiveTaxRate)
   ) {
+    warnings.push(
+      "A valid effective tax rate is unavailable."
+    );
+  }
+
+  if (!isFiniteNumber(riskFreeRate)) {
     warnings.push(
       "Risk-free rate is unavailable."
     );
@@ -330,20 +304,17 @@ export function calculateWacc(
     );
   }
 
-  const cleanWarnings =
-    uniqueWarnings(warnings);
-
   return {
-    applicable:
-      wacc !== null,
+    applicable: wacc !== null,
 
     suitabilityReason:
       wacc !== null
-        ? "WACC was calculated using market-value capital weights, CAPM cost of equity and the after-tax cost of debt."
+        ? hasVerifiedZeroDebt
+          ? "WACC equals the CAPM cost of equity because the latest verified filing reports no debt."
+          : "WACC was calculated using market-value capital weights, CAPM cost of equity and the after-tax cost of debt."
         : "WACC could not be calculated because one or more required market or assumption inputs are unavailable.",
 
     inputs,
-
     costOfEquity,
     preTaxCostOfDebt,
     effectiveTaxRate,
@@ -351,8 +322,6 @@ export function calculateWacc(
     equityWeight,
     debtWeight,
     wacc,
-
-    warnings:
-      cleanWarnings,
+    warnings: uniqueWarnings(warnings),
   };
 }

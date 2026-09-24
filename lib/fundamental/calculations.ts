@@ -338,6 +338,12 @@ function calculateGrowthMetrics(
       latest
     );
 
+    const previous =
+  findHistoricalPeriod(
+    annualPeriods,
+    1
+  );
+
   /*
    * Generic corporate growth metrics
    * are not presented for banks.
@@ -353,40 +359,76 @@ function calculateGrowthMetrics(
    * growth and bank-specific ratios.
    */
   if (isBankingCompany) {
-    return {
-      availableCagrYears,
+  const latestEps =
+    latest?.epsDiluted ??
+    latest?.epsBasic ??
+    null;
 
-      revenueGrowth1Y: null,
-      revenueCagrAvailable: null,
-      revenueCagr3Y: null,
-      revenueCagr5Y: null,
-      revenueCagr10Y: null,
+  const previousEps =
+    previous?.epsDiluted ??
+    previous?.epsBasic ??
+    null;
 
-      ebitdaGrowth1Y: null,
-      ebitdaCagrAvailable: null,
-      ebitdaCagr3Y: null,
-      ebitdaCagr5Y: null,
+  return {
+    availableCagrYears,
 
-      patGrowth1Y: null,
-      patCagrAvailable: null,
-      patCagr3Y: null,
-      patCagr5Y: null,
-      patCagr10Y: null,
+    /*
+     * For banks, the normalized revenue field
+     * represents total banking income.
+     *
+     * Only the latest one-year comparison is
+     * used because FY25 and FY26 come from the
+     * same official NSE Integrated taxonomy.
+     */
+    revenueGrowth1Y:
+      calculateGrowth(
+        latest?.revenue ?? null,
+        previous?.revenue ?? null
+      ),
 
-      epsGrowth1Y: null,
-      epsCagrAvailable: null,
-      epsCagr3Y: null,
-      epsCagr5Y: null,
-    };
-  }
+    revenueCagrAvailable: null,
+    revenueCagr3Y: null,
+    revenueCagr5Y: null,
+    revenueCagr10Y: null,
 
-  const previous =
-    findHistoricalPeriod(
-      annualPeriods,
-      1
-    );
+    /*
+     * EBITDA is not an appropriate banking
+     * performance measure.
+     */
+    ebitdaGrowth1Y: null,
+    ebitdaCagrAvailable: null,
+    ebitdaCagr3Y: null,
+    ebitdaCagr5Y: null,
 
-  const threeYearsAgo =
+    /*
+     * PAT and EPS remain valid measures for
+     * banks and can be compared across the
+     * latest verified annual periods.
+     */
+    patGrowth1Y:
+      calculateGrowth(
+        latest?.netProfit ?? null,
+        previous?.netProfit ?? null
+      ),
+
+    patCagrAvailable: null,
+    patCagr3Y: null,
+    patCagr5Y: null,
+    patCagr10Y: null,
+
+    epsGrowth1Y:
+      calculateGrowth(
+        latestEps,
+        previousEps
+      ),
+
+    epsCagrAvailable: null,
+    epsCagr3Y: null,
+    epsCagr5Y: null,
+  };
+}
+
+    const threeYearsAgo =
     findHistoricalPeriod(
       annualPeriods,
       3

@@ -1,4 +1,8 @@
 import {
+  auth,
+} from "@clerk/nextjs/server";
+
+import {
   NextResponse,
 } from "next/server";
 
@@ -48,6 +52,208 @@ type LoadedAnalytics = {
 
   error: string | null;
 };
+
+async function requirePremiumValuationAccess():
+  Promise<NextResponse | null> {
+  const {
+    userId,
+    getToken,
+  } = await auth();
+
+  if (!userId) {
+    return NextResponse.json(
+      {
+        status: "error",
+        authenticated: false,
+        entitlement: "FREE",
+        is_premium: false,
+        code: "AUTHENTICATION_REQUIRED",
+        detail:
+          "Sign in is required to access detailed company valuation.",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const token =
+    await getToken();
+
+  if (!token) {
+    return NextResponse.json(
+      {
+        status: "error",
+        authenticated: false,
+        entitlement: "FREE",
+        is_premium: false,
+        code: "AUTHENTICATION_REQUIRED",
+        detail:
+          "Unable to obtain the Clerk session token.",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  const backendUrl =
+    process.env.STFL_BACKEND_URL;
+
+  if (!backendUrl) {
+    console.error(
+      "STFL_BACKEND_URL is missing from frontend/.env.local"
+    );
+
+    return NextResponse.json(
+      {
+        status: "error",
+        authenticated: true,
+        entitlement: "FREE",
+        is_premium: false,
+        code:
+          "SUBSCRIPTION_SERVICE_NOT_CONFIGURED",
+        detail:
+          "Subscription service is not configured.",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+
+  try {
+    const backendResponse =
+      await fetch(
+        `${backendUrl.replace(
+          /\/$/,
+          ""
+        )}/api/subscription/status`,
+        {
+          method: "GET",
+
+          headers: {
+            Accept:
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`,
+          },
+
+          cache: "no-store",
+        }
+      );
+
+    const responseText =
+      await backendResponse.text();
+
+    let responseData:
+      Record<string, unknown>;
+
+    try {
+      const parsedData:
+        unknown =
+          JSON.parse(
+            responseText
+          );
+
+      responseData =
+        parsedData !== null &&
+        typeof parsedData ===
+          "object" &&
+        !Array.isArray(
+          parsedData
+        )
+          ? (
+              parsedData as
+                Record<
+                  string,
+                  unknown
+                >
+            )
+          : {};
+    } catch {
+      responseData = {};
+    }
+
+    if (!backendResponse.ok) {
+      return NextResponse.json(
+        Object.keys(
+          responseData
+        ).length > 0
+          ? responseData
+          : {
+              status: "error",
+              code:
+                "SUBSCRIPTION_CHECK_FAILED",
+              detail:
+                "Unable to verify Premium access.",
+            },
+        {
+          status:
+            backendResponse.status,
+        }
+      );
+    }
+
+    const isPremium =
+      responseData.is_premium ===
+        true ||
+      responseData.entitlement ===
+        "PREMIUM";
+
+    if (!isPremium) {
+      return NextResponse.json(
+        {
+          status: "error",
+          authenticated: true,
+          entitlement:
+            responseData.entitlement ??
+            "FREE",
+          is_premium: false,
+          code:
+            "PREMIUM_REQUIRED",
+          detail:
+            "An active STFL Premium subscription is required to access detailed company valuation.",
+          upgrade: {
+            monthly_price_inr:
+              299,
+            annual_price_inr:
+              2999,
+            url:
+              "/premium",
+          },
+        },
+        {
+          status: 403,
+        }
+      );
+    }
+
+    return null;
+  } catch (error) {
+    console.error(
+      "Company valuation Premium access check failed:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        status: "error",
+        authenticated: true,
+        entitlement: "FREE",
+        is_premium: false,
+        code:
+          "SUBSCRIPTION_SERVICE_UNAVAILABLE",
+        detail:
+          "Subscription service is temporarily unavailable.",
+      },
+      {
+        status: 503,
+      }
+    );
+  }
+}
 
 function parsePeerSymbols(
   searchParams: URLSearchParams
@@ -308,6 +514,12 @@ function analyticsToPeerCompany(
   const metrics =
     analytics.metrics;
 
+    const bankMetrics =
+  metrics
+    ?.industrySpecific
+    .bank ?? null;
+    
+
   return {
     symbol:
       requestedSymbol,
@@ -316,17 +528,53 @@ function analyticsToPeerCompany(
       analytics.companyName ??
       requestedSymbol,
 
+      isBanking:
+  bankMetrics !== null,
+
+depositGrowth:
+  bankMetrics
+    ?.depositGrowth ??
+  null,
+
+creditGrowth:
+  bankMetrics
+    ?.creditGrowth ??
+  null,
+
+returnOnAssets:
+  metrics
+    ?.profitability
+    .returnOnAssets ??
+  bankMetrics
+    ?.returnOnAssets ??
+  null,
+
+    /*
+     * Use a consistent period basis for
+     * every company in a peer set.
+     *
+     * Non-banks use verified three-year
+     * CAGR. Banks use latest annual YoY
+     * growth, matching deposit and credit
+     * growth reporting.
+     */
     revenueGrowth:
-      metrics
-        ?.growth
-        .revenueGrowth1Y ??
-      null,
+      bankMetrics !== null
+        ? metrics?.growth
+            .revenueGrowth1Y ??
+          null
+        : metrics?.growth
+            .revenueCagr3Y ??
+          null,
 
     patGrowth:
-      metrics
-        ?.growth
-        .patGrowth1Y ??
-      null,
+      bankMetrics !== null
+        ? metrics?.growth
+            .patGrowth1Y ??
+          null
+        : metrics?.growth
+            .patCagr3Y ??
+          null,
 
     ebitdaMargin:
       metrics
@@ -377,6 +625,15 @@ export async function GET(
   { params }: RouteContext
 ) {
   try {
+    const accessDeniedResponse =
+      await requirePremiumValuationAccess();
+
+    if (
+      accessDeniedResponse
+    ) {
+      return accessDeniedResponse;
+    }
+
     const { symbol } =
       await params;
 

@@ -478,6 +478,22 @@ function handleSearchKeyDown(
   }
 }
 
+function getMarketCapQueryValue(
+  value: string
+): string {
+  const values: Record<
+    string,
+    string
+  > = {
+    "Large Cap": "LARGE_CAP",
+    "Mid Cap": "MID_CAP",
+    "Small Cap": "SMALL_CAP",
+    "Micro Cap": "MICRO_CAP",
+  };
+
+  return values[value] ?? value;
+}
+
 async function runScreener() {
   if (isScreening) {
     return;
@@ -495,7 +511,9 @@ async function runScreener() {
         sector: selectedSector,
         industry: selectedIndustry,
         marketCap:
-          selectedMarketCap,
+  getMarketCapQueryValue(
+    selectedMarketCap
+  ),
         investmentStyle:
           selectedInvestmentStyle,
         valuationMethod:

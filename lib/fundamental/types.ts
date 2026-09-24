@@ -428,6 +428,17 @@ export type PeerCompany = {
   symbol: string;
   companyName: string;
 
+    isBanking: boolean;
+
+  depositGrowth:
+    NullableNumber;
+
+  creditGrowth:
+    NullableNumber;
+
+  returnOnAssets:
+    NullableNumber;
+
   revenueGrowth:
     NullableNumber;
 

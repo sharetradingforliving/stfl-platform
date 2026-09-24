@@ -6,6 +6,17 @@ export type PeerComparisonCompany = {
   symbol: string;
   companyName: string;
 
+  isBanking?: boolean;
+
+  depositGrowth?:
+    NullableNumber;
+
+  creditGrowth?:
+    NullableNumber;
+
+  returnOnAssets?:
+    NullableNumber;
+
   revenueGrowth:
     NullableNumber;
 
@@ -48,6 +59,9 @@ export type PeerMedianPosition =
 export type PeerMetricKey =
   | "REVENUE_GROWTH"
   | "PAT_GROWTH"
+  | "DEPOSIT_GROWTH"
+  | "CREDIT_GROWTH"
+  | "RETURN_ON_ASSETS"
   | "EBITDA_MARGIN"
   | "RETURN_ON_EQUITY"
   | "RETURN_ON_CAPITAL_EMPLOYED"
@@ -322,6 +336,33 @@ function getCompanyValue(
   }
 
   if (
+    key === "DEPOSIT_GROWTH"
+  ) {
+    return (
+      company.depositGrowth ??
+      null
+    );
+  }
+
+  if (
+    key === "CREDIT_GROWTH"
+  ) {
+    return (
+      company.creditGrowth ??
+      null
+    );
+  }
+
+  if (
+    key === "RETURN_ON_ASSETS"
+  ) {
+    return (
+      company.returnOnAssets ??
+      null
+    );
+  }
+
+  if (
     key === "EBITDA_MARGIN"
   ) {
     return company.ebitdaMargin;
@@ -386,6 +427,64 @@ export default function PeerComparisonResult({
     ranking.selectedCompany,
     ...ranking.peers,
   ];
+
+  const isBankingComparison =
+    ranking.selectedCompany
+      .isBanking === true;
+
+  const detailedComparisonMetrics:
+    {
+      key: PeerMetricKey;
+      label: string;
+    }[] = isBankingComparison
+      ? [
+          {
+            key: "REVENUE_GROWTH",
+            label:
+              "Total Income Growth (YoY)",
+          },
+          {
+            key: "PAT_GROWTH",
+            label: "PAT Growth (YoY)",
+          },
+          {
+            key: "DEPOSIT_GROWTH",
+            label:
+              "Deposit Growth (YoY)",
+          },
+          {
+            key: "CREDIT_GROWTH",
+            label:
+              "Credit Growth (YoY)",
+          },
+          {
+            key: "RETURN_ON_ASSETS",
+            label:
+              "Return on Assets",
+          },
+          {
+            key: "RETURN_ON_EQUITY",
+            label:
+              "Return on Equity",
+          },
+          {
+            key: "PRICE_TO_EARNINGS",
+            label: "P/E",
+          },
+          {
+            key: "PRICE_TO_BOOK",
+            label: "P/B",
+          },
+        ]
+      : [
+          ...ranking
+            .qualityRankings,
+          ...ranking
+            .valuationComparisons,
+        ].map((metric) => ({
+          key: metric.key,
+          label: metric.label,
+        }));
 
   return (
     <div className="space-y-6">
@@ -457,9 +556,13 @@ export default function PeerComparisonResult({
           </h3>
 
           <p className="mt-2 text-sm text-slate-400">
-            Rankings use reported
-            financial metrics from the
-            selected companies.
+            Non-bank growth uses verified
+            three-year CAGR. Banking
+            growth uses latest annual
+            year-on-year values. Each
+            median includes only selected
+            peers with valid comparable
+            data for that metric.
           </p>
         </div>
 
@@ -527,6 +630,37 @@ export default function PeerComparisonResult({
             )
           )}
         </div>
+      </div>
+
+      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+          STFL Research Interpretation
+        </p>
+
+        <h3 className="mt-2 text-xl font-bold text-white">
+          What this comparison means
+        </h3>
+
+        <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-300">
+          {ranking.summary.map(
+            (statement, index) => (
+              <li
+                key={`interpretation-${statement}-${index}`}
+                className="flex gap-3"
+              >
+                <span className="text-emerald-400">
+                  •
+                </span>
+
+                <span>{statement}</span>
+              </li>
+            )
+          )}
+        </ul>
+
+        <p className="mt-4 text-xs leading-5 text-slate-500">
+          This explanation is generated deterministically from verified values, not from unverified external text. Growth, profitability and leverage describe operating quality; valuation multiples show market positioning and do not independently establish fair value.
+        </p>
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-slate-950 p-6">
@@ -645,12 +779,7 @@ export default function PeerComparisonResult({
                   Company
                 </th>
 
-                {[
-                  ...ranking
-                    .qualityRankings,
-                  ...ranking
-                    .valuationComparisons,
-                ].map((metric) => (
+                {detailedComparisonMetrics.map((metric) => (
                   <th
                     key={metric.key}
                     className="whitespace-nowrap px-4 py-4"
@@ -711,12 +840,7 @@ export default function PeerComparisonResult({
                         </div>
                       </td>
 
-                      {[
-                        ...ranking
-                          .qualityRankings,
-                        ...ranking
-                          .valuationComparisons,
-                      ].map(
+                      {detailedComparisonMetrics.map(
                         (metric) => (
                           <td
                             key={`${company.symbol}-${metric.key}`}

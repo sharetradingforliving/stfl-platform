@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import PeerComparisonResult, {
   type PeerComparisonRanking,
 } from "./PeerComparisonResult";
@@ -21,6 +21,11 @@ type PeerCandidate = {
 type PeerCompany = {
   symbol: string;
   companyName: string;
+
+  isBanking: boolean;
+  depositGrowth: number | null;
+  creditGrowth: number | null;
+  returnOnAssets: number | null;
 
   revenueGrowth: number | null;
   patGrowth: number | null;
@@ -108,6 +113,11 @@ type PeerApiResponse = {
     | "selection_required"
     | "unavailable"
     | "error";
+  authenticated?: boolean;
+  entitlement?: string;
+  is_premium?: boolean;
+  code?: string;
+  detail?: string;
 
   symbol: string;
 
@@ -121,6 +131,9 @@ type PeerApiResponse = {
   PeerComparisonRanking | null;
 
   peerCompanies?: PeerCompany[];
+
+  selectedCompanyComparison?:
+    PeerCompany | null;
 
   peerValuation?: PeerValuation | null;
 
@@ -136,7 +149,12 @@ type PeerValuationPanelProps = {
   symbol: string;
 };
 
-const MINIMUM_PEERS = 1;
+type ValuationAccessState =
+  | "allowed"
+  | "signed_out"
+  | "premium_required";
+
+const MINIMUM_PEERS = 3;
 const MAXIMUM_PEERS = 5;
 
 function formatNumber(
@@ -294,11 +312,20 @@ export default function PeerValuationPanel({
   const [error, setError] =
     useState("");
 
+  const [
+    accessState,
+    setAccessState,
+  ] = useState<ValuationAccessState>(
+    "allowed"
+  );
+
   const loadPeerUniverse =
     useCallback(async () => {
       try {
         setIsLoadingUniverse(true);
         setError("");
+        setAccessState("allowed");
+        setPeerUniverse(null);
 
         const response = await fetch(
           `/api/fundamental/peers/${encodeURIComponent(
@@ -314,13 +341,40 @@ export default function PeerValuationPanel({
           (await response.json()) as
             PeerApiResponse;
 
+        if (
+          response.status === 401 ||
+          data.code ===
+            "AUTHENTICATION_REQUIRED"
+        ) {
+          setAccessState(
+            "signed_out"
+          );
+
+          return;
+        }
+
+        if (
+          response.status === 403 ||
+          data.code ===
+            "PREMIUM_REQUIRED"
+        ) {
+          setAccessState(
+            "premium_required"
+          );
+
+          return;
+        }
+
         if (!response.ok) {
           throw new Error(
-            data.details ??
+            data.detail ??
+              data.details ??
               data.error ??
               "Unable to load the peer universe."
           );
         }
+
+        setAccessState("allowed");
 
         setPeerUniverse(
           data.peerUniverse ?? null
@@ -430,9 +484,30 @@ export default function PeerValuationPanel({
         (await response.json()) as
           PeerApiResponse;
 
+      if (
+        response.status === 401 ||
+        data.code ===
+          "AUTHENTICATION_REQUIRED"
+      ) {
+        setAccessState("signed_out");
+        return;
+      }
+
+      if (
+        response.status === 403 ||
+        data.code ===
+          "PREMIUM_REQUIRED"
+      ) {
+        setAccessState(
+          "premium_required"
+        );
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(
-          data.details ??
+          data.detail ??
+            data.details ??
             data.error ??
             "Unable to calculate peer valuation."
         );
@@ -470,6 +545,145 @@ export default function PeerValuationPanel({
       </div>
     );
   }
+
+  if (
+  accessState ===
+    "signed_out"
+) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-amber-500/30 bg-slate-950">
+      <div className="border-b border-slate-800 bg-gradient-to-r from-amber-500/10 via-slate-950 to-emerald-500/10 px-6 py-7">
+        <div className="flex flex-wrap items-center gap-3">
+          <h3 className="text-xl font-bold text-white">
+            Company Valuation
+          </h3>
+
+          <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-300">
+            PREMIUM
+          </span>
+        </div>
+
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
+          Sign in to access STFL&apos;s
+          company valuation workspace and
+          check your Premium entitlement.
+        </p>
+      </div>
+
+      <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          "Peer-implied fair value",
+          "Detailed peer comparison",
+          "Composite valuation",
+          "Premium or discount analysis",
+        ].map((feature) => (
+          <div
+            key={feature}
+            className="rounded-xl border border-slate-800 bg-slate-900/70 p-4"
+          >
+            <p className="text-sm font-semibold text-slate-200">
+              {feature}
+            </p>
+
+            <p className="mt-2 text-xs text-slate-500">
+              Sign in required
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-4 border-t border-slate-800 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-slate-400">
+          Already a member? Sign in to
+          continue.
+        </p>
+
+        <Link
+          href="/sign-in"
+          className="inline-flex justify-center rounded-xl bg-emerald-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-emerald-300"
+        >
+          Sign in to continue
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+if (
+  accessState ===
+    "premium_required"
+) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-amber-500/30 bg-slate-950">
+      <div className="border-b border-slate-800 bg-gradient-to-r from-amber-500/10 via-slate-950 to-emerald-500/10 px-6 py-7">
+        <div className="flex flex-wrap items-center gap-3">
+          <h3 className="text-xl font-bold text-white">
+            Unlock Complete Company
+            Valuation
+          </h3>
+
+          <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-300">
+            STFL PREMIUM
+          </span>
+        </div>
+
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
+          Upgrade to examine comparable
+          companies, peer-implied fair
+          value, composite valuation and
+          valuation confidence for{" "}
+          <span className="font-semibold text-white">
+            {symbol.toUpperCase()}
+          </span>
+          .
+        </p>
+      </div>
+
+      <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          "Select comparable companies",
+          "Compare financial quality",
+          "Estimate peer fair value",
+          "Review upside or downside",
+        ].map((feature) => (
+          <div
+            key={feature}
+            className="rounded-xl border border-slate-800 bg-slate-900/70 p-4"
+          >
+            <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full border border-amber-400/30 bg-amber-400/10 text-amber-300">
+              ✓
+            </div>
+
+            <p className="text-sm font-semibold text-slate-200">
+              {feature}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-4 border-t border-slate-800 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-white">
+            ₹299 monthly or ₹2,999
+            annually
+          </p>
+
+          <p className="mt-1 text-xs text-slate-500">
+            Includes Premium research
+            features across STFL.
+          </p>
+        </div>
+
+        <Link
+  href="/premium-research"
+  className="inline-flex justify-center rounded-xl bg-amber-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
+>
+  Unlock Premium Research
+</Link>
+      </div>
+    </div>
+  );
+}
 
   if (
     error &&
@@ -731,18 +945,25 @@ export default function PeerValuationPanel({
         </div>
       )}
 
-      {(peerResult
-        .analyticsWarnings
-        ?.length ??
-        0) > 0 && (
-        <WarningPanel
-          title="Peer data warnings"
-          warnings={
-            peerResult
-              .analyticsWarnings ?? []
-          }
-        />
-      )}
+      <PeerResult
+        valuation={
+          peerResult.peerValuation ??
+          null
+        }
+        peerCompanies={
+          peerResult.peerCompanies ??
+          []
+        }
+        selectedCompany={
+          peerResult
+            .selectedCompanyComparison ??
+          null
+        }
+        analyticsWarnings={
+          peerResult.analyticsWarnings ??
+          []
+        }
+      />
     </>
   )}
     </div>
@@ -752,10 +973,12 @@ export default function PeerValuationPanel({
 function PeerResult({
   valuation,
   peerCompanies,
+  selectedCompany,
   analyticsWarnings,
 }: {
   valuation: PeerValuation | null;
   peerCompanies: PeerCompany[];
+  selectedCompany: PeerCompany | null;
   analyticsWarnings: string[];
 }) {
   if (!valuation) {
@@ -888,8 +1111,12 @@ function PeerResult({
       </div>
 
       <PeerComparisonTable
-        peers={peerCompanies}
-      />
+  peers={valuation.peers}
+  isBankingComparison={
+    selectedCompany?.isBanking ===
+      true
+  }
+/>
 
       {(valuation.outlierWarnings
         ?.length ??
@@ -944,57 +1171,68 @@ function ResultCard({
 
 function PeerComparisonTable({
   peers,
+  isBankingComparison,
 }: {
   peers: PeerCompany[];
+  isBankingComparison: boolean;
 }) {
   return (
     <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
-      <div className="p-6">
-        <h3 className="text-lg font-bold">
-          Peer comparison
-        </h3>
-
-        <p className="mt-2 text-sm text-slate-400">
-          Published financial metrics
-          calculated by the same STFL
-          methodology.
-        </p>
-      </div>
-
       <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-sm">
-          <thead className="border-y border-slate-800 bg-slate-900 text-left text-slate-400">
+        <table className="min-w-full text-left text-sm">
+          <thead className="border-y border-slate-800 bg-slate-900 text-xs uppercase tracking-wide text-blue-300">
             <tr>
               <th className="px-4 py-4">
                 Company
               </th>
+
               <th className="px-4 py-4">
-                Revenue Growth
+                {isBankingComparison
+                  ? "Total Income Growth (YoY)"
+                  : "Revenue CAGR (3Y)"}
               </th>
+
               <th className="px-4 py-4">
-                PAT Growth
+                {isBankingComparison
+                  ? "PAT Growth (YoY)"
+                  : "PAT CAGR (3Y)"}
               </th>
+
               <th className="px-4 py-4">
-                EBITDA Margin
+                {isBankingComparison
+                  ? "Deposit Growth (YoY)"
+                  : "EBITDA Margin"}
               </th>
+
               <th className="px-4 py-4">
-                ROE
+                {isBankingComparison
+                  ? "Credit Growth (YoY)"
+                  : "Return on Capital Employed"}
               </th>
+
               <th className="px-4 py-4">
-                ROCE
+                {isBankingComparison
+                  ? "Return on Assets"
+                  : "Debt to Equity"}
               </th>
+
               <th className="px-4 py-4">
-                D/E
+                Return on Equity
               </th>
+
               <th className="px-4 py-4">
                 P/E
               </th>
+
               <th className="px-4 py-4">
                 P/B
               </th>
-              <th className="px-4 py-4">
-                EV/EBITDA
-              </th>
+
+              {!isBankingComparison && (
+                <th className="px-4 py-4">
+                  EV/EBITDA
+                </th>
+              )}
             </tr>
           </thead>
 
@@ -1004,14 +1242,14 @@ function PeerComparisonTable({
                 key={peer.symbol}
                 className="border-b border-slate-800 last:border-b-0"
               >
-                <td className="whitespace-nowrap px-4 py-4">
-                  <p className="font-bold text-white">
+                <td className="px-4 py-4">
+                  <div className="font-bold text-white">
                     {peer.symbol}
-                  </p>
+                  </div>
 
-                  <p className="mt-1 max-w-48 truncate text-xs text-slate-500">
+                  <div className="mt-1 text-xs text-blue-400">
                     {peer.companyName}
-                  </p>
+                  </div>
                 </td>
 
                 <td className="px-4 py-4">
@@ -1028,26 +1266,34 @@ function PeerComparisonTable({
 
                 <td className="px-4 py-4">
                   {formatPercent(
-                    peer.ebitdaMargin
+                    isBankingComparison
+                      ? peer.depositGrowth
+                      : peer.ebitdaMargin
                   )}
+                </td>
+
+                <td className="px-4 py-4">
+                  {formatPercent(
+                    isBankingComparison
+                      ? peer.creditGrowth
+                      : peer
+                          .returnOnCapitalEmployed
+                  )}
+                </td>
+
+                <td className="px-4 py-4">
+                  {isBankingComparison
+                    ? formatPercent(
+                        peer.returnOnAssets
+                      )
+                    : formatNumber(
+                        peer.debtToEquity
+                      )}
                 </td>
 
                 <td className="px-4 py-4">
                   {formatPercent(
                     peer.returnOnEquity
-                  )}
-                </td>
-
-                <td className="px-4 py-4">
-                  {formatPercent(
-                    peer
-                      .returnOnCapitalEmployed
-                  )}
-                </td>
-
-                <td className="px-4 py-4">
-                  {formatNumber(
-                    peer.debtToEquity
                   )}
                 </td>
 
@@ -1063,12 +1309,14 @@ function PeerComparisonTable({
                   )}
                 </td>
 
-                <td className="px-4 py-4">
-                  {formatMultiple(
-                    peer
-                      .enterpriseValueToEbitda
-                  )}
-                </td>
+                {!isBankingComparison && (
+                  <td className="px-4 py-4">
+                    {formatMultiple(
+                      peer
+                        .enterpriseValueToEbitda
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

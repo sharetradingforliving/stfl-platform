@@ -19,6 +19,9 @@ export type PeerMedianPosition =
 export type PeerMetricKey =
   | "REVENUE_GROWTH"
   | "PAT_GROWTH"
+  | "DEPOSIT_GROWTH"
+  | "CREDIT_GROWTH"
+  | "RETURN_ON_ASSETS"
   | "EBITDA_MARGIN"
   | "RETURN_ON_EQUITY"
   | "RETURN_ON_CAPITAL_EMPLOYED"
@@ -93,12 +96,12 @@ type MetricDefinition = {
 const NEAR_MEDIAN_THRESHOLD_PERCENT =
   10;
 
-const QUALITY_METRICS:
+const NON_BANK_QUALITY_METRICS:
   MetricDefinition[] = [
     {
       key: "REVENUE_GROWTH",
 
-      label: "Revenue Growth",
+      label: "Revenue CAGR (3Y)",
 
       direction:
         "HIGHER_IS_BETTER",
@@ -113,7 +116,7 @@ const QUALITY_METRICS:
     {
       key: "PAT_GROWTH",
 
-      label: "PAT Growth",
+      label: "PAT CAGR (3Y)",
 
       direction:
         "HIGHER_IS_BETTER",
@@ -189,7 +192,68 @@ const QUALITY_METRICS:
     },
   ];
 
-const VALUATION_METRICS:
+const BANK_QUALITY_METRICS:
+  MetricDefinition[] = [
+    {
+      key: "REVENUE_GROWTH",
+      label:
+        "Total Income Growth (YoY)",
+      direction:
+        "HIGHER_IS_BETTER",
+      getValue: (company) =>
+        company.revenueGrowth,
+      requiresPositiveValue: false,
+    },
+    {
+      key: "PAT_GROWTH",
+      label: "PAT Growth (YoY)",
+      direction:
+        "HIGHER_IS_BETTER",
+      getValue: (company) =>
+        company.patGrowth,
+      requiresPositiveValue: false,
+    },
+    {
+      key: "DEPOSIT_GROWTH",
+      label:
+        "Deposit Growth (YoY)",
+      direction:
+        "HIGHER_IS_BETTER",
+      getValue: (company) =>
+        company.depositGrowth,
+      requiresPositiveValue: false,
+    },
+    {
+      key: "CREDIT_GROWTH",
+      label:
+        "Credit Growth (YoY)",
+      direction:
+        "HIGHER_IS_BETTER",
+      getValue: (company) =>
+        company.creditGrowth,
+      requiresPositiveValue: false,
+    },
+    {
+      key: "RETURN_ON_ASSETS",
+      label: "Return on Assets",
+      direction:
+        "HIGHER_IS_BETTER",
+      getValue: (company) =>
+        company.returnOnAssets,
+      requiresPositiveValue: false,
+    },
+    {
+      key: "RETURN_ON_EQUITY",
+      label: "Return on Equity",
+      direction:
+        "HIGHER_IS_BETTER",
+      getValue: (company) =>
+        company.returnOnEquity,
+      requiresPositiveValue: false,
+    },
+  ];
+
+const NON_BANK_VALUATION_METRICS:
   MetricDefinition[] = [
     {
       key: "PRICE_TO_EARNINGS",
@@ -238,6 +302,14 @@ const VALUATION_METRICS:
         true,
     },
   ];
+
+const BANK_VALUATION_METRICS:
+  MetricDefinition[] =
+    NON_BANK_VALUATION_METRICS.filter(
+      (definition) =>
+        definition.key !==
+        "ENTERPRISE_VALUE_TO_EBITDA"
+    );
 
 function isFiniteNumber(
   value: NullableNumber
@@ -759,8 +831,22 @@ export function calculatePeerComparisonRanking(
     };
   }
 
+  const isBankingComparison =
+    selectedCompany.isBanking ===
+    true;
+
+  const qualityDefinitions =
+    isBankingComparison
+      ? BANK_QUALITY_METRICS
+      : NON_BANK_QUALITY_METRICS;
+
+  const valuationDefinitions =
+    isBankingComparison
+      ? BANK_VALUATION_METRICS
+      : NON_BANK_VALUATION_METRICS;
+
   const qualityRankings =
-    QUALITY_METRICS.map(
+    qualityDefinitions.map(
       (definition) =>
         prepareMetricRanking(
           selectedCompany,
@@ -770,7 +856,7 @@ export function calculatePeerComparisonRanking(
     );
 
   const valuationComparisons =
-    VALUATION_METRICS.map(
+    valuationDefinitions.map(
       (definition) =>
         prepareMetricRanking(
           selectedCompany,
@@ -830,7 +916,9 @@ export function calculatePeerComparisonRanking(
     available: true,
 
     suitabilityReason:
-      "The selected company was ranked against user-selected Nifty 500 companies from the same published industry. Valuation multiples describe relative market positioning and do not independently establish fair value.",
+      isBankingComparison
+        ? "The selected bank was compared with user-selected banks from the same published industry. Growth metrics use latest annual year-on-year changes; P/E and P/B describe relative market positioning and do not independently establish fair value."
+        : "The selected company was compared with user-selected Nifty 500 companies from the same published industry. Revenue and PAT growth use verified three-year CAGR; valuation multiples describe relative market positioning and do not independently establish fair value.",
 
     selectedCompany,
 
