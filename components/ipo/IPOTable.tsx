@@ -28,6 +28,18 @@ type IPOEngineResult = {
     sme: number;
   };
 
+  providers?: {
+    nse?: boolean;
+    offerDetails?: boolean;
+    gmp?: boolean;
+    gmpSource?: string;
+    gmpLastFetchedAt?: string;
+    gmpLastUpdatedAt?: string;
+    persistentDatabase?: boolean;
+  };
+
+  gmpDisclaimer?: string;
+
   lastUpdated: string;
 };
 
@@ -73,6 +85,28 @@ function formatDate(value?: string) {
     day: "2-digit",
     month: "short",
     year: "numeric",
+  }).format(date);
+}
+
+function formatDateTime(value?: string) {
+  if (!value) {
+    return "Not available";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Kolkata",
+    timeZoneName: "short",
   }).format(date);
 }
 
@@ -516,7 +550,7 @@ export default function IPOTable() {
 
                     <Link
                       href={`/ipo/${ipo.slug}`}
-                      className="font-semibold text-white transition hover:text-emerald-400"
+                      className="text-sm font-semibold leading-5 text-white"
                     >
                       {ipo.companyName}
                     </Link>
@@ -588,32 +622,44 @@ export default function IPOTable() {
 
                   {/* GMP */}
 
-                  <td className="px-3 py-5">
+                  <td className="px-3 py-5 align-middle">
+  {typeof ipo.gmp === "number" &&
+  Number.isFinite(ipo.gmp) ? (
+    <div className="relative">
+      <span
+        className={`block whitespace-nowrap text-sm font-medium leading-5 ${
+          ipo.gmp >= 0
+            ? "text-emerald-400"
+            : "text-rose-400"
+        }`}
+      >
+        {ipo.gmp >= 0 ? "+" : ""}
+        {formatCurrency(ipo.gmp)}
+      </span>
 
-                    {ipo.gmp !== undefined ? (
-                      <span className="font-semibold text-emerald-400">
-                        {ipo.gmp >= 0
-                          ? "+"
-                          : ""}
-                        {formatCurrency(
-                          ipo.gmp
-                        )}
-                      </span>
-                    ) : (
-                      <span className="text-slate-600">
-                        —
-                      </span>
-                    )}
-
-                  </td>
-
+      {typeof ipo.estimatedListingPrice === "number" &&
+        Number.isFinite(ipo.estimatedListingPrice) && (
+          <span className="absolute left-0 top-full mt-1 block whitespace-nowrap text-[11px] text-slate-500">
+            Est. listing:{" "}
+            {formatCurrency(
+              ipo.estimatedListingPrice
+            )}
+          </span>
+        )}
+    </div>
+  ) : (
+    <span className="text-slate-600">
+      —
+    </span>
+  )}
+</td>
                   {/* GMP % */}
 
-<td className="px-3 py-5">
+<td className="px-3 py-5 align-middle">
   {typeof ipo.gmpPercent === "number" &&
   Number.isFinite(ipo.gmpPercent) ? (
     <span
-      className={`font-semibold ${
+      className={`block whitespace-nowrap text-sm font-medium leading-5 ${
         ipo.gmpPercent >= 0
           ? "text-emerald-400"
           : "text-rose-400"
@@ -696,20 +742,44 @@ export default function IPOTable() {
 
       {/* Footer */}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+      <div className="space-y-3 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-4">
+  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+    <span>
+      IPO data: NSE and STFL IPO Engine
+    </span>
 
-        <span>
-          Source: NSE • STFL IPO Engine
+    <span>
+      Catalogue updated:{" "}
+      {formatDateTime(data.lastUpdated)}
+    </span>
+  </div>
+
+  {data.providers?.gmp && (
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 pt-3 text-xs text-slate-500">
+      <span>
+        GMP source:{" "}
+        <span className="font-medium text-slate-300">
+          {data.providers.gmpSource ??
+            "IPO Guru"}
         </span>
+      </span>
 
-        <span>
-          Last updated:{" "}
-          {formatDate(
-            data.lastUpdated
-          )}
-        </span>
+      <span>
+        GMP updated:{" "}
+        {formatDateTime(
+          data.providers.gmpLastUpdatedAt ??
+            data.providers.gmpLastFetchedAt
+        )}
+      </span>
+    </div>
+  )}
 
-      </div>
+  {data.gmpDisclaimer && (
+    <p className="border-t border-slate-800 pt-3 text-xs leading-5 text-amber-200/70">
+      {data.gmpDisclaimer}
+    </p>
+  )}
+</div>
 
     </section>
   );

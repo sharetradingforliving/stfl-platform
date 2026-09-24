@@ -17,9 +17,8 @@ import {
   enrichIPOOfferDetails,
 } from "./providers/ipoOfferDetails";
 
-import {
-  fetchGMPData,
-  type GMPRecord,
+import type {
+  GMPRecord,
 } from "./providers/gmp";
 
 import {
@@ -442,17 +441,10 @@ Promise<IPOEngineResult> {
      * ------------------------------------------------
      */
 
-    const [
-      nseResult,
-      gmpResult,
-    ] =
-      await Promise.allSettled([
-
-        fetchNSEIPOData(),
-
-        fetchGMPData(),
-
-      ]);
+    const [nseResult] =
+  await Promise.allSettled([
+    fetchNSEIPOData(),
+  ]);
 
 
     /**
@@ -474,11 +466,10 @@ Promise<IPOEngineResult> {
      * ------------------------------------------------
      */
 
-    const gmpRecords =
-      gmpResult.status ===
-      "fulfilled"
-        ? gmpResult.value
-        : [];
+    // GMP is synchronized independently by the backend IPO Guru service.
+// Keeping this empty prevents frontend providers from overwriting
+// the authoritative GMP values stored in Neon.
+const gmpRecords: GMPRecord[] = [];
 
 
     if (
@@ -492,20 +483,7 @@ Promise<IPOEngineResult> {
       );
     }
 
-
-    if (
-      gmpResult.status ===
-      "rejected"
-    ) {
-
-      console.error(
-        "GMP provider failed:",
-        gmpResult.reason
-      );
-    }
-
-
-    console.log(
+        console.log(
       "===== STFL IPO ENGINE ====="
     );
 

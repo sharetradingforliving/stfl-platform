@@ -101,6 +101,19 @@ export interface IPORecord {
   gmpPercent?: number;
 
   estimatedListingPrice?: number;
+  gmpProviderSlug?: string;
+
+gmpSource?: string;
+
+gmpKostak?: string;
+
+gmpSubjectToSauda?: string;
+
+gmpUpdatedAt?: string;
+
+gmpUpdatedAtLabel?: string;
+
+gmpFetchedAt?: string;
 
   /**
    * Subscription
