@@ -200,7 +200,7 @@ export default function CorporateActionsPage() {
         new URLSearchParams({
           view,
           page: String(page),
-          page_size: "25",
+          page_size: "10",
         });
 
       if (actionType !== "ALL") {
@@ -298,6 +298,56 @@ export default function CorporateActionsPage() {
     return `${first}–${last} of ${data.total}`;
   }, [data]);
 
+  const visiblePages = useMemo(() => {
+    const totalPages =
+      data?.total_pages ?? 0;
+
+    if (totalPages === 0) {
+      return [];
+    }
+
+    const maximumVisiblePages = 5;
+
+    let firstPage = Math.max(
+      1,
+      page - 2
+    );
+
+    const lastPossibleFirstPage =
+      Math.max(
+        1,
+        totalPages -
+          maximumVisiblePages +
+          1
+      );
+
+    firstPage = Math.min(
+      firstPage,
+      lastPossibleFirstPage
+    );
+
+    const lastPage = Math.min(
+      totalPages,
+      firstPage +
+        maximumVisiblePages -
+        1
+    );
+
+    return Array.from(
+      {
+        length:
+          lastPage -
+          firstPage +
+          1,
+      },
+      (_, index) =>
+        firstPage + index
+    );
+  }, [
+    data?.total_pages,
+    page,
+  ]);
+
   function changeView(
     nextView: ViewMode
   ) {
@@ -319,29 +369,6 @@ export default function CorporateActionsPage() {
             Track upcoming and historical dividends, distributions, bonus issues, stock splits, rights issues, buybacks and other NSE corporate actions.
           </p>
         </header>
-
-        <section className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <SummaryCard
-            label="Filtered results"
-            value={data?.total ?? 0}
-            detail="For the selected view and filters"
-          />
-          <SummaryCard
-            label="Upcoming"
-            value={data?.upcoming_count ?? 0}
-            detail="Effective date today or later"
-          />
-          <SummaryCard
-            label="Historical"
-            value={data?.historical_count ?? 0}
-            detail="Retained permanently in STFL"
-          />
-          <SummaryCard
-            label="Current page"
-            value={data?.actions.length ?? 0}
-            detail={rangeText}
-          />
-        </section>
 
         <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 shadow-2xl shadow-black/20">
           <div className="border-b border-slate-800 p-4 sm:p-5">
@@ -536,24 +563,51 @@ export default function CorporateActionsPage() {
 
           <div className="flex flex-col gap-3 border-t border-slate-800 px-5 py-4 text-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="text-slate-500">
-              {rangeText}
+              Showing {rangeText}
             </p>
-            <div className="flex items-center gap-3">
+
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 disabled={loading || page <= 1}
                 onClick={() =>
                   setPage((current) =>
-                    Math.max(1, current - 1)
+                    Math.max(
+                      1,
+                      current - 1
+                    )
                   )
                 }
                 className="rounded-lg border border-slate-700 px-3 py-2 text-slate-300 transition hover:border-slate-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
               </button>
-              <span className="text-slate-400">
-                Page {data?.page ?? page} of {data?.total_pages ?? 0}
-              </span>
+
+              {visiblePages.map(
+                (pageNumber) => (
+                  <button
+                    key={pageNumber}
+                    type="button"
+                    disabled={loading}
+                    aria-current={
+                      pageNumber === page
+                        ? "page"
+                        : undefined
+                    }
+                    onClick={() =>
+                      setPage(pageNumber)
+                    }
+                    className={`min-w-10 rounded-lg border px-3 py-2 transition ${
+                      pageNumber === page
+                        ? "border-amber-400/60 bg-amber-400/10 text-amber-300"
+                        : "border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white"
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                )
+              )}
+
               <button
                 type="button"
                 disabled={
@@ -579,29 +633,5 @@ export default function CorporateActionsPage() {
         </p>
       </div>
     </main>
-  );
-}
-
-function SummaryCard({
-  label,
-  value,
-  detail,
-}: {
-  label: string;
-  value: number;
-  detail: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-      <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-        {label}
-      </p>
-      <p className="mt-2 text-3xl font-bold text-white">
-        {value.toLocaleString("en-IN")}
-      </p>
-      <p className="mt-1 text-xs text-slate-500">
-        {detail}
-      </p>
-    </div>
   );
 }
