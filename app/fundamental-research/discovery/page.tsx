@@ -1,5 +1,5 @@
-import CompanyResearchSearch from "@/components/fundamental/CompanyResearchSearch";
+import StockDiscoveryTerminal from "@/components/fundamental/StockDiscoveryTerminal";
 
 export default function Page() {
-  return <CompanyResearchSearch />;
+  return <StockDiscoveryTerminal />;
 }

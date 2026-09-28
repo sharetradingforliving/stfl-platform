@@ -376,6 +376,8 @@ function resolveClassification(
       directGroup?.sector ??
       existingClassification
         ?.sector ??
+      nifty500Company?.industry
+        ?.trim() ??
       null,
 
     industry:
@@ -701,12 +703,41 @@ export async function POST(
       );
 
     const companyEquities =
-      universe.equities.filter(
-        (instrument) =>
-          instrument.instrumentType ===
-            "EQ" &&
-          instrument.exchange === "NSE"
-      );
+      universe.equities
+        .filter(
+          (instrument) =>
+            instrument.instrumentType ===
+              "EQ" &&
+            instrument.exchange === "NSE"
+        )
+        .sort((first, second) => {
+          const firstIsNifty500 =
+            nifty500BySymbol.has(
+              normalizeSymbol(
+                first.symbol
+              )
+            );
+
+          const secondIsNifty500 =
+            nifty500BySymbol.has(
+              normalizeSymbol(
+                second.symbol
+              )
+            );
+
+          if (
+            firstIsNifty500 !==
+            secondIsNifty500
+          ) {
+            return firstIsNifty500
+              ? -1
+              : 1;
+          }
+
+          return first.symbol.localeCompare(
+            second.symbol
+          );
+        });
 
     const batch = companyEquities.slice(
       cursor,
