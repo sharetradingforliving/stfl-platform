@@ -1,13 +1,3 @@
-/**
- * ================================================================
- * STFL Fundamental Screener API Proxy
- * Route: /api/fundamental/screener
- *
- * Proxies validated discovery filters to the FastAPI/Neon screener
- * service. No financial values are calculated in this route.
- * ================================================================
- */
-
 import {
   auth,
 } from "@clerk/nextjs/server";
@@ -17,7 +7,8 @@ import {
 } from "next/server";
 
 
-export const dynamic = "force-dynamic";
+export const dynamic =
+  "force-dynamic";
 
 
 const BACKEND_BASE_URL =
@@ -34,7 +25,8 @@ const ALLOWED_QUERY_PARAMETERS = [
   "marketCap",
   "investmentStyle",
   "valuationMethod",
-  "limit",
+  "page",
+  "pageSize",
 ] as const;
 
 
@@ -52,7 +44,35 @@ type ScreenerPayload = {
 };
 
 
-async function hasPremiumScreenerAccess(): Promise<boolean> {
+function parseJsonPayload(
+  responseText: string
+): ScreenerPayload | null {
+  if (!responseText.trim()) {
+    return null;
+  }
+
+  try {
+    const parsed =
+      JSON.parse(responseText) as
+        unknown;
+
+    if (
+      typeof parsed !== "object" ||
+      parsed === null
+    ) {
+      return null;
+    }
+
+    return parsed as
+      ScreenerPayload;
+  } catch {
+    return null;
+  }
+}
+
+
+async function hasPremiumScreenerAccess():
+Promise<boolean> {
   try {
     const {
       userId,
@@ -105,9 +125,19 @@ async function hasPremiumScreenerAccess(): Promise<boolean> {
       return false;
     }
 
+    const responseText =
+      await response.text();
+
     const subscription =
-      (await response.json()) as
-        SubscriptionStatusResponse;
+      parseJsonPayload(
+        responseText
+      ) as
+        SubscriptionStatusResponse |
+        null;
+
+    if (!subscription) {
+      return false;
+    }
 
     return (
       subscription.is_premium ===
@@ -207,16 +237,68 @@ export async function GET(
       backendUrl.toString(),
       {
         method: "GET",
+
         cache: "no-store",
+
         headers: {
-          Accept: "application/json",
+          Accept:
+            "application/json",
         },
       }
     );
 
+    const responseText =
+      await response.text();
+
     const payload =
-      (await response.json()) as
-        ScreenerPayload;
+      parseJsonPayload(
+        responseText
+      );
+
+    if (!payload) {
+      console.error(
+        "Fundamental screener backend returned a non-JSON response:",
+        {
+          status:
+            response.status,
+
+          contentType:
+            response.headers.get(
+              "content-type"
+            ),
+
+          preview:
+            responseText
+              .slice(0, 300),
+        }
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            response.ok
+              ? (
+                  "The screener backend " +
+                  "returned an invalid response."
+                )
+              : (
+                  "The screener backend " +
+                  `is unavailable (${response.status}).`
+                ),
+        },
+        {
+          status:
+            response.ok
+              ? 502
+              : response.status,
+
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        }
+      );
+    }
 
     if (!response.ok) {
       return NextResponse.json(
@@ -228,8 +310,10 @@ export async function GET(
         },
         {
           status: response.status,
+
           headers: {
-            "Cache-Control": "no-store",
+            "Cache-Control":
+              "no-store",
           },
         }
       );
@@ -246,9 +330,11 @@ export async function GET(
       securedPayload,
       {
         status: 200,
+
         headers: {
           "Cache-Control":
             "private, no-store, max-age=0",
+
           Vary:
             "Cookie, Authorization",
         },
@@ -263,12 +349,22 @@ export async function GET(
     return NextResponse.json(
       {
         error:
-          "The fundamental screener service is temporarily unavailable.",
+          error instanceof Error
+            ? (
+                "The fundamental screener " +
+                `service is unavailable: ${error.message}`
+              )
+            : (
+                "The fundamental screener " +
+                "service is temporarily unavailable."
+              ),
       },
       {
         status: 503,
+
         headers: {
-          "Cache-Control": "no-store",
+          "Cache-Control":
+            "no-store",
         },
       }
     );

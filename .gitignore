@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Temporary code inspection exports
+/*_code.txt
+/*_inspection.txt
+/*_search_filter_code.txt
+/unlisted_frontend_search.txt
+
+# Safe environment template
+!.env.example
+
+# Local source-code backup copies
+*.encoding-backup
+*.before-*

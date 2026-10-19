@@ -32,9 +32,13 @@ const navigationGroups: NavigationGroup[] = [
         label: "News & Sentiment",
         href: "/news-sentiment",
       },
-      {
+            {
         label: "Corporate Actions",
         href: "/corporate-actions",
+      },
+      {
+        label: "Unlisted Shares",
+        href: "/unlisted-shares",
       },
       {
         label: "IPO Research",
