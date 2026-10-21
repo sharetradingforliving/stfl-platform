@@ -25,29 +25,15 @@ export default function MarketSnapshotCard({
 
       <div className="border-b border-slate-700 px-4 py-2">
 
-        <div className="flex items-center justify-between">
+        <div>
+  <h2 className="text-lg font-semibold text-white">
+    Market Intelligence
+  </h2>
 
-          <div>
-
-            <h2 className="text-lg font-semibold text-white">
-              Market Intelligence
-            </h2>
-
-                      </div>
-
-          <div className="text-right">
-
-            <p className="text-xs uppercase tracking-wider text-slate-500">
-              Confidence
-            </p>
-
-            <p className="text-lg font-bold text-green-400">
-              {technical.technicalScore.confidence}%
-            </p>
-
-          </div>
-
-        </div>
+  <p className="mt-1 text-xs text-slate-400">
+    Trend, entry quality and momentum overview
+  </p>
+</div>
 
       </div>
 

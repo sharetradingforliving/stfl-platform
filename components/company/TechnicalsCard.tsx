@@ -624,21 +624,8 @@ export default function TechnicalsCard({
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-8">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500">
-              Confidence
-            </p>
-
-            <p className="mt-1 text-lg font-semibold text-white">
-              {summary
-                ?.confidence ??
-                "--"}
-              %
-            </p>
-          </div>
-
-          <div>
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-7">
+  <div>
             <p className="text-xs uppercase tracking-wide text-slate-500">
               Recommendation
             </p>
