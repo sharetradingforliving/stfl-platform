@@ -2,7 +2,7 @@
  * ================================================================
  * STFL Technical Research Engine
  * File: momentum.ts
- * Purpose: Balanced Momentum Analysis Module
+ * Purpose: Multi-session Momentum Analysis
  * ================================================================
  */
 
@@ -27,7 +27,9 @@ function getRSIContribution(
   rsi: number
 ): number {
   if (rsi >= 60) return 15;
+  if (rsi >= 55) return 10;
   if (rsi <= 40) return -15;
+  if (rsi <= 45) return -10;
 
   return 0;
 }
@@ -47,18 +49,10 @@ function getMACDContribution(
   signal: number
 ): number {
   if (macd > signal) {
-    /*
-     * A bullish crossover below zero is an early recovery,
-     * not the same as established positive momentum.
-     */
     return macd >= 0 ? 20 : 10;
   }
 
   if (macd < signal) {
-    /*
-     * A bearish crossover above zero is deterioration,
-     * while one below zero is established bearish momentum.
-     */
     return macd <= 0 ? -20 : -10;
   }
 
@@ -79,10 +73,152 @@ function getStochasticContribution(
   k: number,
   d: number
 ): number {
-  if (k > d && k < 80) return 15;
-  if (k < d && k > 20) return -15;
+  if (k > d && k < 80) return 10;
+  if (k < d && k > 20) return -10;
 
   return 0;
+}
+
+function getRecentPriceAction(
+  input: TechnicalResearchInput
+) {
+  const recentCandles = [
+    ...input.priceHistory,
+  ]
+    .sort(
+      (left, right) =>
+        new Date(left.date).getTime() -
+        new Date(right.date).getTime()
+    )
+    .slice(-5);
+
+  if (recentCandles.length < 2) {
+    return {
+      risingSessions: 0,
+      fallingSessions: 0,
+      recentReturnPercent: 0,
+      contribution: 0,
+    };
+  }
+
+  let risingSessions = 0;
+  let fallingSessions = 0;
+
+  for (
+    let index = 1;
+    index < recentCandles.length;
+    index += 1
+  ) {
+    const previous =
+      recentCandles[index - 1].close;
+
+    const current =
+      recentCandles[index].close;
+
+    if (current > previous) {
+      risingSessions += 1;
+    } else if (current < previous) {
+      fallingSessions += 1;
+    }
+  }
+
+  const firstClose =
+    recentCandles[0].close;
+
+  const lastClose =
+    recentCandles[
+      recentCandles.length - 1
+    ].close;
+
+  const recentReturnPercent =
+    firstClose > 0
+      ? (
+          (lastClose - firstClose) /
+          firstClose
+        ) * 100
+      : 0;
+
+  let contribution = 0;
+
+  if (
+    risingSessions >= 3 &&
+    recentReturnPercent > 0
+  ) {
+    contribution = 15;
+  } else if (
+    fallingSessions >= 3 &&
+    recentReturnPercent < 0
+  ) {
+    contribution = -15;
+  } else if (
+    recentReturnPercent >= 1
+  ) {
+    contribution = 8;
+  } else if (
+    recentReturnPercent <= -1
+  ) {
+    contribution = -8;
+  }
+
+  return {
+    risingSessions,
+    fallingSessions,
+    recentReturnPercent,
+    contribution,
+  };
+}
+
+function getEMAContribution(
+  input: TechnicalResearchInput
+): number {
+  const {
+    currentPrice,
+    movingAverages,
+  } = input;
+
+  let contribution = 0;
+
+  contribution +=
+    currentPrice >= movingAverages.ema20
+      ? 5
+      : -5;
+
+  contribution +=
+    currentPrice >= movingAverages.ema50
+      ? 5
+      : -5;
+
+  return contribution;
+}
+
+function calculateAgreement(
+  contributions: number[]
+): number {
+  const active =
+    contributions.filter(
+      (value) => value !== 0
+    );
+
+  if (active.length === 0) {
+    return 0;
+  }
+
+  const bullish =
+    active.filter(
+      (value) => value > 0
+    ).length;
+
+  const bearish =
+    active.filter(
+      (value) => value < 0
+    ).length;
+
+  return Math.round(
+    (
+      Math.max(bullish, bearish) /
+      active.length
+    ) * 100
+  );
 }
 
 export function analyzeMomentum(
@@ -120,45 +256,118 @@ export function analyzeMomentum(
       osc.stochasticD
     );
 
+  const priceAction =
+    getRecentPriceAction(input);
+
+  const emaContribution =
+    getEMAContribution(input);
+
+  const contributions = [
+    rsiContribution,
+    macdContribution,
+    stochasticContribution,
+    priceAction.contribution,
+    emaContribution,
+  ];
+
   const rawScore =
     50 +
-    rsiContribution +
-    macdContribution +
-    stochasticContribution;
+    contributions.reduce(
+      (total, value) =>
+        total + value,
+      0
+    );
 
-  const score = Math.max(
+  let score = Math.max(
     0,
     Math.min(100, rawScore)
   );
 
+  const priceAboveEMA20 =
+    input.currentPrice >=
+    input.movingAverages.ema20;
+
+  const priceAboveEMA50 =
+    input.currentPrice >=
+    input.movingAverages.ema50;
+
+  const macdBullish =
+    osc.macd > osc.macdSignal;
+
+  const establishedBullish =
+    priceAboveEMA20 &&
+    priceAboveEMA50 &&
+    osc.rsi >= 55 &&
+    macdBullish &&
+    osc.macd >= 0 &&
+    priceAction.risingSessions >= 3;
+
+  /*
+   * Prevent an early recovery below EMA 50,
+   * neutral RSI or negative MACD from receiving
+   * an established-momentum score.
+   */
+  if (
+    !priceAboveEMA50 ||
+    osc.rsi < 55 ||
+    osc.macd < 0
+  ) {
+    score = Math.min(score, 69);
+  }
+
   let momentumStrength =
     SignalStrength.MODERATE;
 
-  if (score >= 80) {
+  if (
+    score >= 80 &&
+    establishedBullish &&
+    osc.adx >= 30
+  ) {
     momentumStrength =
       SignalStrength.VERY_STRONG;
-  } else if (score >= 65) {
+  } else if (
+    score >= 70 &&
+    establishedBullish &&
+    osc.adx >= 20
+  ) {
     momentumStrength =
       SignalStrength.STRONG;
-  } else if (score <= 35) {
+  } else if (
+    score >= 55 &&
+    macdBullish &&
+    osc.rsi >= 45 &&
+    (
+      priceAction.risingSessions >= 2 ||
+      priceAction.recentReturnPercent > 0
+    )
+  ) {
     momentumStrength =
-      SignalStrength.WEAK;
+      SignalStrength.BUILDING;
+  } else if (
+    score <= 35 &&
+    !priceAboveEMA20 &&
+    osc.rsi < 45 &&
+    !macdBullish &&
+    priceAction.fallingSessions >= 3
+  ) {
+    momentumStrength =
+      SignalStrength.NEGATIVE;
+  } else if (
+    score < 50 &&
+    (
+      priceAction.fallingSessions >= 3 ||
+      priceAction.recentReturnPercent < 0 ||
+      !macdBullish
+    )
+  ) {
+    momentumStrength =
+      SignalStrength.SLOWING;
   }
 
-  const directionalSignals = [
-    rsiContribution,
-    macdContribution,
-    stochasticContribution,
-  ];
-
-  const agreeingSignals =
-    directionalSignals.filter(
-      (value) => value !== 0
-    ).length;
-
-  const confidence = Math.round(
-    (agreeingSignals / 3) * 100
-  );
+  const confidence =
+    calculateAgreement(
+      contributions
+    );
 
   return {
     score,
@@ -168,9 +377,11 @@ export function analyzeMomentum(
     momentumStrength,
     confidence,
     explanation:
-      `Momentum score is ${score}/100. ` +
-      `RSI contribution: ${rsiContribution}, ` +
-      `MACD contribution: ${macdContribution}, ` +
-      `Stochastic contribution: ${stochasticContribution}.`,
+      `Momentum is ${momentumStrength}. ` +
+      `Score ${score}/100; ` +
+      `${priceAction.risingSessions} rising and ` +
+      `${priceAction.fallingSessions} falling sessions ` +
+      `across the recent window; ` +
+      `recent return ${priceAction.recentReturnPercent.toFixed(2)}%.`,
   };
 }

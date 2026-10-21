@@ -20,18 +20,20 @@ export enum TrendDirection {
 }
 
 export enum SignalStrength {
-  VERY_STRONG = "VERY_STRONG",
+  VERY_STRONG = "VERY STRONG",
   STRONG = "STRONG",
+  BUILDING = "BUILDING",
   MODERATE = "MODERATE",
+  SLOWING = "SLOWING",
+  NEGATIVE = "NEGATIVE",
   WEAK = "WEAK",
-  VERY_WEAK = "VERY_WEAK",
+  VERY_WEAK = "VERY WEAK",
 }
 
 export enum EntryQuality {
-  EXCELLENT = "EXCELLENT",
-  GOOD = "GOOD",
-  AVERAGE = "AVERAGE",
-  POOR = "POOR",
+  FAVORABLE = "FAVORABLE",
+  WATCH = "WATCH",
+  WAIT = "WAIT",
   AVOID = "AVOID",
 }
 

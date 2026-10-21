@@ -22,9 +22,10 @@ type IndicatorCardProps = {
   value: string;
   signal?: string;
   tone?:
-    | "positive"
-    | "negative"
-    | "neutral";
+  | "negative"
+  | "positive"
+  | "neutral"
+  | "warning";
 };
 
 function isValidNumber(
@@ -130,14 +131,14 @@ function getMovingAverageSignal(
 }
 
 function getRsiSignal(
-  rsi:
-    number | null | undefined
+  rsi: number | null | undefined
 ): {
   label: string;
   tone:
     | "positive"
     | "negative"
-    | "neutral";
+    | "neutral"
+    | "warning";
 } {
   if (!isValidNumber(rsi)) {
     return {
@@ -146,33 +147,33 @@ function getRsiSignal(
     };
   }
 
-  if (rsi >= 70) {
-    return {
-      label: "Overbought",
-      tone: "negative",
-    };
-  }
+  if (rsi >= 80) {
+  return {
+    label: "Overbought",
+    tone: "warning",
+  };
+}
 
-  if (rsi <= 30) {
-    return {
-      label: "Oversold",
-      tone: "positive",
-    };
-  }
+if (rsi <= 20) {
+  return {
+    label: "Oversold",
+    tone: "warning",
+  };
+}
 
-  if (rsi >= 55) {
-    return {
-      label: "Bullish momentum",
-      tone: "positive",
-    };
-  }
+if (rsi >= 60) {
+  return {
+    label: "Bullish",
+    tone: "positive",
+  };
+}
 
-  if (rsi <= 45) {
-    return {
-      label: "Bearish momentum",
-      tone: "negative",
-    };
-  }
+if (rsi <= 40) {
+  return {
+    label: "Bearish",
+    tone: "negative",
+  };
+}
 
   return {
     label: "Neutral momentum",
@@ -191,7 +192,8 @@ function getMacdSignal(
   tone:
     | "positive"
     | "negative"
-    | "neutral";
+    | "neutral"
+    | "warning";
 } {
   if (
     !isValidNumber(macd) ||
@@ -428,10 +430,12 @@ function IndicatorCard({
   tone = "neutral",
 }: IndicatorCardProps) {
   const toneClass =
-    tone === "positive"
-      ? "text-emerald-400"
-      : tone === "negative"
-        ? "text-red-400"
+  tone === "positive"
+    ? "text-emerald-400"
+    : tone === "negative"
+      ? "text-red-400"
+      : tone === "warning"
+        ? "text-amber-400"
         : "text-slate-300";
 
   return (
