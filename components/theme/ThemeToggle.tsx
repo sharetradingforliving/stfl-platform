@@ -95,7 +95,7 @@ export default function ThemeToggle() {
           ? "Switch to light theme"
           : "Switch to dark theme"
       }
-      className="theme-toggle relative flex h-9 w-[70px] shrink-0 items-center rounded-full border p-1 transition"
+      className="theme-toggle relative flex h-9 w-[62px] shrink-0 items-center rounded-full border p-1 transition"
     >
       <Sun
         className="absolute left-2 h-4 w-4 text-amber-500"
@@ -111,7 +111,7 @@ export default function ThemeToggle() {
         className={`relative z-10 h-7 w-7 rounded-full shadow-md transition-transform duration-300 ${
           isReady &&
           theme === "dark"
-            ? "translate-x-[32px] bg-slate-700"
+            ? "translate-x-[24px] bg-slate-700"
             : "translate-x-0 bg-white"
         }`}
       />

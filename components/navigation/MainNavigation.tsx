@@ -129,11 +129,11 @@ export default function MainNavigation() {
           <HeaderIndexPrices />
         </div>
 
-        <nav className="hidden items-center gap-1 lg:flex">
+        <nav className="ml-4 hidden items-center gap-0 border-l border-slate-700 pl-4 lg:flex">
           <Link
             href="/"
             onClick={closeMenu}
-            className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-emerald-400"
+            className="rounded-xl px-3 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-emerald-400"
           >
             Home
           </Link>

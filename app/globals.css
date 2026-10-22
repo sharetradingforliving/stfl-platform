@@ -294,3 +294,19 @@ html.light .unlisted-disclaimer {
   background-color: #fffbeb !important;
   color: #92400e !important;
 }
+/* Improve market ticker readability in light mode */
+html.light .market-ticker-track {
+  color: #334155;
+}
+
+html.light .market-ticker-track .text-slate-300,
+html.light .market-ticker-track .text-slate-400,
+html.light .market-ticker-track .text-slate-500 {
+  color: #334155 !important;
+}
+
+html.light .market-ticker-track strong,
+html.light .market-ticker-track .font-semibold,
+html.light .market-ticker-track .font-bold {
+  color: #0f172a;
+}
