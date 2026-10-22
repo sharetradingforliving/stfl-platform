@@ -820,6 +820,52 @@ onKeyDown={handleSearchKeyDown}
         <p className="mt-5 text-sm font-semibold text-emerald-400">
           Research Smarter. Trade Smarter. Invest Better.
         </p>
+        <div className="mt-6 space-y-3 text-sm text-slate-400">
+  <a
+    href="mailto:sharetradingforliving@gmail.com"
+    className="block break-words transition hover:text-emerald-400"
+  >
+    sharetradingforliving@gmail.com
+  </a>
+
+  <a
+    href="https://wa.me/917905635297?text=Hello%20STFL%2C%20I%20would%20like%20to%20know%20more%20about%20your%20market%20research%20services."
+    target="_blank"
+    rel="noreferrer noopener"
+    className="block transition hover:text-emerald-400"
+  >
+    WhatsApp: +91 79056 35297
+  </a>
+
+  <div className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
+    <a
+      href="https://www.youtube.com/@sharetrading4living"
+      target="_blank"
+      rel="noreferrer noopener"
+      className="transition hover:text-red-400"
+    >
+      YouTube
+    </a>
+
+    <a
+      href="https://www.instagram.com/sharetradingforliving/"
+      target="_blank"
+      rel="noreferrer noopener"
+      className="transition hover:text-pink-400"
+    >
+      Instagram
+    </a>
+
+    <a
+      href="https://www.facebook.com/sharetradingforliving"
+      target="_blank"
+      rel="noreferrer noopener"
+      className="transition hover:text-blue-400"
+    >
+      Facebook
+    </a>
+  </div>
+</div>
       </div>
 
       {/* Research */}
@@ -879,9 +925,12 @@ onKeyDown={handleSearchKeyDown}
           <a href="#" className="block transition hover:text-emerald-400">
             Blog
           </a>
-          <a href="#" className="block transition hover:text-emerald-400">
-            Contact
-          </a>
+          <a
+  href="/contact"
+  className="block transition hover:text-emerald-400"
+>
+  Contact Us
+</a>
           <a href="#" className="block transition hover:text-emerald-400">
             Privacy Policy
           </a>

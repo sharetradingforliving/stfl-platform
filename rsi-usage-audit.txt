@@ -1,0 +1,38 @@
+components\charts\ChartToolbar.tsx:235: RSI — Coming next
+components\company\TechnicalsCard.tsx:133: rsi:
+components\company\TechnicalsCard.tsx:142: if (!isValidNumber(rsi)) {
+components\company\TechnicalsCard.tsx:149: if (rsi >= 70) {
+components\company\TechnicalsCard.tsx:151: label: "Overbought",
+components\company\TechnicalsCard.tsx:156: if (rsi <= 30) {
+components\company\TechnicalsCard.tsx:158: label: "Oversold",
+components\company\TechnicalsCard.tsx:163: if (rsi >= 55) {
+components\company\TechnicalsCard.tsx:170: if (rsi <= 45) {
+components\company\TechnicalsCard.tsx:254: label: "Overbought",
+components\company\TechnicalsCard.tsx:264: label: "Oversold",
+components\company\TechnicalsCard.tsx:538: oscillators?.rsi
+components\company\TechnicalsCard.tsx:838: RSI, MACD, stochastic oscillator, trend strength and volatility.
+components\company\TechnicalsCard.tsx:843: label="RSI"
+components\company\TechnicalsCard.tsx:845: oscillators?.rsi
+lib\indicators\index.ts:3: export * from "./rsi";
+lib\indicators\rsi.ts:1: import { RSI } from "technicalindicators";
+lib\indicators\rsi.ts:18: const rsiValues = RSI.calculate({
+lib\technical\builders\buildOscillators.ts:25: const rsi = calculateRSI(candles, 14);
+lib\technical\builders\buildOscillators.ts:32: rsi: rsi.at(-1)?.value ?? 0,
+lib\technical\momentum.ts:16: rsi: number
+lib\technical\momentum.ts:18: if (rsi >= 70) return "OVERBOUGHT";
+lib\technical\momentum.ts:19: if (rsi <= 30) return "OVERSOLD";
+lib\technical\momentum.ts:20: if (rsi >= 60) return "BULLISH";
+lib\technical\momentum.ts:21: if (rsi <= 40) return "BEARISH";
+lib\technical\momentum.ts:27: rsi: number
+lib\technical\momentum.ts:29: if (rsi >= 60) return 15;
+lib\technical\momentum.ts:30: if (rsi >= 55) return 10;
+lib\technical\momentum.ts:31: if (rsi <= 40) return -15;
+lib\technical\momentum.ts:32: if (rsi <= 45) return -10;
+lib\technical\momentum.ts:230: getRSISignal(osc.rsi);
+lib\technical\momentum.ts:245: getRSIContribution(osc.rsi);
+lib\technical\momentum.ts:300: osc.rsi >= 55 &&
+lib\technical\momentum.ts:307: * neutral RSI or negative MACD from receiving
+lib\technical\momentum.ts:312: osc.rsi < 55 ||
+lib\technical\momentum.ts:338: osc.rsi >= 45 &&
+lib\technical\momentum.ts:349: osc.rsi < 45 &&
+lib\technical\types.ts:90: rsi: number;

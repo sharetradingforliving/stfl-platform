@@ -222,6 +222,14 @@ export default function MainNavigation() {
             Learn
           </Link>
 
+<Link
+  href="/contact"
+  onClick={closeMenu}
+  className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-emerald-400"
+>
+  Contact
+</Link>
+
           {isLoaded &&
             !isSignedIn && (
               <Link

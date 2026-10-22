@@ -1,7 +1,9 @@
 "use client";
 import {
-  calculateSMA,
   calculateEMA,
+  calculateMACD,
+  calculateRSI,
+  calculateSMA,
 } from "@/lib/indicators";
 
 import {
@@ -12,6 +14,7 @@ import {
   ColorType,
   CrosshairMode,
   type Time,
+  type IPriceLine,
 } from "lightweight-charts";
 
 import { buildPriceHistory } from "@/lib/technical/builders/buildPriceHistory";
@@ -28,7 +31,8 @@ type ChartCommand =
   | "moveRight"
   | "zoomIn"
   | "zoomOut"
-  | "reset";
+  | "reset"
+  | "clearDrawings";
 
 type PriceChartProps = {
   symbol: string;
@@ -38,6 +42,7 @@ type PriceChartProps = {
   activeIndicators: string[];
   activeDrawingTool: string | null;
   isCrosshairActive: boolean;
+  isFullscreen: boolean;
    chartCommand: {
     action: ChartCommand;
     id: number;
@@ -92,6 +97,7 @@ export default function PriceChart({
   activeIndicators,
     activeDrawingTool,
     isCrosshairActive,
+    isFullscreen,
     chartCommand,
   onResearchReady,
   }: PriceChartProps) {
@@ -115,6 +121,11 @@ const activeDrawingToolRef =
 const fibonacciPointsRef =
   useRef<FibonacciPoint[]>([]);
 
+  const drawingPriceLinesRef =
+  useRef<IPriceLine[]>([]);
+
+const clearDrawingsRef =
+  useRef<() => void>(() => {});
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -129,11 +140,12 @@ const fibonacciPointsRef =
     : CrosshairMode.Hidden,
 },
   layout: {
-    background: {
-      color: "#020817",
-    },
-    textColor: "#CBD5E1",
+  background: {
+    color: "#020817",
   },
+  textColor: "#CBD5E1",
+  attributionLogo: false,
+},
 
   grid: {
     vertLines: {
@@ -160,6 +172,23 @@ const candleSeries = chart.addSeries(CandlestickSeries, {
     wickUpColor: "#22c55e",
     wickDownColor: "#ef4444",
 });
+clearDrawingsRef.current = () => {
+  drawingPriceLinesRef.current.forEach(
+    (priceLine) => {
+      try {
+        candleSeries.removePriceLine(
+          priceLine
+        );
+      } catch {
+        // The chart may already have been rebuilt.
+      }
+    }
+  );
+
+  drawingPriceLinesRef.current = [];
+  fibonacciPointsRef.current = [];
+  setFibonacciPoints([]);
+};
 const volumeSeries = chart.addSeries(HistogramSeries, {
   priceFormat: {
     type: "volume",
@@ -410,6 +439,152 @@ movingAverageConfigs.forEach((indicator) => {
     movingAverageData
   );
 });
+
+let nextOscillatorPane = 1;
+
+if (activeIndicators.includes("RSI")) {
+  const rsiPane = nextOscillatorPane;
+  nextOscillatorPane += 1;
+
+  const rsiData = calculateRSI(
+    formattedCandles,
+    14
+  );
+
+  const rsiSeries = chart.addSeries(
+    LineSeries,
+    {
+      title: "RSI 14",
+      color: "#a855f7",
+      lineWidth: 2,
+      priceLineVisible: false,
+      lastValueVisible: true,
+    },
+    rsiPane
+  );
+
+  rsiSeries.setData(rsiData);
+
+  const rsiUpperBand =
+    chart.addSeries(
+      LineSeries,
+      {
+        title: "RSI 70",
+        color: "#ef4444",
+        lineWidth: 1,
+        lineStyle: 2,
+        priceLineVisible: false,
+        lastValueVisible: false,
+      },
+      rsiPane
+    );
+
+  rsiUpperBand.setData(
+    rsiData.map((point) => ({
+      time: point.time,
+      value: 70,
+    }))
+  );
+
+  const rsiLowerBand =
+    chart.addSeries(
+      LineSeries,
+      {
+        title: "RSI 30",
+        color: "#22c55e",
+        lineWidth: 1,
+        lineStyle: 2,
+        priceLineVisible: false,
+        lastValueVisible: false,
+      },
+      rsiPane
+    );
+
+  rsiLowerBand.setData(
+    rsiData.map((point) => ({
+      time: point.time,
+      value: 30,
+    }))
+  );
+
+  chart.panes()[rsiPane]?.setHeight(
+    160
+  );
+}
+
+if (activeIndicators.includes("MACD")) {
+  const macdPane = nextOscillatorPane;
+  nextOscillatorPane += 1;
+
+  const macdData = calculateMACD(
+    formattedCandles
+  );
+
+  const macdSeries = chart.addSeries(
+    LineSeries,
+    {
+      title: "MACD",
+      color: "#38bdf8",
+      lineWidth: 2,
+      priceLineVisible: false,
+      lastValueVisible: true,
+    },
+    macdPane
+  );
+
+  macdSeries.setData(
+    macdData.map((point) => ({
+      time: point.time,
+      value: point.macd,
+    }))
+  );
+
+  const signalSeries = chart.addSeries(
+    LineSeries,
+    {
+      title: "Signal",
+      color: "#f59e0b",
+      lineWidth: 2,
+      priceLineVisible: false,
+      lastValueVisible: true,
+    },
+    macdPane
+  );
+
+  signalSeries.setData(
+    macdData.map((point) => ({
+      time: point.time,
+      value: point.signal,
+    }))
+  );
+
+  const histogramSeries =
+    chart.addSeries(
+      HistogramSeries,
+      {
+        title: "MACD Histogram",
+        priceLineVisible: false,
+        lastValueVisible: false,
+      },
+      macdPane
+    );
+
+  histogramSeries.setData(
+    macdData.map((point) => ({
+      time: point.time,
+      value: point.histogram,
+      color:
+        point.histogram >= 0
+          ? "rgba(34, 197, 94, 0.65)"
+          : "rgba(239, 68, 68, 0.65)",
+    }))
+  );
+
+  chart.panes()[macdPane]?.setHeight(
+    160
+  );
+}
+
 chart.subscribeCrosshairMove((param) => {
   if (!param.time) {
     setCrosshairData(null);
@@ -444,9 +619,12 @@ chart.subscribeCrosshairMove((param) => {
 });
 });
 chart.subscribeClick((param) => {
+  const selectedDrawingTool =
+    activeDrawingToolRef.current;
+
   if (
-    activeDrawingToolRef.current !==
-    "fibonacci"
+    selectedDrawingTool !== "fibonacci" &&
+    selectedDrawingTool !== "horizontal-line"
   ) {
     return;
   }
@@ -461,10 +639,29 @@ chart.subscribeClick((param) => {
     );
 
   if (clickedPrice === null) {
-    return;
-  }
+  return;
+}
 
-  const newPoint: FibonacciPoint = {
+if (
+  activeDrawingToolRef.current ===
+  "horizontal-line"
+) {
+  const horizontalLine =
+  candleSeries.createPriceLine({
+    price: clickedPrice,
+    title: `₹${clickedPrice.toFixed(2)}`,
+    color: "#22c55e",
+    lineWidth: 2,
+    lineStyle: 2,
+    axisLabelVisible: true,
+  });
+drawingPriceLinesRef.current.push(
+  horizontalLine
+);
+  return;
+}
+
+const newPoint: FibonacciPoint = {
     time: Number(param.time),
     price: clickedPrice,
   };
@@ -547,7 +744,8 @@ fibonacciLevels.forEach(
       startPrice +
       priceDifference * ratio;
 
-    candleSeries.createPriceLine({
+    const fibonacciLine =
+  candleSeries.createPriceLine({
       price: levelPrice,
       title: `Fib ${label}`,
       color,
@@ -555,6 +753,9 @@ fibonacciLevels.forEach(
       lineStyle: 2,
       axisLabelVisible: true,
     });
+    drawingPriceLinesRef.current.push(
+  fibonacciLine
+);
   }
 );
   
@@ -587,7 +788,43 @@ loadCandles();
 
 chart.timeScale().fitContent();
 
-    return () => chart.remove();
+const chartContainer =
+  chartRef.current;
+
+const resizeObserver =
+  new ResizeObserver((entries) => {
+    const entry = entries[0];
+
+    if (!entry) {
+      return;
+    }
+
+    const width = Math.floor(
+      entry.contentRect.width
+    );
+
+    const height = Math.floor(
+      entry.contentRect.height
+    );
+
+    if (width > 0 && height > 0) {
+      chart.resize(
+        width,
+        height
+      );
+    }
+  });
+
+resizeObserver.observe(
+  chartContainer
+);
+
+return () => {
+  resizeObserver.disconnect();
+  chartInstanceRef.current = null;
+  chart.remove();
+};
+
   }, [symbol, instrumentKey, timeframe, activeIndicators]);
   useEffect(() => {
   if (!chartInstanceRef.current) return;
@@ -610,6 +847,43 @@ useEffect(() => {
     setFibonacciPoints([]);
   }
 }, [activeDrawingTool]);
+
+useEffect(() => {
+  if (
+    chartCommand?.action ===
+    "clearDrawings"
+  ) {
+    clearDrawingsRef.current();
+  }
+}, [chartCommand]);
+
+useEffect(() => {
+  function handleEscapeKey(
+    event: KeyboardEvent
+  ) {
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    clearDrawingsRef.current();
+
+    activeDrawingToolRef.current = null;
+    fibonacciPointsRef.current = [];
+    setFibonacciPoints([]);
+  }
+
+  window.addEventListener(
+    "keydown",
+    handleEscapeKey
+  );
+
+  return () => {
+    window.removeEventListener(
+      "keydown",
+      handleEscapeKey
+    );
+  };
+}, []);
 
 function moveChartLeft() {
   const chart = chartInstanceRef.current;
@@ -688,10 +962,36 @@ function resetChartView() {
 
   chart.timeScale().fitContent();
 }
+const oscillatorPaneCount =
+  Number(
+    activeIndicators.includes("RSI")
+  ) +
+  Number(
+    activeIndicators.includes("MACD")
+  );
 
-  return (
+return (
   <div className="w-full">
+
     {/* Active Drawing Tool Status */}
+{activeDrawingTool === "horizontal-line" && (
+  <div className="mb-3 flex items-center justify-between rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3">
+    <div>
+      <p className="text-sm font-semibold text-cyan-400">
+        Horizontal Line Mode Active
+      </p>
+
+      <p className="mt-1 text-xs text-slate-400">
+        Click anywhere on the chart to place a
+        horizontal price level.
+      </p>
+    </div>
+
+    <span className="rounded-lg bg-cyan-500/15 px-3 py-1 text-xs font-medium text-cyan-400">
+      Drawing Mode
+    </span>
+  </div>
+)}
 {activeDrawingTool === "fibonacci" &&
   fibonacciPoints.length < 2 && (
   <div className="mb-3 flex items-center justify-between rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3">
@@ -812,9 +1112,17 @@ function resetChartView() {
    {/* STFL Price Chart */}
 <div className="group relative w-full">
   <div
-    ref={chartRef}
-    className="h-[540px] w-full rounded-2xl"
-  />
+  ref={chartRef}
+  className={
+    isFullscreen
+      ? "h-[calc(100vh-190px)] min-h-[540px] w-full rounded-2xl"
+      : oscillatorPaneCount === 2
+        ? "h-[820px] w-full rounded-2xl"
+        : oscillatorPaneCount === 1
+          ? "h-[680px] w-full rounded-2xl"
+          : "h-[540px] w-full rounded-2xl"
+  }
+/>
 {/* Left navigation button */}
 <button
   type="button"
@@ -930,7 +1238,20 @@ function resetChartView() {
   →
 </button>
   </div>
-    {isLoading && (
+
+  <p className="mt-2 text-right text-[11px] text-slate-500">
+    Charts powered by{" "}
+    <a
+      href="https://www.tradingview.com/"
+      target="_blank"
+      rel="noreferrer noopener"
+      className="transition hover:text-slate-300"
+    >
+      TradingView Lightweight Charts
+    </a>
+  </p>
+
+  {isLoading && (
       <p className="mt-3 text-sm text-slate-400">
         Loading market chart...
       </p>
