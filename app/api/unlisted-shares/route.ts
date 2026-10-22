@@ -3,10 +3,8 @@ import {
   NextResponse,
 } from "next/server";
 
-
 export const dynamic =
   "force-dynamic";
-
 
 const BACKEND_BASE_URL = (
   process.env.STFL_BACKEND_URL ||
@@ -14,45 +12,174 @@ const BACKEND_BASE_URL = (
   "http://127.0.0.1:8001"
 ).replace(/\/$/, "");
 
-
 const ALLOWED_QUERY_PARAMETERS = [
   "search",
   "sector",
+  "industry",
   "status",
   "page",
   "pageSize",
 ] as const;
 
+const RETRYABLE_STATUS_CODES =
+  new Set([
+    502,
+    503,
+    504,
+  ]);
 
 type BackendPayload = {
+  status?: string;
   detail?: string;
   error?: string;
   [key: string]: unknown;
 };
 
+type BackendResult = {
+  ok: boolean;
+  status: number;
+  payload: BackendPayload;
+};
 
-async function parseBackendResponse(
-  response: Response
-): Promise<BackendPayload> {
-  const responseText =
-    await response.text();
+function wait(
+  milliseconds: number
+) {
+  return new Promise<void>(
+    (resolve) => {
+      setTimeout(
+        resolve,
+        milliseconds
+      );
+    }
+  );
+}
 
+function parsePayload(
+  responseText: string
+): BackendPayload | null {
   if (!responseText.trim()) {
-    return {};
+    return null;
   }
 
   try {
-    return JSON.parse(
-      responseText
-    ) as BackendPayload;
+    const parsed =
+      JSON.parse(responseText);
+
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
+      return null;
+    }
+
+    return parsed as BackendPayload;
   } catch {
-    return {
-      error:
-        "The backend returned an invalid response.",
-    };
+    return null;
   }
 }
 
+async function fetchBackendWithRetry(
+  backendUrl: string
+): Promise<BackendResult> {
+  const maximumAttempts = 3;
+
+  for (
+    let attempt = 1;
+    attempt <= maximumAttempts;
+    attempt += 1
+  ) {
+    try {
+      const response = await fetch(
+        backendUrl,
+        {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            Accept:
+              "application/json",
+          },
+        }
+      );
+
+      const responseText =
+        await response.text();
+
+      const payload =
+        parsePayload(responseText);
+
+      const shouldRetry =
+        payload === null ||
+        RETRYABLE_STATUS_CODES.has(
+          response.status
+        );
+
+      if (
+        shouldRetry &&
+        attempt < maximumAttempts
+      ) {
+        await wait(
+          attempt * 500
+        );
+
+        continue;
+      }
+
+      if (payload === null) {
+        return {
+          ok: false,
+          status: 502,
+          payload: {
+            status: "error",
+            error:
+              "The backend returned an invalid response.",
+          },
+        };
+      }
+
+      return {
+        ok: response.ok,
+        status: response.status,
+        payload,
+      };
+    } catch (error) {
+      if (
+        attempt < maximumAttempts
+      ) {
+        await wait(
+          attempt * 500
+        );
+
+        continue;
+      }
+
+      console.error(
+        "Unlisted-share backend request failed:",
+        error
+      );
+
+      return {
+        ok: false,
+        status: 503,
+        payload: {
+          status: "error",
+          error:
+            "The unlisted-share service is temporarily unavailable.",
+        },
+      };
+    }
+  }
+
+  return {
+    ok: false,
+    status: 503,
+    payload: {
+      status: "error",
+      error:
+        "The unlisted-share service is temporarily unavailable.",
+    },
+  };
+}
 
 export async function GET(
   request: NextRequest
@@ -80,33 +207,22 @@ export async function GET(
       }
     }
 
-    const response = await fetch(
-      backendUrl.toString(),
-      {
-        method: "GET",
-        cache: "no-store",
-        headers: {
-          Accept: "application/json",
-        },
-      }
-    );
-
-    const payload =
-      await parseBackendResponse(
-        response
+    const result =
+      await fetchBackendWithRetry(
+        backendUrl.toString()
       );
 
-    if (!response.ok) {
+    if (!result.ok) {
       return NextResponse.json(
         {
           status: "error",
           error:
-            payload.error ??
-            payload.detail ??
+            result.payload.error ??
+            result.payload.detail ??
             "Unable to retrieve unlisted shares.",
         },
         {
-          status: response.status,
+          status: result.status,
           headers: {
             "Cache-Control":
               "no-store",
@@ -116,7 +232,7 @@ export async function GET(
     }
 
     return NextResponse.json(
-      payload,
+      result.payload,
       {
         status: 200,
         headers: {

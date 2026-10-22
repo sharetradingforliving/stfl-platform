@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import HeaderIndexPrices from "./HeaderIndexPrices";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 type NavigationItem = {
   label: string;
@@ -106,7 +107,7 @@ export default function MainNavigation() {
   }
 
   return (
-    <header className="sticky top-0 z-[100] border-b border-slate-800 bg-[#020817]/95 backdrop-blur-xl">
+    <header className="theme-header sticky top-0 z-[100] border-b border-slate-800 bg-[#020817]/95 backdrop-blur-xl">
       <div className="mx-auto flex min-h-[84px] max-w-7xl items-center justify-between gap-6 px-6">
         <div className="flex min-w-0 items-center gap-5">
           <Link
@@ -230,6 +231,7 @@ export default function MainNavigation() {
   Contact
 </Link>
 
+<ThemeToggle />
           {isLoaded &&
             !isSignedIn && (
               <Link

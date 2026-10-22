@@ -1,8 +1,30 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root,
+html.dark {
+  color-scheme: dark;
+
+  --background: #020817;
+  --foreground: #f8fafc;
+}
+
+html.light {
+  color-scheme: light;
+
+  --background: #f8fafc;
+  --foreground: #0f172a;
+
+  --color-slate-950: #ffffff;
+  --color-slate-900: #ffffff;
+  --color-slate-800: #f8fafc;
+  --color-slate-700: #e2e8f0;
+  --color-slate-600: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-400: #475569;
+  --color-slate-300: #334155;
+  --color-slate-200: #1e293b;
+  --color-slate-100: #0f172a;
+  --color-slate-50: #020617;
 }
 
 @theme inline {
@@ -12,17 +34,40 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+html {
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
+}
+
+body {
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
+}
+
+.theme-toggle {
+  border-color: #475569;
+  background-color: #0f172a;
+}
+
+html.light .theme-toggle {
+  border-color: #cbd5e1;
+  background-color: #e2e8f0;
+}
+
+html.light .theme-header {
+  border-color: #e2e8f0;
+  background-color: rgb(255 255 255 / 95%);
+}
+
+html.light .text-white {
+  color: #0f172a;
 }
 @keyframes marketTicker {
   from {
@@ -62,4 +107,190 @@ body {
 
 .market-ticker-track:hover {
   animation-play-state: paused;
+}
+/* =========================================================
+   STFL LIGHT THEME — GLOBAL SURFACE CORRECTIONS
+   ========================================================= */
+
+html.light body,
+html.light main {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Fixed dark page backgrounds */
+html.light [class*="bg-[#020817]"],
+html.light [class*="bg-[#020617]"],
+html.light [class*="bg-[#030712]"],
+html.light [class*="bg-[#0a0f1e]"],
+html.light [class*="bg-[#0f172a]"] {
+  background-color: #f8fafc !important;
+}
+
+/* Main cards and panels */
+html.light [class*="bg-slate-950/"],
+html.light [class*="bg-slate-900/"] {
+  background-color: rgb(255 255 255 / 94%) !important;
+}
+
+html.light [class*="bg-slate-800/"] {
+  background-color: rgb(248 250 252 / 96%) !important;
+}
+
+/* Solid card backgrounds */
+html.light .bg-slate-950,
+html.light .bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+html.light .bg-slate-800 {
+  background-color: #f8fafc !important;
+}
+
+/* Borders */
+html.light .border-slate-800,
+html.light .border-slate-700 {
+  border-color: #dbe3ee !important;
+}
+
+/* Secondary text */
+html.light .text-slate-500 {
+  color: #64748b !important;
+}
+
+html.light .text-slate-400 {
+  color: #475569 !important;
+}
+
+html.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+html.light .text-slate-200,
+html.light .text-slate-100,
+html.light .text-white {
+  color: #0f172a !important;
+}
+
+/* Inputs and selectors */
+html.light input,
+html.light select,
+html.light textarea {
+  border-color: #cbd5e1;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Tables */
+html.light table {
+  color: #0f172a;
+}
+
+html.light thead {
+  background-color: #f1f5f9;
+}
+
+html.light tbody tr {
+  border-color: #dbe3ee;
+  background-color: #ffffff;
+}
+
+html.light tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+html.light tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Footer */
+html.light footer {
+  border-color: #dbe3ee !important;
+  background-color: #ffffff !important;
+}
+
+/* Keep chart canvas dark in both themes */
+html.light .stfl-chart-surface {
+  background-color: #020817 !important;
+  color: #f8fafc !important;
+}
+/* Light-theme coloured text contrast */
+
+html.light .text-amber-200,
+html.light .text-amber-300 {
+  color: #b45309 !important;
+}
+
+html.light .text-cyan-200,
+html.light .text-cyan-300 {
+  color: #0e7490 !important;
+}
+
+html.light .text-emerald-200,
+html.light .text-emerald-300 {
+  color: #047857 !important;
+}
+
+html.light .text-blue-200,
+html.light .text-blue-300 {
+  color: #1d4ed8 !important;
+}
+
+/* Coloured button borders */
+
+html.light .border-amber-500\/30,
+html.light .border-amber-500\/40 {
+  border-color: #f59e0b !important;
+}
+
+html.light .border-cyan-500\/30,
+html.light .border-cyan-500\/40 {
+  border-color: #06b6d4 !important;
+}
+
+html.light .border-emerald-500\/30,
+html.light .border-emerald-500\/40 {
+  border-color: #10b981 !important;
+}
+html.light [class*="bg-[#07111f]"] {
+  background-color: #ffffff !important;
+}
+
+html.light [class*="bg-[#0a1424]"] {
+  background-color: #f8fafc !important;
+}
+
+html.light [class*="bg-[#0b1628]"] {
+  background-color: #f1f5f9 !important;
+}
+
+html.light [class*="hover:bg-[#0b1628]"]:hover {
+  background-color: #f1f5f9 !important;
+}
+/* Unlisted-share disclaimer in light mode */
+
+html.light [class*="border-amber"] {
+  border-color: #fbbf24 !important;
+}
+
+html.light [class*="bg-amber-500/"],
+html.light [class*="bg-amber-400/"],
+html.light [class*="bg-amber-300/"] {
+  background-color: #fffbeb !important;
+}
+
+html.light .text-amber-100,
+html.light .text-amber-200,
+html.light .text-amber-300 {
+  color: #92400e !important;
+}
+html.light .unlisted-disclaimer {
+  border-color: #f59e0b !important;
+  background-color: #fffbeb !important;
+  color: #92400e !important;
 }

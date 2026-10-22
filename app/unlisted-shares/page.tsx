@@ -1284,18 +1284,9 @@ export default function UnlistedSharesPage() {
 
 
 
-          <div className="mt-5 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs leading-6 text-amber-100/70">
-
-            Prices shown here are
-
-            indicative observations,
-
-            not live exchange prices
-
-            or executable quotations.
-
-          </div>
-
+          <div className="unlisted-disclaimer mt-5 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs font-medium leading-6 text-amber-100/70">
+  Prices shown here are indicative observations, not live exchange prices or executable quotations.
+</div>
         </div>
 
       </section>
