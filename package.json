@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.2",
+    "@next/third-parties": "^16.4.2",
     "fast-xml-parser": "^5.11.1",
     "lightweight-charts": "^5.2.0",
     "lucide-react": "^1.33.0",

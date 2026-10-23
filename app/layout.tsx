@@ -3,6 +3,10 @@ import type {
 } from "next";
 
 import {
+  GoogleAnalytics,
+} from "@next/third-parties/google";
+
+import {
   ClerkProvider,
 } from "@clerk/nextjs";
 
@@ -53,6 +57,9 @@ export default function RootLayout({
 
           {children}
         </body>
+         <GoogleAnalytics
+          gaId="G-5MST6VRL1J"
+          />
       </html>
     </ClerkProvider>
   );
