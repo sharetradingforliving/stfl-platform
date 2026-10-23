@@ -100,14 +100,93 @@ async function synchronizeCatalogue(
 }
 
 
-export async function GET() {
-  try {
-    const liveResult = await runIPOEngine();
+const IPO_REFRESH_INTERVAL_MS =
+  15 * 60 * 1000;
+
+let lastIPORefreshStartedAt = 0;
+
+let ipoRefreshPromise:
+  Promise<void> | null = null;
+
+const IPO_CACHE_CONTROL =
+  "public, max-age=60, s-maxage=300, stale-while-revalidate=3600";
+
+function refreshCatalogueInBackground() {
+  const now = Date.now();
+
+  const refreshIsRecent =
+    now - lastIPORefreshStartedAt <
+    IPO_REFRESH_INTERVAL_MS;
+
+  if (
+    refreshIsRecent ||
+    ipoRefreshPromise
+  ) {
+    return;
+  }
+
+  lastIPORefreshStartedAt = now;
+
+  ipoRefreshPromise = (async () => {
+    const liveResult =
+      await runIPOEngine();
 
     if (liveResult.ipos.length > 0) {
-      const synchronized = await synchronizeCatalogue(
+      await synchronizeCatalogue(
         liveResult.ipos
       );
+    }
+  })()
+    .catch((error) => {
+      console.error(
+        "Background IPO refresh failed:",
+        error
+      );
+    })
+    .finally(() => {
+      ipoRefreshPromise = null;
+    });
+}
+
+export async function GET() {
+  try {
+    /*
+     * Serve the permanent catalogue first.
+     * The visitor must not wait for external
+     * IPO fetching and database synchronization.
+     */
+    const stored =
+      await readStoredCatalogue();
+
+    if (stored) {
+      void refreshCatalogueInBackground();
+
+      return NextResponse.json(
+        stored,
+        {
+          status: 200,
+          headers: {
+            "Cache-Control":
+              IPO_CACHE_CONTROL,
+            "X-STFL-IPO-Source":
+              "persistent-catalogue",
+          },
+        }
+      );
+    }
+
+    /*
+     * If the stored catalogue is unavailable,
+     * perform one live load as a fallback.
+     */
+    const liveResult =
+      await runIPOEngine();
+
+    if (liveResult.ipos.length > 0) {
+      const synchronized =
+        await synchronizeCatalogue(
+          liveResult.ipos
+        );
 
       if (synchronized) {
         return NextResponse.json(
@@ -116,40 +195,24 @@ export async function GET() {
             status: 200,
             headers: {
               "Cache-Control":
-                "no-store, no-cache, must-revalidate",
+                IPO_CACHE_CONTROL,
+              "X-STFL-IPO-Source":
+                "live-synchronized",
             },
           }
         );
       }
     }
 
-    // If NSE is unavailable, continue serving the permanent catalogue.
-    const stored = await readStoredCatalogue();
-
-    if (stored) {
-      return NextResponse.json(
-        stored,
-        {
-          status: 200,
-          headers: {
-            "Cache-Control":
-              "no-store, no-cache, must-revalidate",
-            "X-STFL-IPO-Source": "persistent-fallback",
-          },
-        }
-      );
-    }
-
-    // Final fallback preserves the previous frontend behavior when the
-    // persistence service is temporarily unavailable.
     return NextResponse.json(
       liveResult,
       {
         status: 200,
         headers: {
           "Cache-Control":
-            "no-store, no-cache, must-revalidate",
-          "X-STFL-IPO-Source": "live-only-fallback",
+            IPO_CACHE_CONTROL,
+          "X-STFL-IPO-Source":
+            "live-fallback",
         },
       }
     );
@@ -159,28 +222,17 @@ export async function GET() {
       error
     );
 
-    const stored = await readStoredCatalogue();
-
-    if (stored) {
-      return NextResponse.json(
-        stored,
-        {
-          status: 200,
-          headers: {
-            "Cache-Control":
-              "no-store, no-cache, must-revalidate",
-            "X-STFL-IPO-Source": "persistent-error-fallback",
-          },
-        }
-      );
-    }
-
     return NextResponse.json(
       {
-        error: "Unable to load IPO data.",
+        error:
+          "Unable to load IPO data.",
       },
       {
         status: 503,
+        headers: {
+          "Cache-Control":
+            "no-store",
+        },
       }
     );
   }

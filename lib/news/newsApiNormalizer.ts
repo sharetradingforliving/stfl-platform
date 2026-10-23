@@ -25,7 +25,22 @@ export function normalizeNewsApiNews(
 
       headline: article.title || "",
 
-      summary: article.description || "",
+      summary: (
+  article.description || ""
+)
+  .replace(
+    /<[^>]*>/g,
+    " "
+  )
+  .replace(
+    /\s+/g,
+    " "
+  )
+  .trim()
+  .slice(
+    0,
+    500
+  ),
 
       source: article.source?.name || "NewsAPI",
 

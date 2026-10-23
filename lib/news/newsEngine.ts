@@ -111,8 +111,12 @@ export async function runNewsEngine(): Promise<NewsEngineResult> {
   );
 
   const articles = rankNews(
-    duplicateFilter(indianMarketFilter(mergedArticles))
-  );
+  duplicateFilter(
+    indianMarketFilter(
+      mergedArticles
+    )
+  )
+).slice(0, 60);
 
   const {
     intelligence,

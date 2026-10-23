@@ -85,7 +85,7 @@ const confirmationRequirements = [
 export default function MarketAstrologyPage() {
   return (
     <main className="min-h-screen bg-[#020817] text-slate-100">
-      <section className="border-b border-slate-800 bg-gradient-to-b from-indigo-950/30 to-[#020817]">
+      <section className="astrology-hero border-b border-slate-800 bg-gradient-to-b from-indigo-950/30 to-[#020817]">
         <div className="mx-auto max-w-7xl px-6 py-14">
           <div className="max-w-4xl">
             <div className="mb-5 flex flex-wrap items-center gap-3">

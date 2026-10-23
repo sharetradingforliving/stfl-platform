@@ -403,13 +403,20 @@ async function fetchGoogleNewsQuery(
     const response = await fetch(
       url,
       {
-        cache: "no-store",
+  cache: "force-cache",
 
-        headers: {
-          "User-Agent":
-            "STFL-News-Intelligence/1.0",
-        },
-      }
+  next: {
+    revalidate: 300,
+  },
+
+  signal:
+    AbortSignal.timeout(8000),
+
+  headers: {
+    "User-Agent":
+      "STFL-News-Intelligence/1.0",
+  },
+}
     );
 
     if (!response.ok) {
@@ -638,7 +645,7 @@ async function fetchDelayedNewsApi():
 
       sortBy: "publishedAt",
 
-      pageSize: "100",
+      pageSize: "40",
 
       page: "1",
 
@@ -652,13 +659,20 @@ async function fetchDelayedNewsApi():
   try {
     const response =
       await fetch(url, {
-        cache: "no-store",
+  cache: "force-cache",
 
-        headers: {
-          "X-Api-Key":
-            NEWS_API_KEY,
-        },
-      });
+  next: {
+    revalidate: 300,
+  },
+
+  signal:
+    AbortSignal.timeout(8000),
+
+  headers: {
+    "X-Api-Key":
+      NEWS_API_KEY,
+  },
+});
 
     if (!response.ok) {
       console.warn(

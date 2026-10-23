@@ -310,3 +310,22 @@ html.light .market-ticker-track .font-semibold,
 html.light .market-ticker-track .font-bold {
   color: #0f172a;
 }
+/* Market Astrology hero — light theme */
+html.light .astrology-hero {
+  border-color: #cbd5e1 !important;
+  background: linear-gradient(
+    180deg,
+    #eef2ff 0%,
+    #f8fafc 55%,
+    #ffffff 100%
+  ) !important;
+}
+
+html.light .astrology-hero h1 {
+  color: #0f172a !important;
+}
+
+html.light .astrology-hero .text-slate-400,
+html.light .astrology-hero .text-slate-500 {
+  color: #475569 !important;
+}
