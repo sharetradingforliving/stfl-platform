@@ -1,8 +1,12 @@
-import { NextResponse } from "next/server";
+import {
+  NextResponse,
+} from "next/server";
+
 import {
   getAllNseEquities,
   type NseCashEquity,
 } from "@/lib/market/allNseEquities";
+
 import {
   getUpstoxReadOnlyAccessToken,
   type UpstoxAccessTokenSource,
@@ -11,6 +15,9 @@ import {
 type UpstoxQuote = {
   last_price?: number;
   net_change?: number;
+  prev_close_price?: number;
+  year_high?: number;
+  year_low?: number;
   volume?: number;
   timestamp?: string;
   last_trade_time?: string | number;
@@ -23,6 +30,8 @@ type UpstoxQuote = {
     high?: number;
     low?: number;
     close?: number;
+    volume?: number;
+    ts?: number;
   };
 };
 
@@ -40,6 +49,10 @@ type AllStockItem = {
   open: number | null;
   high: number | null;
   low: number | null;
+  yearHigh: number | null;
+  yearLow: number | null;
+  distanceFromYearHighPercent: number | null;
+  distanceFromYearLowPercent: number | null;
   lowerCircuitLimit: number | null;
   upperCircuitLimit: number | null;
   tradeDate: string | null;
@@ -49,8 +62,7 @@ type AllStockItem = {
 type AllStocksSnapshot = {
   status: "success";
   marketDataStatus: "live";
-  authenticationSource:
-    UpstoxAccessTokenSource;
+  authenticationSource: UpstoxAccessTokenSource;
   universe: {
     eligibleInstruments: number;
     quotedInstruments: number;
@@ -70,6 +82,8 @@ type AllStocksSnapshot = {
   };
   topGainers: AllStockItem[];
   topLosers: AllStockItem[];
+  top52WeekHigh: AllStockItem[];
+  top52WeekLow: AllStockItem[];
   mostActiveVolume: AllStockItem[];
   mostActiveValue: AllStockItem[];
   source: string;
@@ -89,11 +103,39 @@ let snapshotPromise:
   | Promise<AllStocksSnapshot>
   | null = null;
 
-function normalizeKey(value: string): string {
+function normalizeKey(
+  value: string
+): string {
   return value
     .replace("|", ":")
     .trim()
     .toUpperCase();
+}
+
+function normalizeSymbol(
+  value: string | undefined
+): string {
+  return value
+    ?.trim()
+    .toUpperCase() ?? "";
+}
+
+function validPositiveNumber(
+  value: unknown
+): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value > 0
+  );
+}
+
+function optionalPositiveNumber(
+  value: unknown
+): number | null {
+  return validPositiveNumber(value)
+    ? value
+    : null;
 }
 
 function splitIntoBatches<T>(
@@ -135,20 +177,17 @@ function formatIndiaDate(
   const parts =
     formatter.formatToParts(date);
 
-  const year =
-    parts.find(
-      (part) => part.type === "year"
-    )?.value;
+  const year = parts.find(
+    (part) => part.type === "year"
+  )?.value;
 
-  const month =
-    parts.find(
-      (part) => part.type === "month"
-    )?.value;
+  const month = parts.find(
+    (part) => part.type === "month"
+  )?.value;
 
-  const day =
-    parts.find(
-      (part) => part.type === "day"
-    )?.value;
+  const day = parts.find(
+    (part) => part.type === "day"
+  )?.value;
 
   if (!year || !month || !day) {
     return "";
@@ -189,17 +228,11 @@ function parseTradeDate(
   }
 
   if (quote.timestamp) {
-    const timestampDate =
+    const date =
       new Date(quote.timestamp);
 
-    if (
-      !Number.isNaN(
-        timestampDate.getTime()
-      )
-    ) {
-      return formatIndiaDate(
-        timestampDate
-      );
+    if (!Number.isNaN(date.getTime())) {
+      return formatIndiaDate(date);
     }
   }
 
@@ -214,11 +247,6 @@ function createQuoteLookup(
 
   Object.entries(quoteData).forEach(
     ([responseKey, quote]) => {
-      lookup.set(
-        normalizeKey(responseKey),
-        quote
-      );
-
       if (quote.instrument_token) {
         lookup.set(
           normalizeKey(
@@ -227,6 +255,11 @@ function createQuoteLookup(
           quote
         );
       }
+
+      lookup.set(
+        normalizeKey(responseKey),
+        quote
+      );
     }
   );
 
@@ -236,9 +269,7 @@ function createQuoteLookup(
 async function fetchQuoteBatch(
   batch: NseCashEquity[],
   accessToken: string
-): Promise<
-  Map<string, UpstoxQuote>
-> {
+): Promise<Map<string, UpstoxQuote>> {
   const instrumentKeys =
     batch.map(
       (instrument) =>
@@ -246,7 +277,7 @@ async function fetchQuoteBatch(
     );
 
   const quoteUrl =
-    "https://api.upstox.com/v2/market-quote/quotes" +
+    "https://api.upstox.com/v3/market-quote/quotes" +
     `?instrument_key=${encodeURIComponent(
       instrumentKeys.join(",")
     )}`;
@@ -269,7 +300,7 @@ async function fetchQuoteBatch(
 
   if (!response.ok) {
     throw new Error(
-      `Upstox quote batch failed with status ${response.status}: ${JSON.stringify(
+      `Upstox V3 quote batch failed with status ${response.status}: ${JSON.stringify(
         responseData
       )}`
     );
@@ -286,83 +317,141 @@ async function fetchQuoteBatch(
 function createStockItem(
   instrument: NseCashEquity,
   quote: UpstoxQuote
-): AllStockItem {
-  const price =
-    Number(quote.last_price) || 0;
+): AllStockItem | null {
+  const quoteSymbol =
+    normalizeSymbol(quote.symbol);
 
-  const change =
-    Number(quote.net_change) || 0;
+  if (
+    quoteSymbol &&
+    quoteSymbol !== instrument.symbol
+  ) {
+    console.warn(
+      "Skipping mismatched Upstox quote:",
+      {
+        requestedSymbol:
+          instrument.symbol,
+        quoteSymbol,
+        instrumentKey:
+          instrument.instrumentKey,
+      }
+    );
+
+    return null;
+  }
+
+  const price =
+    Number(quote.last_price);
+
+  if (!validPositiveNumber(price)) {
+    return null;
+  }
+
+  const suppliedPreviousClose =
+    Number(quote.prev_close_price);
+
+  const suppliedChange =
+    Number(quote.net_change);
 
   const previousClose =
-    price - change;
+    validPositiveNumber(
+      suppliedPreviousClose
+    )
+      ? suppliedPreviousClose
+      : Number.isFinite(suppliedChange)
+        ? price - suppliedChange
+        : 0;
+
+  if (!validPositiveNumber(previousClose)) {
+    return null;
+  }
+
+  const change =
+    price - previousClose;
 
   const changePercent =
-    previousClose !== 0
-      ? (change / previousClose) * 100
-      : 0;
+    (change / previousClose) * 100;
 
   const volume =
-    Number(quote.volume) || 0;
+    Number(
+      quote.volume ??
+      quote.ohlc?.volume ??
+      0
+    ) || 0;
 
   const tradedValue =
     price * volume;
 
-  const lowerCircuitLimit =
-    typeof quote.lower_circuit_limit ===
-    "number"
-      ? quote.lower_circuit_limit
+  const yearHigh =
+    optionalPositiveNumber(
+      quote.year_high
+    );
+
+  const yearLow =
+    optionalPositiveNumber(
+      quote.year_low
+    );
+
+  const distanceFromYearHighPercent =
+    yearHigh
+      ? Math.max(
+          0,
+          ((yearHigh - price) /
+            yearHigh) *
+            100
+        )
       : null;
 
-  const upperCircuitLimit =
-    typeof quote.upper_circuit_limit ===
-    "number"
-      ? quote.upper_circuit_limit
+  const distanceFromYearLowPercent =
+    yearLow
+      ? Math.max(
+          0,
+          ((price - yearLow) /
+            yearLow) *
+            100
+        )
       : null;
 
   return {
     companyName:
       instrument.companyName,
-
     symbol:
       instrument.symbol,
-
     isin:
       instrument.isin,
-
     instrumentKey:
       instrument.instrumentKey,
-
     price,
     previousClose,
     change,
     changePercent,
     volume,
     tradedValue,
-
     open:
-      typeof quote.ohlc?.open ===
-      "number"
-        ? quote.ohlc.open
-        : null,
-
+      optionalPositiveNumber(
+        quote.ohlc?.open
+      ),
     high:
-      typeof quote.ohlc?.high ===
-      "number"
-        ? quote.ohlc.high
-        : null,
-
+      optionalPositiveNumber(
+        quote.ohlc?.high
+      ),
     low:
-      typeof quote.ohlc?.low ===
-      "number"
-        ? quote.ohlc.low
-        : null,
-
-    lowerCircuitLimit,
-    upperCircuitLimit,
-
+      optionalPositiveNumber(
+        quote.ohlc?.low
+      ),
+    yearHigh,
+    yearLow,
+    distanceFromYearHighPercent,
+    distanceFromYearLowPercent,
+    lowerCircuitLimit:
+      optionalPositiveNumber(
+        quote.lower_circuit_limit
+      ),
+    upperCircuitLimit:
+      optionalPositiveNumber(
+        quote.upper_circuit_limit
+      ),
     tradeDate:
       parseTradeDate(quote),
-
     lastUpdated:
       quote.timestamp ?? null,
   };
@@ -404,12 +493,11 @@ async function buildAllStocksSnapshot(
   const quotedStocks =
     universe.equities
       .map((instrument) => {
-        const quote =
-          quoteLookup.get(
-            normalizeKey(
-              instrument.instrumentKey
-            )
-          );
+        const quote = quoteLookup.get(
+          normalizeKey(
+            instrument.instrumentKey
+          )
+        );
 
         if (!quote) {
           return null;
@@ -473,38 +561,23 @@ async function buildAllStocksSnapshot(
     );
 
   const upperCircuitStocks =
-    tradedStocks.filter((stock) => {
-      if (
-        !stock.upperCircuitLimit ||
-        stock.upperCircuitLimit <= 0
-      ) {
-        return false;
-      }
-
-      return (
+    tradedStocks.filter(
+      (stock) =>
+        stock.upperCircuitLimit !== null &&
         stock.price >=
-        stock.upperCircuitLimit - 0.001
-      );
-    });
+          stock.upperCircuitLimit - 0.001
+    );
 
   const lowerCircuitStocks =
-    tradedStocks.filter((stock) => {
-      if (
-        !stock.lowerCircuitLimit ||
-        stock.lowerCircuitLimit <= 0
-      ) {
-        return false;
-      }
-
-      return (
+    tradedStocks.filter(
+      (stock) =>
+        stock.lowerCircuitLimit !== null &&
         stock.price <=
-        stock.lowerCircuitLimit + 0.001
-      );
-    });
+          stock.lowerCircuitLimit + 0.001
+    );
 
   const directionalTotal =
-    advances.length +
-    declines.length;
+    advances.length + declines.length;
 
   const advancePercentage =
     directionalTotal > 0
@@ -536,72 +609,84 @@ async function buildAllStocksSnapshot(
     )
     .slice(0, 10);
 
-  const mostActiveVolume = [
-    ...tradedStocks,
-  ]
-    .sort(
-      (a, b) =>
-        b.volume - a.volume
-    )
-    .slice(0, 10);
+  const top52WeekHigh =
+    tradedStocks
+      .filter(
+        (stock) =>
+          stock.yearHigh !== null &&
+          stock.distanceFromYearHighPercent !== null
+      )
+      .sort(
+        (a, b) =>
+          (a.distanceFromYearHighPercent ?? Infinity) -
+          (b.distanceFromYearHighPercent ?? Infinity)
+      )
+      .slice(0, 10);
 
-  const mostActiveValue = [
-    ...tradedStocks,
-  ]
-    .sort(
-      (a, b) =>
-        b.tradedValue -
-        a.tradedValue
-    )
-    .slice(0, 10);
+  const top52WeekLow =
+    tradedStocks
+      .filter(
+        (stock) =>
+          stock.yearLow !== null &&
+          stock.distanceFromYearLowPercent !== null
+      )
+      .sort(
+        (a, b) =>
+          (a.distanceFromYearLowPercent ?? Infinity) -
+          (b.distanceFromYearLowPercent ?? Infinity)
+      )
+      .slice(0, 10);
+
+  const mostActiveVolume =
+    [...tradedStocks]
+      .sort(
+        (a, b) =>
+          b.volume - a.volume
+      )
+      .slice(0, 10);
+
+  const mostActiveValue =
+    [...tradedStocks]
+      .sort(
+        (a, b) =>
+          b.tradedValue -
+          a.tradedValue
+      )
+      .slice(0, 10);
 
   return {
     status: "success",
     marketDataStatus: "live",
     authenticationSource,
-
     universe: {
       eligibleInstruments:
         universe.total,
-
       quotedInstruments:
         quotedStocks.length,
-
       stocksTraded:
         tradedStocks.length,
-
       marketSessionDate,
     },
-
     breadth: {
-      advances:
-        advances.length,
-
-      declines:
-        declines.length,
-
-      unchanged:
-        unchanged.length,
-
+      advances: advances.length,
+      declines: declines.length,
+      unchanged: unchanged.length,
       advancePercentage,
       declinePercentage,
     },
-
     circuits: {
       upperCircuit:
         upperCircuitStocks.length,
-
       lowerCircuit:
         lowerCircuitStocks.length,
     },
-
     topGainers,
     topLosers,
+    top52WeekHigh,
+    top52WeekLow,
     mostActiveVolume,
     mostActiveValue,
-
-    source: "Upstox",
-
+    source: "Upstox V3",
     fetchedAt:
       new Date().toISOString(),
   };
@@ -633,8 +718,6 @@ export async function GET() {
       if (cachedSnapshot) {
         return NextResponse.json({
           ...cachedSnapshot,
-          marketDataStatus:
-            "live",
           cacheStatus: "stale",
         });
       }
@@ -643,7 +726,6 @@ export async function GET() {
         {
           error:
             "Upstox read-only access token is missing",
-
           instruction:
             "Add UPSTOX_ANALYTICS_TOKEN to frontend/.env.local or authorize Upstox through /api/upstox/login.",
         },
@@ -655,8 +737,7 @@ export async function GET() {
 
     const {
       accessToken,
-      source:
-        authenticationSource,
+      source: authenticationSource,
     } = tokenResult;
 
     if (!snapshotPromise) {
@@ -672,8 +753,7 @@ export async function GET() {
         await snapshotPromise;
 
       cachedSnapshot = snapshot;
-      cacheTimestamp =
-        Date.now();
+      cacheTimestamp = Date.now();
 
       return NextResponse.json({
         ...snapshot,
@@ -691,7 +771,6 @@ export async function GET() {
     if (cachedSnapshot) {
       return NextResponse.json({
         ...cachedSnapshot,
-        marketDataStatus: "live",
         cacheStatus: "stale",
         warning:
           "The latest refresh failed. Showing the last available snapshot.",
@@ -702,7 +781,6 @@ export async function GET() {
       {
         error:
           "Unable to prepare the all-NSE market snapshot",
-
         details:
           error instanceof Error
             ? error.message

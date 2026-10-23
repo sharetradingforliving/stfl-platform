@@ -1,6 +1,8 @@
 import "server-only";
 
-import { getUpstoxInstruments } from "@/lib/upstox/instrumentMaster";
+import {
+  getUpstoxInstruments,
+} from "@/lib/upstox/instrumentMaster";
 
 export type NseCashEquity = {
   companyName: string;
@@ -56,8 +58,8 @@ export async function getAllNseEquities(): Promise<
       "UNKNOWN";
 
     const instrumentKey =
-      instrument.instrument_key?.trim() ??
-      "";
+      instrument.instrument_key
+        ?.trim() ?? "";
 
     const symbol =
       instrument.trading_symbol
@@ -75,11 +77,24 @@ export async function getAllNseEquities(): Promise<
       symbol
     ).trim();
 
-    const isNseCashInstrument =
-      segment === "NSE_EQ";
+    /*
+     * Accept only ordinary NSE equity shares.
+     *
+     * This excludes NCDs, bonds, ETFs,
+     * rights entitlements and other
+     * non-equity securities.
+     */
+    const isOrdinaryNseEquity =
+      segment === "NSE_EQ" &&
+      instrumentType === "EQ" &&
+      (
+        exchange === "NSE" ||
+        exchange === ""
+      ) &&
+      isin.startsWith("INE");
 
     if (
-      !isNseCashInstrument ||
+      !isOrdinaryNseEquity ||
       !instrumentKey ||
       !symbol
     ) {
@@ -101,31 +116,23 @@ export async function getAllNseEquities(): Promise<
     );
   });
 
-  const equities = Array.from(
-    uniqueInstruments.values()
-  ).sort((a, b) =>
-    a.symbol.localeCompare(b.symbol)
-  );
-
-  const instrumentsByType =
-    equities.reduce<
-      Record<string, number>
-    >((counts, instrument) => {
-      const type =
-        instrument.instrumentType ||
-        "UNKNOWN";
-
-      counts[type] =
-        (counts[type] ?? 0) + 1;
-
-      return counts;
-    }, {});
+  const equities =
+    Array.from(
+      uniqueInstruments.values()
+    ).sort((a, b) =>
+      a.symbol.localeCompare(
+        b.symbol
+      )
+    );
 
   cachedUniverse = {
     total:
       equities.length,
 
-    instrumentsByType,
+    instrumentsByType: {
+      EQ:
+        equities.length,
+    },
 
     equities,
   };
