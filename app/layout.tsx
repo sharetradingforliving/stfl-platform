@@ -41,32 +41,41 @@ export const metadata: Metadata = {
 
   title: {
     default:
-      "Indian Stock Market Research & Analysis | STFL",
+      "Share Trading & Investment Research India | STFL",
     template:
       "%s | Share Trading For Living",
   },
 
   description:
-    "Research Indian stocks, IPOs, unlisted shares, corporate actions and market trends with fundamental analysis, technical insights and investor education from STFL.",
+    "Research Indian shares, mutual funds, ETFs, debt investments, IPOs and unlisted companies with AI-assisted insights, fundamental analysis, technical research and market intelligence from STFL.",
 
   keywords: [
+    "share trading India",
+    "investment research India",
     "Indian stock market research",
     "stock analysis India",
     "fundamental analysis",
     "technical analysis",
+    "mutual fund research India",
+    "ETF research India",
+    "debt investments India",
     "IPO research India",
     "unlisted shares India",
-    "corporate actions India",
-    "share market research",
-    "stock screener India",
     "market intelligence India",
+    "AI stock analysis India",
+    "AI investment research India",
+    "AI mutual fund analysis",
+    "AI ETF analysis",
+    "AI debt fund analysis",
+    "AI market intelligence",
     "Share Trading For Living",
     "STFL",
   ],
 
   authors: [
     {
-      name: "Share Trading For Living",
+      name:
+        "Share Trading For Living",
       url: siteUrl,
     },
   ],
@@ -86,7 +95,8 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
+      "max-image-preview":
+        "large",
       "max-snippet": -1,
       "max-video-preview": -1,
     },
@@ -99,13 +109,15 @@ export const metadata: Metadata = {
     siteName:
       "Share Trading For Living",
     title:
-      "Indian Stock Market Research & Analysis | STFL",
+      "Share Trading & Investment Research India | STFL",
     description:
-      "Research Indian stocks, IPOs, unlisted shares, corporate actions and market trends with fundamental and technical insights.",
+      "Research Indian shares, mutual funds, ETFs, debt investments, IPOs and unlisted companies with AI-assisted insights and analytical tools.",
     images: [
       {
-        url: "/sharetradingforlivingwithoutbg.png",
-        alt: "Share Trading For Living",
+        url:
+          "/sharetradingforlivingwithoutbg.png",
+        alt:
+          "Share Trading For Living",
       },
     ],
   },
@@ -113,9 +125,9 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title:
-      "Indian Stock Market Research & Analysis | STFL",
+      "Share Trading & Investment Research India | STFL",
     description:
-      "Research Indian stocks, IPOs, unlisted shares and market trends with fundamental and technical insights.",
+      "AI-assisted research for Indian shares, mutual funds, ETFs, debt investments, IPOs and market intelligence.",
     images: [
       "/sharetradingforlivingwithoutbg.png",
     ],
