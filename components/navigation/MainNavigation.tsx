@@ -30,6 +30,14 @@ const navigationGroups: NavigationGroup[] = [
         href: "/market-intelligence",
       },
       {
+  label: "Market Movers",
+  href: "/market-movers",
+},
+{
+  label: "Market Movers",
+  href: "/market-movers",
+},
+      {
         label: "News & Sentiment",
         href: "/news-sentiment",
       },
