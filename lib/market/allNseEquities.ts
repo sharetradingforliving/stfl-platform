@@ -84,14 +84,25 @@ export async function getAllNseEquities(): Promise<
      * rights entitlements and other
      * non-equity securities.
      */
-    const isOrdinaryNseEquity =
-      segment === "NSE_EQ" &&
-      instrumentType === "EQ" &&
-      (
-        exchange === "NSE" ||
-        exchange === ""
-      ) &&
-      isin.startsWith("INE");
+    const hasOrdinaryEquityIsin =
+  isin.length === 12 &&
+  isin.startsWith("INE") &&
+  isin.slice(7, 9) === "01";
+
+const looksLikeDebtSecurity =
+  /\b(NCD|BOND|DEBENTURE|SECURED|UNSECURED)\b|%/i.test(
+    `${symbol} ${companyName}`
+  );
+
+const isOrdinaryNseEquity =
+  segment === "NSE_EQ" &&
+  instrumentType === "EQ" &&
+  (
+    exchange === "NSE" ||
+    exchange === ""
+  ) &&
+  hasOrdinaryEquityIsin &&
+  !looksLikeDebtSecurity;
 
     if (
       !isOrdinaryNseEquity ||
