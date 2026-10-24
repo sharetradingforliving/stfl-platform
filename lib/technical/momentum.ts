@@ -15,8 +15,8 @@ import {
 function getRSISignal(
   rsi: number
 ): string {
-  if (rsi >= 70) return "OVERBOUGHT";
-  if (rsi <= 30) return "OVERSOLD";
+  if (rsi >= 80) return "OVERBOUGHT";
+  if (rsi <= 20) return "OVERSOLD";
   if (rsi >= 60) return "BULLISH";
   if (rsi <= 40) return "BEARISH";
 

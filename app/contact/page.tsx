@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: "Contact Us | Share Trading For Living",
   description:
     "Contact Share Trading For Living for questions about stock research, market intelligence and STFL services.",
+alternates: {
+  canonical:
+    "/contact",
+},
 };
 
 const contactOptions = [

@@ -21,6 +21,13 @@ export default function sitemap():
       changeFrequency: "daily",
       priority: 0.9,
     },
+{
+  url:
+    `${baseUrl}/market-movers`,
+  lastModified: new Date(),
+  changeFrequency: "daily",
+  priority: 0.9,
+},
     {
       url:
         `${baseUrl}/news-sentiment`,

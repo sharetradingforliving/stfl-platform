@@ -27,6 +27,62 @@ import {
   Zap,
 } from "lucide-react";
 
+const homepageFaqs = [
+  {
+    question: "What is Share Trading For Living?",
+    answer:
+      "Share Trading For Living, or STFL, is an Indian-market research and investment education platform providing market intelligence, company research and analytical tools.",
+  },
+  {
+    question: "How can I research Indian stocks on STFL?",
+    answer:
+      "You can search NSE and BSE companies and study available price data, charts, technical indicators, company fundamentals, market activity and research insights.",
+  },
+  {
+    question: "Does STFL provide live NSE and BSE market data?",
+    answer:
+      "STFL provides current or latest available NSE and BSE market information. Data availability and timing may vary by exchange session, provider and instrument.",
+  },
+  {
+    question: "Can I research mutual funds, ETFs and IPOs on STFL?",
+    answer:
+      "Yes. STFL includes dedicated research areas for mutual funds, ETFs, IPOs, unlisted shares and other investment categories as those modules become available.",
+  },
+  {
+    question: "What are AI-assisted investment insights?",
+    answer:
+      "AI-assisted insights organize financial, technical and market information into structured observations. They support research but do not guarantee outcomes or replace professional advice.",
+  },
+  {
+    question: "Is STFL investment advice?",
+    answer:
+      "No. STFL provides research and educational information. It does not guarantee returns or replace independent research and advice from a qualified financial professional.",
+  },
+  {
+    question: "Which STFL research tools are available for free?",
+    answer:
+      "Visitors can access selected market information, research previews and educational resources. Advanced valuation, analytical and premium research features may require membership.",
+  },
+];
+
+const homepageFaqSchema = {
+  "@context": "https://schema.org",
+
+  "@type": "FAQPage",
+
+  mainEntity: homepageFaqs.map((item) => ({
+    "@type": "Question",
+
+    name: item.question,
+
+    acceptedAnswer: {
+      "@type": "Answer",
+
+      text: item.answer,
+    },
+  })),
+};
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   type StockSearchResult = {
@@ -188,6 +244,12 @@ export default function Home() {
       id="top"
       className="min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-white"
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(homepageFaqSchema).replace(/</g, "\\u003c"),
+        }}
+      />
       {/* Live Market Ticker */}
       <LiveMarketTicker />
 
@@ -199,11 +261,11 @@ export default function Home() {
           </p>
 
           <h1 className="text-5xl font-bold leading-tight text-slate-950 md:text-7xl dark:text-white">
-            Research Smarter.
+            Research Indian Stocks Smarter.
             <br />
             Trade Smarter.
             <br />
-            <span className="text-emerald-500 dark:text-emerald-400">
+            <span className="text-emerald-600 dark:text-emerald-400">
               Invest Better.
             </span>
           </h1>
@@ -984,6 +1046,42 @@ export default function Home() {
         </div>
       </section>
       <PlatformModules />
+      {/* Homepage FAQ */}
+      <section className="border-t border-slate-200 bg-slate-100/70 px-6 py-20 dark:border-slate-800 dark:bg-slate-900/50">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400">
+              Frequently Asked Questions
+            </p>
+
+            <h2 className="mt-4 text-3xl font-bold text-slate-950 md:text-5xl dark:text-white">
+              Learn More About STFL
+            </h2>
+
+            <p className="mx-auto mt-5 max-w-2xl leading-7 text-slate-600 dark:text-slate-400">
+              Understand how STFL supports Indian stock-market research,
+              investment learning and informed decision-making.
+            </p>
+          </div>
+
+          <div className="mt-12 space-y-4">
+            {homepageFaqs.map((item) => (
+              <article
+                key={item.question}
+                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:shadow-none"
+              >
+                <h3 className="text-lg font-bold text-slate-950 dark:text-white">
+                  {item.question}
+                </h3>
+
+                <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-400">
+                  {item.answer}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white px-6 pt-16 dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl">

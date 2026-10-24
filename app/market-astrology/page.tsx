@@ -12,6 +12,10 @@ export const metadata: Metadata = {
     "Market Astrology Research | STFL",
   description:
     "Experimental research comparing verified planetary configurations with historical market behaviour.",
+alternates: {
+  canonical:
+    "/market-astrology",
+},
 };
 
 const planetaryFramework = [
