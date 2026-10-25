@@ -1,14 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
-import {
-  fetchMarketSnapshot,
-} from "@/lib/market/marketSnapshotCache";
+import { fetchMarketSnapshot } from "@/lib/market/marketSnapshotCache";
 
 type StockItem = {
   companyName: string;
@@ -31,10 +26,7 @@ type StockItem = {
 
 type AllStocksResponse = {
   status?: "success";
-  marketDataStatus?:
-    | "live"
-    | "previous_session"
-    | "unavailable";
+  marketDataStatus?: "live" | "previous_session" | "unavailable";
   universe?: {
     eligibleInstruments: number;
     quotedInstruments: number;
@@ -54,12 +46,7 @@ type AllStocksResponse = {
 };
 
 type MovementSection =
-  | "GAINERS"
-  | "LOSERS"
-  | "52W_HIGH"
-  | "52W_LOW"
-  | "VOLUME"
-  | "VALUE";
+  "GAINERS" | "LOSERS" | "52W_HIGH" | "52W_LOW" | "VOLUME" | "VALUE";
 
 const sectionOptions: Array<{
   id: MovementSection;
@@ -91,52 +78,35 @@ const sectionOptions: Array<{
   },
 ];
 
-function isValidNumber(
-  value: number | null | undefined
-): value is number {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value)
-  );
+function isValidNumber(value: number | null | undefined): value is number {
+  return typeof value === "number" && Number.isFinite(value);
 }
 
-function formatPrice(
-  value: number | null | undefined
-): string {
+function formatPrice(value: number | null | undefined): string {
   if (!isValidNumber(value)) {
     return "\u2014";
   }
 
-  return `\u20B9${value.toLocaleString(
-    "en-IN",
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }
-  )}`;
+  return `\u20B9${value.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
-function formatSignedPrice(
-  value: number
-): string {
+function formatSignedPrice(value: number): string {
   if (!isValidNumber(value)) {
     return "\u2014";
   }
 
   const prefix = value > 0 ? "+" : "";
 
-  return `${prefix}\u20B9${value.toLocaleString(
-    "en-IN",
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }
-  )}`;
+  return `${prefix}\u20B9${value.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
-function formatPercent(
-  value: number | null | undefined
-): string {
+function formatPercent(value: number | null | undefined): string {
   if (!isValidNumber(value)) {
     return "\u2014";
   }
@@ -146,9 +116,7 @@ function formatPercent(
   return `${prefix}${value.toFixed(2)}%`;
 }
 
-function formatVolume(
-  value: number
-): string {
+function formatVolume(value: number): string {
   if (!isValidNumber(value)) {
     return "\u2014";
   }
@@ -168,52 +136,36 @@ function formatVolume(
   return value.toLocaleString("en-IN");
 }
 
-function formatTradedValue(
-  value: number
-): string {
+function formatTradedValue(value: number): string {
   if (!isValidNumber(value)) {
     return "\u2014";
   }
 
-  return `\u20B9${(
-    value / 10_000_000
-  ).toLocaleString(
-    "en-IN",
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }
-  )} Cr`;
+  return `\u20B9${(value / 10_000_000).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} Cr`;
 }
 
-function formatSessionDate(
-  value: string | null | undefined
-): string {
+function formatSessionDate(value: string | null | undefined): string {
   if (!value) {
     return "Latest market session";
   }
 
-  const date = new Date(
-    `${value}T00:00:00+05:30`
-  );
+  const date = new Date(`${value}T00:00:00+05:30`);
 
   if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return date.toLocaleDateString(
-    "en-IN",
-    {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }
-  );
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
-function movementTone(
-  change: number
-): string {
+function movementTone(change: number): string {
   if (change > 0) {
     return "text-emerald-600 dark:text-emerald-400";
   }
@@ -225,9 +177,7 @@ function movementTone(
   return "text-slate-600 dark:text-slate-400";
 }
 
-function directionSymbol(
-  change: number
-): string {
+function directionSymbol(change: number): string {
   if (change > 0) {
     return "\u25B2";
   }
@@ -241,7 +191,7 @@ function directionSymbol(
 
 function sectionMetric(
   stock: StockItem,
-  section: MovementSection
+  section: MovementSection,
 ): {
   label: string;
   value: string;
@@ -270,9 +220,7 @@ function sectionMetric(
   if (section === "VALUE") {
     return {
       label: "Traded Value",
-      value: formatTradedValue(
-        stock.tradedValue
-      ),
+      value: formatTradedValue(stock.tradedValue),
     };
   }
 
@@ -281,40 +229,30 @@ function sectionMetric(
 
 function proximityText(
   stock: StockItem,
-  section: MovementSection
+  section: MovementSection,
 ): string | null {
   if (
     section === "52W_HIGH" &&
-    isValidNumber(
-      stock.distanceFromYearHighPercent
-    )
+    isValidNumber(stock.distanceFromYearHighPercent)
   ) {
-    if (
-      stock.distanceFromYearHighPercent < 0.01
-    ) {
+    if (stock.distanceFromYearHighPercent < 0.01) {
       return "At 52-week high";
     }
 
     return `${stock.distanceFromYearHighPercent.toFixed(
-      2
+      2,
     )}% below 52-week high`;
   }
 
   if (
     section === "52W_LOW" &&
-    isValidNumber(
-      stock.distanceFromYearLowPercent
-    )
+    isValidNumber(stock.distanceFromYearLowPercent)
   ) {
-    if (
-      stock.distanceFromYearLowPercent < 0.01
-    ) {
+    if (stock.distanceFromYearLowPercent < 0.01) {
       return "At 52-week low";
     }
 
-    return `${stock.distanceFromYearLowPercent.toFixed(
-      2
-    )}% above 52-week low`;
+    return `${stock.distanceFromYearLowPercent.toFixed(2)}% above 52-week low`;
   }
 
   return null;
@@ -339,18 +277,14 @@ function MovementTable({
     <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
       <div className="divide-y divide-slate-200 dark:divide-slate-800">
         {stocks.map((stock, index) => {
-          const metric =
-            sectionMetric(stock, section);
+          const metric = sectionMetric(stock, section);
 
-          const proximity =
-            proximityText(stock, section);
+          const proximity = proximityText(stock, section);
 
           return (
             <Link
               key={stock.instrumentKey}
-              href={`/company/${encodeURIComponent(
-                stock.symbol
-              )}?exchange=NSE`}
+              href={`/company/${encodeURIComponent(stock.symbol)}?exchange=NSE`}
               className="grid gap-4 bg-white p-4 transition hover:bg-slate-50 dark:bg-slate-950/60 dark:hover:bg-slate-900 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -368,14 +302,14 @@ function MovementTable({
 
                 <p
                   className={`mt-2 text-sm font-bold ${movementTone(
-                    stock.change
+                    stock.change,
                   )}`}
                 >
                   <span aria-hidden="true">
                     {directionSymbol(stock.change)}{" "}
                   </span>
-                  {formatSignedPrice(stock.change)}{" "}
-                  ({formatPercent(stock.changePercent)})
+                  {formatSignedPrice(stock.change)} (
+                  {formatPercent(stock.changePercent)})
                 </p>
 
                 {proximity && (
@@ -415,35 +349,49 @@ function MovementTable({
 }
 
 export default function StocksOnTheMovePanel() {
-  const [data, setData] =
-    useState<AllStocksResponse | null>(null);
+  const [data, setData] = useState<AllStocksResponse | null>(null);
 
   const [selectedSection, setSelectedSection] =
     useState<MovementSection>("GAINERS");
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  useEffect(() => {
+    const requestedSection = new URLSearchParams(window.location.search).get(
+      "section",
+    );
 
-  const [error, setError] =
-    useState("");
+    const validSections: MovementSection[] = [
+      "GAINERS",
+      "LOSERS",
+      "52W_HIGH",
+      "52W_LOW",
+      "VOLUME",
+      "VALUE",
+    ];
+
+    if (
+      requestedSection &&
+      validSections.includes(requestedSection as MovementSection)
+    ) {
+      setSelectedSection(requestedSection as MovementSection);
+    }
+  }, []);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let requestIsActive = true;
 
     async function loadStocks() {
       try {
-        const result =
-          await fetchMarketSnapshot<AllStocksResponse>();
+        const result = await fetchMarketSnapshot<AllStocksResponse>();
 
-        if (
-          !result.universe ||
-          !result.topGainers ||
-          !result.topLosers
-        ) {
+        if (!result.universe || !result.topGainers || !result.topLosers) {
           throw new Error(
             result.error ??
               result.details ??
-              "Market movement data is unavailable"
+              "Market movement data is unavailable",
           );
         }
 
@@ -452,15 +400,10 @@ export default function StocksOnTheMovePanel() {
           setError("");
         }
       } catch (requestError) {
-        console.error(
-          "Stocks on the move error:",
-          requestError
-        );
+        console.error("Stocks on the move error:", requestError);
 
         if (requestIsActive) {
-          setError(
-            "Stocks-on-the-move data is temporarily unavailable."
-          );
+          setError("Stocks-on-the-move data is temporarily unavailable.");
         }
       } finally {
         if (requestIsActive) {
@@ -471,11 +414,7 @@ export default function StocksOnTheMovePanel() {
 
     loadStocks();
 
-    const refreshTimer =
-      window.setInterval(
-        loadStocks,
-        60_000
-      );
+    const refreshTimer = window.setInterval(loadStocks, 60_000);
 
     return () => {
       requestIsActive = false;
@@ -496,9 +435,7 @@ export default function StocksOnTheMovePanel() {
               ? data?.mostActiveVolume
               : data?.mostActiveValue;
 
-  const isPreviousSession =
-    data?.marketDataStatus ===
-    "previous_session";
+  const isPreviousSession = data?.marketDataStatus === "previous_session";
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-none md:p-8">
@@ -513,10 +450,9 @@ export default function StocksOnTheMovePanel() {
           </h2>
 
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-400">
-            Track NSE equity gainers, losers, stocks nearest
-            their 52-week extremes and the most actively
-            traded shares. Debt securities, NCDs, ETFs and
-            funds are excluded.
+            Track NSE equity gainers, losers, stocks nearest their 52-week
+            extremes and the most actively traded shares. Debt securities, NCDs,
+            ETFs and funds are excluded.
           </p>
         </div>
 
@@ -534,25 +470,20 @@ export default function StocksOnTheMovePanel() {
           </span>
 
           <p className="mt-3 text-xs text-slate-500">
-            {formatSessionDate(
-              data?.universe?.marketSessionDate
-            )}
+            {formatSessionDate(data?.universe?.marketSessionDate)}
           </p>
         </div>
       </div>
 
-            <div className="mt-7 flex flex-wrap gap-3">
+      <div className="mt-7 flex flex-wrap gap-3">
         {sectionOptions.map((option) => {
-          const isSelected =
-            selectedSection === option.id;
+          const isSelected = selectedSection === option.id;
 
           return (
             <button
               key={option.id}
               type="button"
-              onClick={() =>
-                setSelectedSection(option.id)
-              }
+              onClick={() => setSelectedSection(option.id)}
               className={`rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
                 isSelected
                   ? "border-cyan-600 bg-cyan-50 text-cyan-800 dark:border-cyan-500 dark:bg-cyan-500/10 dark:text-cyan-300"
@@ -574,19 +505,16 @@ export default function StocksOnTheMovePanel() {
           </div>
         ) : (
           <MovementTable
-            stocks={(
-              selectedStocks ?? []
-            ).slice(0, 10)}
+            stocks={(selectedStocks ?? []).slice(0, 10)}
             section={selectedSection}
           />
         )}
       </div>
 
       <p className="mt-5 text-xs leading-6 text-slate-500">
-        Rankings use the latest available Upstox V3 market
-        quote for ordinary NSE equity shares. The 52-week tabs
-        rank shares closest to their trailing-year high or low;
-        they are not buy or sell recommendations.
+        Rankings use the latest available Upstox V3 market quote for ordinary
+        NSE equity shares. The 52-week tabs rank shares closest to their
+        trailing-year high or low; they are not buy or sell recommendations.
       </p>
     </section>
   );

@@ -410,6 +410,17 @@ export default function LiveMarketOverview() {
                 </p>
               )}
             </div>
+            <div className="mt-6 flex justify-center border-t border-slate-200 pt-4 dark:border-slate-800">
+              <Link
+                href="/market-movers?section=GAINERS"
+                className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 hover:text-emerald-600 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
+              >
+                View All Gainers
+                <span className="ml-2" aria-hidden="true">
+                  →
+                </span>
+              </Link>
+            </div>
           </div>
 
           {/* Top Losers */}
@@ -437,6 +448,17 @@ export default function LiveMarketOverview() {
                     : "No declining stocks available."}
                 </p>
               )}
+            </div>
+            <div className="mt-6 flex justify-center border-t border-slate-200 pt-4 dark:border-slate-800">
+              <Link
+                href="/market-movers?section=LOSERS"
+                className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 hover:text-red-600 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+              >
+                View All Losers
+                <span className="ml-2" aria-hidden="true">
+                  →
+                </span>
+              </Link>
             </div>
           </div>
 
