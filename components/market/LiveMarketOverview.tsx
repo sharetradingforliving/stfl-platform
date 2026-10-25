@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type MarketStock = {
@@ -440,7 +441,11 @@ export default function LiveMarketOverview() {
           </div>
 
           {/* FII / DII Activity */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10">
+          <Link
+            href="/fii-dii-data"
+            aria-label="View daily and historical FII DII data"
+            className="block rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-lg font-bold">FII / DII Activity</h3>
@@ -513,7 +518,10 @@ export default function LiveMarketOverview() {
                 Latest refresh was delayed. Previously loaded data is shown.
               </p>
             )}
-          </div>
+            <p className="mt-5 border-t border-slate-800 pt-4 text-xs font-semibold text-emerald-400">
+              View daily and historical data →
+            </p>
+          </Link>
         </div>
       </div>
     </section>
