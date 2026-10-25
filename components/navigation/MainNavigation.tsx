@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  SignOutButton,
-  useAuth,
-} from "@clerk/nextjs";
+import { SignOutButton, useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -30,18 +27,14 @@ const navigationGroups: NavigationGroup[] = [
         href: "/market-intelligence",
       },
       {
-  label: "Market Movers",
-  href: "/market-movers",
-},
-{
-  label: "Market Movers",
-  href: "/market-movers",
-},
+        label: "Market Movers",
+        href: "/market-movers",
+      },
       {
         label: "News & Sentiment",
         href: "/news-sentiment",
       },
-            {
+      {
         label: "Corporate Actions",
         href: "/corporate-actions",
       },
@@ -56,26 +49,26 @@ const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
-  label: "Research",
-  items: [
-    {
-      label: "Company Research & Valuation",
-      href: "/fundamental-research",
-    },
-    {
-      label: "Stock Discovery",
-      href: "/fundamental-research/discovery",
-    },
-    {
-      label: "Conviction Engine",
-      href: "/conviction-engine",
-    },
-    {
-      label: "Market Astrology",
-      href: "/market-astrology",
-    },
-  ],
-},
+    label: "Research",
+    items: [
+      {
+        label: "Company Research & Valuation",
+        href: "/fundamental-research",
+      },
+      {
+        label: "Stock Discovery",
+        href: "/fundamental-research/discovery",
+      },
+      {
+        label: "Conviction Engine",
+        href: "/conviction-engine",
+      },
+      {
+        label: "Market Astrology",
+        href: "/market-astrology",
+      },
+    ],
+  },
   {
     label: "Tools",
     items: [
@@ -96,18 +89,11 @@ const navigationGroups: NavigationGroup[] = [
 ];
 
 export default function MainNavigation() {
-  const [openMenu, setOpenMenu] =
-    useState<string | null>(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
 
-  const [
-    isMobileMenuOpen,
-    setIsMobileMenuOpen,
-  ] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const {
-    isLoaded,
-    isSignedIn,
-  } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
 
   function closeMenu() {
     setOpenMenu(null);
@@ -146,74 +132,51 @@ export default function MainNavigation() {
             Home
           </Link>
 
-          {navigationGroups.map(
-            (group) => (
-              <div
-                key={group.label}
-                className="relative"
-                onMouseEnter={() => {
-                  setOpenMenu(
-                    group.label
-                  );
+          {navigationGroups.map((group) => (
+            <div
+              key={group.label}
+              className="relative"
+              onMouseEnter={() => {
+                setOpenMenu(group.label);
+              }}
+              onMouseLeave={() => {
+                setOpenMenu(null);
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setOpenMenu(openMenu === group.label ? null : group.label);
                 }}
-                onMouseLeave={() => {
-                  setOpenMenu(null);
-                }}
+                className={`rounded-xl px-4 py-3 text-sm font-medium transition ${
+                  openMenu === group.label
+                    ? "bg-slate-800 text-emerald-400"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-emerald-400"
+                }`}
               >
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenMenu(
-                      openMenu ===
-                        group.label
-                        ? null
-                        : group.label
-                    );
-                  }}
-                  className={`rounded-xl px-4 py-3 text-sm font-medium transition ${
-                    openMenu ===
-                    group.label
-                      ? "bg-slate-800 text-emerald-400"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-emerald-400"
-                  }`}
-                >
-                  {group.label}
+                {group.label}
 
-                  <span className="ml-2 text-xs">
-                    ▼
-                  </span>
-                </button>
+                <span className="ml-2 text-xs">▼</span>
+              </button>
 
-                {openMenu ===
-                  group.label && (
-                  <div className="absolute left-0 top-full w-72 pt-2">
-                    <div className="rounded-2xl border border-slate-800 bg-slate-950 p-2 shadow-2xl">
-                      {group.items.map(
-                        (item) => (
-                          <Link
-                            key={
-                              item.href
-                            }
-                            href={
-                              item.href
-                            }
-                            onClick={
-                              closeMenu
-                            }
-                            className="block rounded-xl px-4 py-3 text-sm text-slate-300 transition hover:bg-emerald-500/10 hover:text-emerald-400"
-                          >
-                            {
-                              item.label
-                            }
-                          </Link>
-                        )
-                      )}
-                    </div>
+              {openMenu === group.label && (
+                <div className="absolute left-0 top-full w-72 pt-2">
+                  <div className="rounded-2xl border border-slate-800 bg-slate-950 p-2 shadow-2xl">
+                    {group.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMenu}
+                        className="block rounded-xl px-4 py-3 text-sm text-slate-300 transition hover:bg-emerald-500/10 hover:text-emerald-400"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
                   </div>
-                )}
-              </div>
-            )
-          )}
+                </div>
+              )}
+            </div>
+          ))}
 
           <Link
             href="/portfolio-intelligence"
@@ -231,37 +194,35 @@ export default function MainNavigation() {
             Learn
           </Link>
 
-<Link
-  href="/contact"
-  onClick={closeMenu}
-  className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-emerald-400"
->
-  Contact
-</Link>
+          <Link
+            href="/contact"
+            onClick={closeMenu}
+            className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-emerald-400"
+          >
+            Contact
+          </Link>
 
-<ThemeToggle />
-          {isLoaded &&
-            !isSignedIn && (
-              <Link
-                href="/login"
-                onClick={closeMenu}
+          <ThemeToggle />
+          {isLoaded && !isSignedIn && (
+            <Link
+              href="/login"
+              onClick={closeMenu}
+              className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+            >
+              Login
+            </Link>
+          )}
+
+          {isLoaded && isSignedIn && (
+            <SignOutButton>
+              <button
+                type="button"
                 className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
               >
-                Login
-              </Link>
-            )}
-
-          {isLoaded &&
-            isSignedIn && (
-              <SignOutButton>
-                <button
-                  type="button"
-                  className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
-                >
-                  Logout
-                </button>
-              </SignOutButton>
-            )}
+                Logout
+              </button>
+            </SignOutButton>
+          )}
 
           <Link
             href="/premium-research"
@@ -275,20 +236,13 @@ export default function MainNavigation() {
         <button
           type="button"
           onClick={() => {
-            setIsMobileMenuOpen(
-              (current) =>
-                !current
-            );
+            setIsMobileMenuOpen((current) => !current);
           }}
-          aria-expanded={
-            isMobileMenuOpen
-          }
+          aria-expanded={isMobileMenuOpen}
           aria-label="Toggle navigation menu"
           className="rounded-xl border border-slate-700 px-4 py-3 text-sm text-slate-300 transition hover:border-emerald-500 hover:text-emerald-400 lg:hidden"
         >
-          {isMobileMenuOpen
-            ? "× Close"
-            : "☰ Menu"}
+          {isMobileMenuOpen ? "× Close" : "☰ Menu"}
         </button>
       </div>
 
@@ -303,39 +257,27 @@ export default function MainNavigation() {
               Home
             </Link>
 
-            {navigationGroups.map(
-              (group) => (
-                <div
-                  key={group.label}
-                  className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3"
-                >
-                  <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-                    {group.label}
-                  </p>
+            {navigationGroups.map((group) => (
+              <div
+                key={group.label}
+                className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3"
+              >
+                <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+                  {group.label}
+                </p>
 
-                  {group.items.map(
-                    (item) => (
-                      <Link
-                        key={
-                          item.href
-                        }
-                        href={
-                          item.href
-                        }
-                        onClick={
-                          closeMenu
-                        }
-                        className="block rounded-xl px-3 py-3 text-sm text-slate-300 transition hover:bg-emerald-500/10 hover:text-emerald-400"
-                      >
-                        {
-                          item.label
-                        }
-                      </Link>
-                    )
-                  )}
-                </div>
-              )
-            )}
+                {group.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={closeMenu}
+                    className="block rounded-xl px-3 py-3 text-sm text-slate-300 transition hover:bg-emerald-500/10 hover:text-emerald-400"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            ))}
 
             <Link
               href="/portfolio-intelligence"
@@ -353,29 +295,27 @@ export default function MainNavigation() {
               Learning Centre
             </Link>
 
-            {isLoaded &&
-              !isSignedIn && (
-                <Link
-                  href="/login"
-                  onClick={closeMenu}
-                  className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
-                >
-                  Login / Member Access
-                </Link>
-              )}
+            {isLoaded && !isSignedIn && (
+              <Link
+                href="/login"
+                onClick={closeMenu}
+                className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+              >
+                Login / Member Access
+              </Link>
+            )}
 
-            {isLoaded &&
-              isSignedIn && (
-                <SignOutButton>
-                  <button
-                    type="button"
-                    onClick={closeMenu}
-                    className="rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
-                  >
-                    Logout
-                  </button>
-                </SignOutButton>
-              )}
+            {isLoaded && isSignedIn && (
+              <SignOutButton>
+                <button
+                  type="button"
+                  onClick={closeMenu}
+                  className="rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+                >
+                  Logout
+                </button>
+              </SignOutButton>
+            )}
 
             <Link
               href="/premium-research"
