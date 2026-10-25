@@ -82,46 +82,28 @@ type FiiDiiResponse = {
   details?: string;
 };
 
-type DataStatus =
-  | "loading"
-  | "live"
-  | "stale"
-  | "unavailable";
+type DataStatus = "loading" | "live" | "stale" | "unavailable";
 
 const MARKET_REFRESH_INTERVAL = 60_000;
 
-const FII_DII_REFRESH_INTERVAL =
-  5 * 60_000;
+const FII_DII_REFRESH_INTERVAL = 5 * 60_000;
 
-function formatPercentage(
-  value: number
-): string {
+function formatPercentage(value: number): string {
   const prefix = value > 0 ? "+" : "";
 
   return `${prefix}${value.toFixed(2)}%`;
 }
 
-function formatCrores(
-  value: number
-): string {
-  const sign =
-    value > 0
-      ? "+"
-      : value < 0
-        ? "-"
-        : "";
+function formatCrores(value: number): string {
+  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
 
-  return `${sign}₹${Math.abs(
-    value
-  ).toLocaleString("en-IN", {
+  return `${sign}₹${Math.abs(value).toLocaleString("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} Cr`;
 }
 
-function getFlowColor(
-  value: number
-): string {
+function getFlowColor(value: number): string {
   if (value > 0) {
     return "text-emerald-400";
   }
@@ -133,130 +115,96 @@ function getFlowColor(
   return "text-slate-300";
 }
 
-function formatTradingDate(
-  value: string
-): string {
-  const parsedDate = new Date(
-    `${value}T00:00:00`
-  );
+function formatTradingDate(value: string): string {
+  const parsedDate = new Date(`${value}T00:00:00`);
 
-  if (
-    Number.isNaN(parsedDate.getTime())
-  ) {
+  if (Number.isNaN(parsedDate.getTime())) {
     return value;
   }
 
-  return parsedDate.toLocaleDateString(
-    "en-IN",
-    {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }
-  );
+  return parsedDate.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 export default function LiveMarketOverview() {
-  const [overview, setOverview] =
-    useState<MarketOverviewResponse | null>(
-      null
-    );
+  const [overview, setOverview] = useState<MarketOverviewResponse | null>(null);
 
-  const [status, setStatus] =
-    useState<DataStatus>("loading");
+  const [status, setStatus] = useState<DataStatus>("loading");
 
-  const [fiiDiiData, setFiiDiiData] =
-    useState<FiiDiiData | null>(null);
+  const [fiiDiiData, setFiiDiiData] = useState<FiiDiiData | null>(null);
 
-  const [fiiDiiStatus, setFiiDiiStatus] =
-    useState<DataStatus>("loading");
+  const [fiiDiiStatus, setFiiDiiStatus] = useState<DataStatus>("loading");
 
   useEffect(() => {
     let isMounted = true;
     let requestInProgress = false;
 
-    const loadMarketOverview =
-      async () => {
-        if (requestInProgress) {
+    const loadMarketOverview = async () => {
+      if (requestInProgress) {
+        return;
+      }
+
+      requestInProgress = true;
+
+      try {
+        const response = await fetch("/api/market/overview", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const result = (await response.json()) as MarketOverviewResponse;
+
+        if (
+          !response.ok ||
+          result.status !== "success" ||
+          !result.universe ||
+          !result.breadth ||
+          !Array.isArray(result.topGainers) ||
+          !Array.isArray(result.topLosers)
+        ) {
+          throw new Error(
+            result.error ?? "Market overview data is unavailable",
+          );
+        }
+
+        if (!isMounted) {
           return;
         }
 
-        requestInProgress = true;
+        setOverview(result);
+        setStatus("live");
+      } catch (error) {
+        console.error("Live market overview error:", error);
 
-        try {
-          const response = await fetch(
-            "/api/market/overview",
-            {
-              method: "GET",
-              cache: "no-store",
-            }
-          );
-
-          const result =
-            (await response.json()) as MarketOverviewResponse;
-
-          if (
-            !response.ok ||
-            result.status !== "success" ||
-            !result.universe ||
-            !result.breadth ||
-            !Array.isArray(
-              result.topGainers
-            ) ||
-            !Array.isArray(
-              result.topLosers
-            )
-          ) {
-            throw new Error(
-              result.error ??
-                "Market overview data is unavailable"
-            );
-          }
-
-          if (!isMounted) {
-            return;
-          }
-
-          setOverview(result);
-          setStatus("live");
-        } catch (error) {
-          console.error(
-            "Live market overview error:",
-            error
-          );
-
-          if (!isMounted) {
-            return;
-          }
-
-          setStatus((currentStatus) => {
-            if (
-              currentStatus === "live" ||
-              currentStatus === "stale"
-            ) {
-              return "stale";
-            }
-
-            return "unavailable";
-          });
-        } finally {
-          requestInProgress = false;
+        if (!isMounted) {
+          return;
         }
-      };
+
+        setStatus((currentStatus) => {
+          if (currentStatus === "live" || currentStatus === "stale") {
+            return "stale";
+          }
+
+          return "unavailable";
+        });
+      } finally {
+        requestInProgress = false;
+      }
+    };
 
     void loadMarketOverview();
 
-    const intervalId =
-      window.setInterval(() => {
-        void loadMarketOverview();
-      }, MARKET_REFRESH_INTERVAL);
+    const intervalId = window.setInterval(() => {
+      void loadMarketOverview();
+    }, MARKET_REFRESH_INTERVAL);
 
     return () => {
       isMounted = false;
 
-      window.clearInterval(
-        intervalId
-      );
+      window.clearInterval(intervalId);
     };
   }, []);
 
@@ -264,84 +212,62 @@ export default function LiveMarketOverview() {
     let isMounted = true;
     let requestInProgress = false;
 
-    const loadFiiDiiData =
-      async () => {
-        if (requestInProgress) {
+    const loadFiiDiiData = async () => {
+      if (requestInProgress) {
+        return;
+      }
+
+      requestInProgress = true;
+
+      try {
+        const response = await fetch("/api/market/fii-dii", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const result = (await response.json()) as FiiDiiResponse;
+
+        if (!response.ok || result.status !== "success" || !result.data) {
+          throw new Error(
+            result.details ?? result.error ?? "FII/DII data is unavailable",
+          );
+        }
+
+        if (!isMounted) {
           return;
         }
 
-        requestInProgress = true;
+        setFiiDiiData(result.data);
+        setFiiDiiStatus("live");
+      } catch (error) {
+        console.error("FII/DII data error:", error);
 
-        try {
-          const response = await fetch(
-            "/api/market/fii-dii",
-            {
-              method: "GET",
-              cache: "no-store",
-            }
-          );
-
-          const result =
-            (await response.json()) as FiiDiiResponse;
-
-          if (
-            !response.ok ||
-            result.status !== "success" ||
-            !result.data
-          ) {
-            throw new Error(
-              result.details ??
-                result.error ??
-                "FII/DII data is unavailable"
-            );
-          }
-
-          if (!isMounted) {
-            return;
-          }
-
-          setFiiDiiData(result.data);
-          setFiiDiiStatus("live");
-        } catch (error) {
-          console.error(
-            "FII/DII data error:",
-            error
-          );
-
-          if (!isMounted) {
-            return;
-          }
-
-          setFiiDiiStatus(
-            (currentStatus) => {
-              if (
-                currentStatus === "live" ||
-                currentStatus === "stale"
-              ) {
-                return "stale";
-              }
-
-              return "unavailable";
-            }
-          );
-        } finally {
-          requestInProgress = false;
+        if (!isMounted) {
+          return;
         }
-      };
+
+        setFiiDiiStatus((currentStatus) => {
+          if (currentStatus === "live" || currentStatus === "stale") {
+            return "stale";
+          }
+
+          return "unavailable";
+        });
+      } finally {
+        requestInProgress = false;
+      }
+    };
 
     void loadFiiDiiData();
 
-    const intervalId =
-      window.setInterval(() => {
-        void loadFiiDiiData();
-      }, FII_DII_REFRESH_INTERVAL);
+    const intervalId = window.setInterval(() => {
+      void loadFiiDiiData();
+    }, FII_DII_REFRESH_INTERVAL);
 
     return () => {
       isMounted = false;
 
-      window.clearInterval(
-        intervalId
-      );
+      window.clearInterval(intervalId);
     };
   }, []);
 
@@ -363,43 +289,24 @@ export default function LiveMarketOverview() {
           ? "border-red-500/40 bg-red-500/10 text-red-300"
           : "border-slate-600 bg-slate-800 text-slate-300";
 
-  const breadth =
-    overview?.breadth;
+  const breadth = overview?.breadth;
 
-  const universe =
-    overview?.universe;
+  const universe = overview?.universe;
 
-  const topGainers =
-    overview?.topGainers?.slice(0, 3) ??
-    [];
+  const topGainers = overview?.topGainers?.slice(0, 3) ?? [];
 
-  const topLosers =
-    overview?.topLosers?.slice(0, 3) ??
-    [];
+  const topLosers = overview?.topLosers?.slice(0, 3) ?? [];
 
-  const hasData =
-    Boolean(breadth && universe);
+  const hasData = Boolean(breadth && universe);
 
-  const latestFlow =
-    fiiDiiData?.latest_day;
+  const latestFlow = fiiDiiData?.latest_day;
 
-  const monthToDate =
-    fiiDiiData?.month_to_date;
+  const monthToDate = fiiDiiData?.month_to_date;
 
-  const flowDate = latestFlow
-    ? formatTradingDate(
-        latestFlow.date
-      )
-    : null;
-
-  const storedTradingDays =
-    monthToDate?.trading_days ?? 0;
+  const storedTradingDays = monthToDate?.trading_days ?? 0;
 
   return (
-    <section
-      id="markets"
-      className="scroll-mt-28 bg-slate-950 px-6 py-20"
-    >
+    <section id="markets" className="scroll-mt-28 bg-slate-950 px-6 py-20">
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
@@ -412,8 +319,7 @@ export default function LiveMarketOverview() {
             </h2>
 
             <p className="mt-3 text-slate-400">
-              Live market breadth and leading
-              stocks across the Nifty 500
+              Live market breadth and leading stocks across the Nifty 500
               universe.
             </p>
           </div>
@@ -428,44 +334,30 @@ export default function LiveMarketOverview() {
         <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
           {/* Market Breadth */}
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10">
-            <h3 className="text-lg font-bold">
-              Market Breadth
-            </h3>
+            <h3 className="text-lg font-bold">Market Breadth</h3>
 
             <div className="mt-6 space-y-4">
               <div className="flex justify-between">
-                <span className="text-slate-400">
-                  Advances
-                </span>
+                <span className="text-slate-400">Advances</span>
 
                 <span className="font-bold text-emerald-400">
-                  {hasData
-                    ? breadth?.advances
-                    : "—"}
+                  {hasData ? breadth?.advances : "—"}
                 </span>
               </div>
 
               <div className="flex justify-between">
-                <span className="text-slate-400">
-                  Declines
-                </span>
+                <span className="text-slate-400">Declines</span>
 
                 <span className="font-bold text-red-400">
-                  {hasData
-                    ? breadth?.declines
-                    : "—"}
+                  {hasData ? breadth?.declines : "—"}
                 </span>
               </div>
 
               <div className="flex justify-between">
-                <span className="text-slate-400">
-                  Unchanged
-                </span>
+                <span className="text-slate-400">Unchanged</span>
 
                 <span className="font-bold text-white">
-                  {hasData
-                    ? breadth?.unchanged
-                    : "—"}
+                  {hasData ? breadth?.unchanged : "—"}
                 </span>
               </div>
             </div>
@@ -474,38 +366,26 @@ export default function LiveMarketOverview() {
               <div
                 className="bg-emerald-500 transition-all duration-500"
                 style={{
-                  width: `${
-                    breadth
-                      ?.advancePercentage ??
-                    0
-                  }%`,
+                  width: `${breadth?.advancePercentage ?? 0}%`,
                 }}
               />
 
               <div
                 className="bg-red-500 transition-all duration-500"
                 style={{
-                  width: `${
-                    breadth
-                      ?.declinePercentage ??
-                    0
-                  }%`,
+                  width: `${breadth?.declinePercentage ?? 0}%`,
                 }}
               />
             </div>
 
             <p className="mt-3 text-xs text-slate-500">
-              Based on{" "}
-              {universe?.quotedCount ?? 0}{" "}
-              live Nifty 500 stocks
+              Based on {universe?.quotedCount ?? 0} live Nifty 500 stocks
             </p>
           </div>
 
           {/* Top Gainers */}
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10">
-            <h3 className="text-lg font-bold">
-              Top Gainers
-            </h3>
+            <h3 className="text-lg font-bold">Top Gainers</h3>
 
             <div className="mt-6 space-y-5">
               {topGainers.length > 0 ? (
@@ -514,14 +394,10 @@ export default function LiveMarketOverview() {
                     key={item.instrumentKey}
                     className="flex justify-between gap-4"
                   >
-                    <span className="truncate">
-                      {item.symbol}
-                    </span>
+                    <span className="truncate">{item.symbol}</span>
 
                     <span className="shrink-0 font-semibold text-emerald-400">
-                      {formatPercentage(
-                        item.changePercent
-                      )}
+                      {formatPercentage(item.changePercent)}
                     </span>
                   </div>
                 ))
@@ -537,9 +413,7 @@ export default function LiveMarketOverview() {
 
           {/* Top Losers */}
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10">
-            <h3 className="text-lg font-bold">
-              Top Losers
-            </h3>
+            <h3 className="text-lg font-bold">Top Losers</h3>
 
             <div className="mt-6 space-y-5">
               {topLosers.length > 0 ? (
@@ -548,14 +422,10 @@ export default function LiveMarketOverview() {
                     key={item.instrumentKey}
                     className="flex justify-between gap-4"
                   >
-                    <span className="truncate">
-                      {item.symbol}
-                    </span>
+                    <span className="truncate">{item.symbol}</span>
 
                     <span className="shrink-0 font-semibold text-red-400">
-                      {formatPercentage(
-                        item.changePercent
-                      )}
+                      {formatPercentage(item.changePercent)}
                     </span>
                   </div>
                 ))
@@ -572,80 +442,66 @@ export default function LiveMarketOverview() {
           {/* FII / DII Activity */}
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10">
             <div className="flex items-start justify-between gap-3">
-              <h3 className="text-lg font-bold">
-                FII / DII Activity
-              </h3>
+              <div>
+                <h3 className="text-lg font-bold">FII / DII Activity</h3>
+
+                <p className="mt-1 text-xs text-slate-500">
+                  Month-to-date institutional flows
+                </p>
+              </div>
 
               {latestFlow && (
                 <span className="rounded-full border border-slate-700 px-2 py-1 text-[10px] font-semibold text-slate-400">
-                  {latestFlow.is_provisional
-                    ? "PROVISIONAL"
-                    : "FINAL"}
+                  {latestFlow.is_provisional ? "PROVISIONAL" : "FINAL"}
                 </span>
               )}
             </div>
 
-            {latestFlow &&
-            monthToDate ? (
+            {latestFlow && monthToDate ? (
               <div className="mt-5 space-y-5">
                 <div>
                   <div className="flex justify-between gap-4">
-                    <span className="text-slate-400">
-                      FII/FPI Net
-                    </span>
+                    <span className="text-slate-400">FII/FPI MTD Net</span>
 
                     <span
                       className={`text-right font-bold ${getFlowColor(
-                        latestFlow.fii_fpi.net
+                        monthToDate.fii_fpi_net,
                       )}`}
                     >
-                      {formatCrores(
-                        latestFlow.fii_fpi.net
-                      )}
+                      {formatCrores(monthToDate.fii_fpi_net)}
                     </span>
                   </div>
-
-                  </div>
+                </div>
 
                 <div>
                   <div className="flex justify-between gap-4">
-                    <span className="text-slate-400">
-                      DII Net
-                    </span>
+                    <span className="text-slate-400">DII MTD Net</span>
 
                     <span
                       className={`text-right font-bold ${getFlowColor(
-                        latestFlow.dii.net
+                        monthToDate.dii_net,
                       )}`}
                     >
-                      {formatCrores(
-                        latestFlow.dii.net
-                      )}
+                      {formatCrores(monthToDate.dii_net)}
                     </span>
                   </div>
-
-                  </div>
+                </div>
 
                 <div className="border-t border-slate-800 pt-3 text-xs text-slate-500">
                   <p>
-                    Latest session:{" "}
-                    {flowDate}
+                    MTD through {formatTradingDate(monthToDate.through_date)}
                   </p>
 
                   <p className="mt-1">
-                    MTD currently includes{" "}
-                    {storedTradingDays} stored{" "}
-                    {storedTradingDays === 1
-                      ? "day"
-                      : "days"}
+                    Based on {storedTradingDays} available market{" "}
+                    {storedTradingDays === 1 ? "session" : "sessions"}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="mt-6">
                 <p className="text-sm text-slate-500">
-                  {fiiDiiStatus ===
-                  "loading"
+                  {fiiDiiStatus === "loading"
                     ? "Loading institutional flows..."
                     : "Institutional-flow data is unavailable."}
                 </p>
@@ -654,8 +510,7 @@ export default function LiveMarketOverview() {
 
             {fiiDiiStatus === "stale" && (
               <p className="mt-3 text-xs text-amber-400">
-                Latest refresh was delayed.
-                Previously loaded data is shown.
+                Latest refresh was delayed. Previously loaded data is shown.
               </p>
             )}
           </div>

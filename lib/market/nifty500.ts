@@ -8,21 +8,17 @@ export type Nifty500Constituent = {
   isin: string;
 };
 
-const NIFTY_500_CSV_URL =
-  "https://www.niftyindices.com/IndexConstituent/ind_nifty500list.csv";
+const NIFTY_500_CSV_URLS = [
+  "https://nsearchives.nseindia.com/content/indices/ind_nifty500list.csv",
+  "https://www.niftyindices.com/IndexConstituent/ind_nifty500list.csv",
+] as const;
+const CACHE_DURATION = 24 * 60 * 60 * 1000;
 
-const CACHE_DURATION =
-  24 * 60 * 60 * 1000;
-
-let cachedConstituents:
-  | Nifty500Constituent[]
-  | null = null;
+let cachedConstituents: Nifty500Constituent[] | null = null;
 
 let cacheTimestamp = 0;
 
-let downloadPromise:
-  | Promise<Nifty500Constituent[]>
-  | null = null;
+let downloadPromise: Promise<Nifty500Constituent[]> | null = null;
 
 function parseCsvLine(line: string): string[] {
   const values: string[] = [];
@@ -30,21 +26,13 @@ function parseCsvLine(line: string): string[] {
   let currentValue = "";
   let insideQuotes = false;
 
-  for (
-    let index = 0;
-    index < line.length;
-    index += 1
-  ) {
+  for (let index = 0; index < line.length; index += 1) {
     const character = line[index];
 
     if (character === '"') {
-      const nextCharacter =
-        line[index + 1];
+      const nextCharacter = line[index + 1];
 
-      if (
-        insideQuotes &&
-        nextCharacter === '"'
-      ) {
+      if (insideQuotes && nextCharacter === '"') {
         currentValue += '"';
         index += 1;
       } else {
@@ -54,10 +42,7 @@ function parseCsvLine(line: string): string[] {
       continue;
     }
 
-    if (
-      character === "," &&
-      !insideQuotes
-    ) {
+    if (character === "," && !insideQuotes) {
       values.push(currentValue.trim());
       currentValue = "";
       continue;
@@ -71,9 +56,7 @@ function parseCsvLine(line: string): string[] {
   return values;
 }
 
-function normalizeHeader(
-  header: string
-): string {
+function normalizeHeader(header: string): string {
   return header
     .replace(/^\uFEFF/, "")
     .trim()
@@ -81,9 +64,7 @@ function normalizeHeader(
     .replace(/[^a-z0-9]/g, "");
 }
 
-function parseNifty500Csv(
-  csvText: string
-): Nifty500Constituent[] {
+function parseNifty500Csv(csvText: string): Nifty500Constituent[] {
   const normalizedText = csvText
     .replace(/^\uFEFF/, "")
     .replace(/\r\n/g, "\n")
@@ -95,136 +76,106 @@ function parseNifty500Csv(
     normalizedText.startsWith("<html")
   ) {
     throw new Error(
-      "Nifty Indices returned an HTML page instead of the constituent CSV"
+      "Nifty Indices returned an HTML page instead of the constituent CSV",
     );
   }
 
   const lines = normalizedText
     .split("\n")
-    .filter(
-      (line) => line.trim().length > 0
-    );
+    .filter((line) => line.trim().length > 0);
 
   if (lines.length < 2) {
-    throw new Error(
-      "The Nifty 500 constituent file is empty"
-    );
+    throw new Error("The Nifty 500 constituent file is empty");
   }
 
-  const headers = parseCsvLine(
-    lines[0]
-  ).map(normalizeHeader);
+  const headers = parseCsvLine(lines[0]).map(normalizeHeader);
 
-  const companyNameIndex =
-    headers.indexOf("companyname");
+  const companyNameIndex = headers.indexOf("companyname");
 
-  const industryIndex =
-    headers.indexOf("industry");
+  const industryIndex = headers.indexOf("industry");
 
-  const symbolIndex =
-    headers.indexOf("symbol");
+  const symbolIndex = headers.indexOf("symbol");
 
-  const seriesIndex =
-    headers.indexOf("series");
+  const seriesIndex = headers.indexOf("series");
 
-  const isinIndex =
-    headers.findIndex(
-      (header) =>
-        header === "isin" ||
-        header === "isincode"
-    );
+  const isinIndex = headers.findIndex(
+    (header) => header === "isin" || header === "isincode",
+  );
 
-  if (
-    companyNameIndex === -1 ||
-    symbolIndex === -1 ||
-    isinIndex === -1
-  ) {
-    throw new Error(
-      `Unexpected Nifty 500 CSV headers: ${headers.join(
-        ", "
-      )}`
-    );
+  if (companyNameIndex === -1 || symbolIndex === -1 || isinIndex === -1) {
+    throw new Error(`Unexpected Nifty 500 CSV headers: ${headers.join(", ")}`);
   }
 
   const constituents = lines
     .slice(1)
     .map((line) => {
-      const values =
-        parseCsvLine(line);
+      const values = parseCsvLine(line);
 
       return {
-        companyName:
-          values[companyNameIndex]?.trim() ??
-          "",
+        companyName: values[companyNameIndex]?.trim() ?? "",
 
         industry:
-          industryIndex >= 0
-            ? values[industryIndex]?.trim() ??
-              ""
-            : "",
+          industryIndex >= 0 ? (values[industryIndex]?.trim() ?? "") : "",
 
-        symbol:
-          values[symbolIndex]
-            ?.trim()
-            .toUpperCase() ?? "",
+        symbol: values[symbolIndex]?.trim().toUpperCase() ?? "",
 
         series:
           seriesIndex >= 0
-            ? values[seriesIndex]
-                ?.trim()
-                .toUpperCase() ?? ""
+            ? (values[seriesIndex]?.trim().toUpperCase() ?? "")
             : "",
 
-        isin:
-          values[isinIndex]
-            ?.trim()
-            .toUpperCase() ?? "",
+        isin: values[isinIndex]?.trim().toUpperCase() ?? "",
       };
     })
     .filter(
       (constituent) =>
-        constituent.symbol.length > 0 &&
-        constituent.isin.length > 0
+        constituent.symbol.length > 0 && constituent.isin.length > 0,
     );
 
   return constituents;
 }
 
-async function downloadNifty500Constituents(): Promise<
-  Nifty500Constituent[]
-> {
-  const response = await fetch(
-    NIFTY_500_CSV_URL,
-    {
-      headers: {
-        Accept:
-          "text/csv,application/csv,application/octet-stream,*/*",
+async function downloadNifty500Constituents(): Promise<Nifty500Constituent[]> {
+  const downloadErrors: string[] = [];
 
-        "User-Agent":
-          "Mozilla/5.0 STFL-Market-Intelligence/1.0",
-      },
-      cache: "no-store",
+  for (const url of NIFTY_500_CSV_URLS) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Accept: "text/csv,application/csv,application/octet-stream,*/*",
+          "User-Agent": "Mozilla/5.0 STFL-Market-Intelligence/1.0",
+        },
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const csvText = await response.text();
+
+      const constituents = parseNifty500Csv(csvText);
+
+      if (constituents.length < 480) {
+        throw new Error(`Only ${constituents.length} constituents were parsed`);
+      }
+
+      return constituents;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown download error";
+
+      downloadErrors.push(`${url}: ${message}`);
+
+      console.warn("Nifty 500 constituent source failed:", url, message);
     }
+  }
+
+  throw new Error(
+    `Unable to download the Nifty 500 constituent list. ${downloadErrors.join(
+      " | ",
+    )}`,
   );
-
-  if (!response.ok) {
-    throw new Error(
-      `Unable to download the Nifty 500 constituent list: ${response.status}`
-    );
-  }
-
-  const csvText = await response.text();
-
-  const constituents =
-    parseNifty500Csv(csvText);
-
-  if (constituents.length < 480) {
-    throw new Error(
-      `Only ${constituents.length} Nifty 500 constituents were parsed`
-    );
-  }
-
-  return constituents;
 }
 
 export async function getNifty500Constituents(): Promise<
@@ -233,28 +184,20 @@ export async function getNifty500Constituents(): Promise<
   const now = Date.now();
 
   const cacheIsValid =
-    cachedConstituents !== null &&
-    now - cacheTimestamp <
-      CACHE_DURATION;
+    cachedConstituents !== null && now - cacheTimestamp < CACHE_DURATION;
 
-  if (
-    cacheIsValid &&
-    cachedConstituents
-  ) {
+  if (cacheIsValid && cachedConstituents) {
     return cachedConstituents;
   }
 
   if (!downloadPromise) {
-    downloadPromise =
-      downloadNifty500Constituents();
+    downloadPromise = downloadNifty500Constituents();
   }
 
   try {
-    const constituents =
-      await downloadPromise;
+    const constituents = await downloadPromise;
 
-    cachedConstituents =
-      constituents;
+    cachedConstituents = constituents;
 
     cacheTimestamp = Date.now();
 
