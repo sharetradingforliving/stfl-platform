@@ -5,8 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
-import HeaderIndexPrices from "./HeaderIndexPrices";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+
+import HeaderIndexPrices from "./HeaderIndexPrices";
 
 type NavigationItem = {
   label: string;
@@ -29,6 +30,10 @@ const navigationGroups: NavigationGroup[] = [
       {
         label: "Market Movers",
         href: "/market-movers",
+      },
+      {
+        label: "FII / DII Data",
+        href: "/fii-dii-data",
       },
       {
         label: "News & Sentiment",
@@ -67,6 +72,10 @@ const navigationGroups: NavigationGroup[] = [
         label: "Market Astrology",
         href: "/market-astrology",
       },
+      {
+        label: "Research Methodology",
+        href: "/research-methodology",
+      },
     ],
   },
   {
@@ -83,6 +92,31 @@ const navigationGroups: NavigationGroup[] = [
       {
         label: "Mutual Fund Research",
         href: "/mutual-fund-research",
+      },
+      {
+        label: "Portfolio Intelligence",
+        href: "/portfolio-intelligence",
+      },
+      {
+        label: "Learning Centre",
+        href: "/learning-centre",
+      },
+    ],
+  },
+  {
+    label: "Company",
+    items: [
+      {
+        label: "About STFL",
+        href: "/about",
+      },
+      {
+        label: "Editorial Policy",
+        href: "/editorial-policy",
+      },
+      {
+        label: "Contact Us",
+        href: "/contact",
       },
     ],
   },
@@ -102,7 +136,7 @@ export default function MainNavigation() {
 
   return (
     <header className="theme-header sticky top-0 z-[100] border-b border-slate-800 bg-[#020817]/95 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-[84px] max-w-7xl items-center justify-between gap-6 px-6">
+      <div className="mx-auto flex min-h-[84px] max-w-[1600px] items-center justify-between gap-4 px-4 xl:px-6">
         <div className="flex min-w-0 items-center gap-5">
           <Link
             href="/"
@@ -120,10 +154,16 @@ export default function MainNavigation() {
             />
           </Link>
 
-          <HeaderIndexPrices />
+          <div className="shrink-0">
+            <HeaderIndexPrices />
+          </div>
         </div>
 
-        <nav className="ml-4 hidden items-center gap-0 border-l border-slate-700 pl-4 lg:flex">
+        {/* Desktop navigation */}
+        <nav
+          aria-label="Main navigation"
+          className="ml-4 hidden items-center gap-0 border-l border-slate-700 pl-4 lg:flex"
+        >
           <Link
             href="/"
             onClick={closeMenu}
@@ -145,6 +185,8 @@ export default function MainNavigation() {
             >
               <button
                 type="button"
+                aria-haspopup="true"
+                aria-expanded={openMenu === group.label}
                 onClick={() => {
                   setOpenMenu(openMenu === group.label ? null : group.label);
                 }}
@@ -156,7 +198,9 @@ export default function MainNavigation() {
               >
                 {group.label}
 
-                <span className="ml-2 text-xs">▼</span>
+                <span className="ml-2 text-xs" aria-hidden="true">
+                  ▼
+                </span>
               </button>
 
               {openMenu === group.label && (
@@ -178,31 +222,8 @@ export default function MainNavigation() {
             </div>
           ))}
 
-          <Link
-            href="/portfolio-intelligence"
-            onClick={closeMenu}
-            className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-emerald-400"
-          >
-            Portfolio
-          </Link>
-
-          <Link
-            href="/learning-centre"
-            onClick={closeMenu}
-            className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-emerald-400"
-          >
-            Learn
-          </Link>
-
-          <Link
-            href="/contact"
-            onClick={closeMenu}
-            className="rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-emerald-400"
-          >
-            Contact
-          </Link>
-
           <ThemeToggle />
+
           {isLoaded && !isSignedIn && (
             <Link
               href="/login"
@@ -233,12 +254,14 @@ export default function MainNavigation() {
           </Link>
         </nav>
 
+        {/* Mobile menu button */}
         <button
           type="button"
           onClick={() => {
             setIsMobileMenuOpen((current) => !current);
           }}
           aria-expanded={isMobileMenuOpen}
+          aria-controls="mobile-navigation"
           aria-label="Toggle navigation menu"
           className="rounded-xl border border-slate-700 px-4 py-3 text-sm text-slate-300 transition hover:border-emerald-500 hover:text-emerald-400 lg:hidden"
         >
@@ -246,9 +269,16 @@ export default function MainNavigation() {
         </button>
       </div>
 
+      {/* Mobile navigation */}
       {isMobileMenuOpen && (
-        <div className="border-t border-slate-800 bg-slate-950 px-6 py-5 lg:hidden">
-          <nav className="mx-auto flex max-w-7xl flex-col gap-2">
+        <div
+          id="mobile-navigation"
+          className="max-h-[calc(100vh-84px)] overflow-y-auto border-t border-slate-800 bg-slate-950 px-6 py-5 lg:hidden"
+        >
+          <nav
+            aria-label="Mobile navigation"
+            className="mx-auto flex max-w-7xl flex-col gap-2"
+          >
             <Link
               href="/"
               onClick={closeMenu}
@@ -260,9 +290,9 @@ export default function MainNavigation() {
             {navigationGroups.map((group) => (
               <div
                 key={group.label}
-                className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3"
+                className="mt-3 rounded-2xl border border-slate-800 bg-slate-900/50 p-2"
               >
-                <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+                <p className="px-3 pb-2 pt-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
                   {group.label}
                 </p>
 
@@ -294,6 +324,12 @@ export default function MainNavigation() {
             >
               Learning Centre
             </Link>
+
+            <div className="flex items-center justify-between rounded-xl border border-slate-800 px-4 py-3">
+              <span className="text-sm font-medium text-slate-300">Theme</span>
+
+              <ThemeToggle />
+            </div>
 
             {isLoaded && !isSignedIn && (
               <Link

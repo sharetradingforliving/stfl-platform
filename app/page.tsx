@@ -1085,7 +1085,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white px-6 pt-16 dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl">
-          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6">
             {/* Brand */}
             <div className="lg:col-span-2">
               <Image
@@ -1161,7 +1161,7 @@ export default function Home() {
               </h3>
 
               <nav
-                aria-label="Research links"
+                aria-label="Footer research links"
                 className="mt-5 space-y-3 text-sm text-slate-600 dark:text-slate-400"
               >
                 <a
@@ -1179,10 +1179,17 @@ export default function Home() {
                 </a>
 
                 <a
+                  href="/market-intelligence"
+                  className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
+                >
+                  Market Intelligence
+                </a>
+
+                <a
                   href="/market-movers"
                   className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
                 >
-                  Stocks on the Move
+                  Market Movers
                 </a>
 
                 <a
@@ -1196,7 +1203,7 @@ export default function Home() {
                   href="/mutual-fund-research"
                   className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
                 >
-                  Mutual Fund Research
+                  Mutual Funds
                 </a>
               </nav>
             </div>
@@ -1208,9 +1215,16 @@ export default function Home() {
               </h3>
 
               <nav
-                aria-label="Learning links"
+                aria-label="Footer learning links"
                 className="mt-5 space-y-3 text-sm text-slate-600 dark:text-slate-400"
               >
+                <a
+                  href="/learning-centre"
+                  className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
+                >
+                  Learning Centre
+                </a>
+
                 <a
                   href="/learning-centre"
                   className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
@@ -1238,29 +1252,24 @@ export default function Home() {
                 >
                   Options Research
                 </a>
-
-                <a
-                  href="/learning-centre"
-                  className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
-                >
-                  STFL Academy
-                </a>
               </nav>
             </div>
 
-            {/* STFL */}
+            {/* Company */}
             <div>
-              <h3 className="font-bold text-slate-950 dark:text-white">STFL</h3>
+              <h3 className="font-bold text-slate-950 dark:text-white">
+                Company
+              </h3>
 
               <nav
-                aria-label="STFL links"
+                aria-label="Footer company links"
                 className="mt-5 space-y-3 text-sm text-slate-600 dark:text-slate-400"
               >
                 <a
-                  href="/market-intelligence"
+                  href="/about"
                   className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
                 >
-                  Market Intelligence
+                  About STFL
                 </a>
 
                 <a
@@ -1292,9 +1301,56 @@ export default function Home() {
                 </a>
               </nav>
             </div>
+
+            {/* Legal and Transparency */}
+            <div>
+              <h3 className="font-bold text-slate-950 dark:text-white">
+                Legal &amp; Transparency
+              </h3>
+
+              <nav
+                aria-label="Footer legal and transparency links"
+                className="mt-5 space-y-3 text-sm text-slate-600 dark:text-slate-400"
+              >
+                <a
+                  href="/research-methodology"
+                  className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
+                >
+                  Research Methodology
+                </a>
+
+                <a
+                  href="/editorial-policy"
+                  className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
+                >
+                  Editorial Policy
+                </a>
+
+                <a
+                  href="/privacy-policy"
+                  className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
+                >
+                  Privacy Policy
+                </a>
+
+                <a
+                  href="/terms-and-conditions"
+                  className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
+                >
+                  Terms &amp; Conditions
+                </a>
+
+                <a
+                  href="/disclaimer"
+                  className="block transition hover:text-emerald-700 dark:hover:text-emerald-400"
+                >
+                  Financial Disclaimer
+                </a>
+              </nav>
+            </div>
           </div>
 
-          {/* Disclaimer */}
+          {/* Market Risk Disclaimer */}
           <div className="mt-14 border-t border-slate-200 py-8 dark:border-slate-800">
             <p className="text-xs leading-6 text-slate-500">
               <span className="font-semibold text-slate-700 dark:text-slate-400">
@@ -1304,16 +1360,45 @@ export default function Home() {
               Please read all related documents carefully before investing.
               Information provided on STFL is intended for educational and
               research purposes and should not be considered a guarantee of
-              returns. Investors should conduct their own research and consult a
-              qualified financial adviser where appropriate.
+              returns. Investors should conduct their own research and consult
+              an appropriately qualified financial professional where necessary.{" "}
+              <a
+                href="/disclaimer"
+                className="font-semibold text-emerald-700 transition hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
+              >
+                Read the complete disclaimer.
+              </a>
             </p>
           </div>
 
           {/* Copyright */}
-          <div className="flex flex-col gap-3 border-t border-slate-200 py-6 text-sm text-slate-500 md:flex-row md:items-center md:justify-between dark:border-slate-800">
+          <div className="flex flex-col gap-4 border-t border-slate-200 py-6 text-sm text-slate-500 md:flex-row md:items-center md:justify-between dark:border-slate-800">
             <p>
               {"\u00A9"} 2026 Share Trading For Living. All rights reserved.
             </p>
+
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              <a
+                href="/privacy-policy"
+                className="transition hover:text-emerald-700 dark:hover:text-emerald-400"
+              >
+                Privacy
+              </a>
+
+              <a
+                href="/terms-and-conditions"
+                className="transition hover:text-emerald-700 dark:hover:text-emerald-400"
+              >
+                Terms
+              </a>
+
+              <a
+                href="/disclaimer"
+                className="transition hover:text-emerald-700 dark:hover:text-emerald-400"
+              >
+                Disclaimer
+              </a>
+            </div>
 
             <p>Built for smarter market research.</p>
           </div>
