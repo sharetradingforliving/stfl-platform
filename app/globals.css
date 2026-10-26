@@ -16,7 +16,7 @@ html.dark {
   --background: #020817;
   --foreground: #f8fafc;
 }
- 
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -299,6 +299,18 @@ html.light .market-ticker-track strong,
 html.light .market-ticker-track .font-semibold,
 html.light .market-ticker-track .font-bold {
   color: #0f172a;
+}
+/* Preserve ticker movement colours in light mode */
+html.light .market-ticker-track .text-emerald-600 {
+  color: #059669 !important;
+}
+
+html.light .market-ticker-track .text-red-600 {
+  color: #dc2626 !important;
+}
+
+html.light .market-ticker-track .text-slate-500 {
+  color: #64748b !important;
 }
 /* Market Astrology hero — light theme */
 html.light .astrology-hero {

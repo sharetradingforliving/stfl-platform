@@ -27,11 +27,7 @@ type TickerApiResponse = {
   instruction?: string;
 };
 
-type TickerStatus =
-  | "loading"
-  | "live"
-  | "stale"
-  | "unavailable";
+type TickerStatus = "loading" | "live" | "stale" | "unavailable";
 
 const REFRESH_INTERVAL = 15_000;
 
@@ -42,24 +38,13 @@ function formatPrice(price: number): string {
   }).format(price);
 }
 
-function formatChangePercent(
-  changePercent: number
-): string {
-  const direction =
-    changePercent > 0
-      ? "▲"
-      : changePercent < 0
-        ? "▼"
-        : "•";
+function formatChangePercent(changePercent: number): string {
+  const direction = changePercent > 0 ? "▲" : changePercent < 0 ? "▼" : "•";
 
-  return `${direction} ${Math.abs(
-    changePercent
-  ).toFixed(2)}%`;
+  return `${direction} ${Math.abs(changePercent).toFixed(2)}%`;
 }
 
-function getStatusText(
-  status: TickerStatus
-): string {
+function getStatusText(status: TickerStatus): string {
   if (status === "live") {
     return "Live Market Data • Upstox";
   }
@@ -75,9 +60,7 @@ function getStatusText(
   return "Connecting to Live Market";
 }
 
-function getStatusColour(
-  status: TickerStatus
-): string {
+function getStatusColour(status: TickerStatus): string {
   if (status === "live") {
     return "text-emerald-400";
   }
@@ -94,11 +77,9 @@ function getStatusColour(
 }
 
 export default function LiveMarketTicker() {
-  const [tickerData, setTickerData] =
-    useState<LiveTickerItem[]>([]);
+  const [tickerData, setTickerData] = useState<LiveTickerItem[]>([]);
 
-  const [status, setStatus] =
-    useState<TickerStatus>("loading");
+  const [status, setStatus] = useState<TickerStatus>("loading");
 
   useEffect(() => {
     let isMounted = true;
@@ -112,26 +93,19 @@ export default function LiveMarketTicker() {
       requestInProgress = true;
 
       try {
-        const response = await fetch(
-          "/api/market/ticker",
-          {
-            method: "GET",
-            cache: "no-store",
-          }
-        );
+        const response = await fetch("/api/market/ticker", {
+          method: "GET",
+          cache: "no-store",
+        });
 
-        const result =
-          (await response.json()) as TickerApiResponse;
+        const result = (await response.json()) as TickerApiResponse;
 
         if (
           !response.ok ||
           result.status !== "success" ||
           !Array.isArray(result.data)
         ) {
-          throw new Error(
-            result.error ??
-              "Live market data is unavailable"
-          );
+          throw new Error(result.error ?? "Live market data is unavailable");
         }
 
         if (!isMounted) {
@@ -141,20 +115,14 @@ export default function LiveMarketTicker() {
         setTickerData(result.data);
         setStatus("live");
       } catch (error) {
-        console.error(
-          "Live market ticker error:",
-          error
-        );
+        console.error("Live market ticker error:", error);
 
         if (!isMounted) {
           return;
         }
 
         setStatus((currentStatus) => {
-          if (
-            currentStatus === "live" ||
-            currentStatus === "stale"
-          ) {
+          if (currentStatus === "live" || currentStatus === "stale") {
             return "stale";
           }
 
@@ -167,12 +135,9 @@ export default function LiveMarketTicker() {
 
     void loadTickerData();
 
-    const intervalId = window.setInterval(
-      () => {
-        void loadTickerData();
-      },
-      REFRESH_INTERVAL
-    );
+    const intervalId = window.setInterval(() => {
+      void loadTickerData();
+    }, REFRESH_INTERVAL);
 
     return () => {
       isMounted = false;
@@ -181,16 +146,14 @@ export default function LiveMarketTicker() {
   }, []);
 
   const scrollingData =
-    tickerData.length > 0
-      ? [...tickerData, ...tickerData]
-      : [];
+    tickerData.length > 0 ? [...tickerData, ...tickerData] : [];
 
   return (
     <section className="overflow-hidden border-y border-slate-800 bg-slate-900">
       <div className="border-b border-slate-800 px-4 py-1 text-right">
         <span
           className={`text-[10px] font-semibold uppercase tracking-wider ${getStatusColour(
-            status
+            status,
           )}`}
         >
           {getStatusText(status)}
@@ -199,36 +162,30 @@ export default function LiveMarketTicker() {
 
       {scrollingData.length > 0 ? (
         <div className="market-ticker-track py-4 text-sm">
-          {scrollingData.map(
-            (item, index) => (
-              <div
-                key={`${item.instrumentKey}-${index}`}
-                className="flex shrink-0 items-center whitespace-nowrap border-r border-slate-700 px-7"
+          {scrollingData.map((item, index) => (
+            <div
+              key={`${item.instrumentKey}-${index}`}
+              className="flex shrink-0 items-center whitespace-nowrap border-r border-slate-700 px-7"
+            >
+              <span className="text-slate-400">{item.name}</span>
+
+              <span className="ml-2 font-bold text-white">
+                {formatPrice(item.price)}
+              </span>
+
+              <span
+                className={`ml-2 font-semibold ${
+                  item.changePercent > 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : item.changePercent < 0
+                      ? "text-red-600 dark:text-red-400"
+                      : "text-slate-500 dark:text-slate-400"
+                }`}
               >
-                <span className="text-slate-400">
-                  {item.name}
-                </span>
-
-                <span className="ml-2 font-bold text-white">
-                  {formatPrice(item.price)}
-                </span>
-
-                <span
-                  className={`ml-2 font-semibold ${
-                    item.change > 0
-                      ? "text-emerald-400"
-                      : item.change < 0
-                        ? "text-red-400"
-                        : "text-slate-400"
-                  }`}
-                >
-                  {formatChangePercent(
-                    item.changePercent
-                  )}
-                </span>
-              </div>
-            )
-          )}
+                {formatChangePercent(item.changePercent)}
+              </span>
+            </div>
+          ))}
         </div>
       ) : (
         <div className="flex min-h-14 items-center justify-center px-4 py-4 text-sm text-slate-400">
