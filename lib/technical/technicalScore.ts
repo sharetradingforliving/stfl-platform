@@ -18,54 +18,75 @@ import {
 } from "./types";
 
 /**
- * Calculate Overall Technical Score
+ * Calculate the overall research score.
+ *
+ * Entry quality and risk/reward are retained
+ * in the engine for a future tracked-trades
+ * module, but they do not influence the
+ * public technical-research score.
  */
 export function calculateTechnicalScore(
   trend: TrendResult,
   momentum: MomentumResult,
   volume: VolumeResult,
   supportResistance: SupportResistanceResult,
-  entryQuality: EntryQualityResult,
-  riskReward: RiskRewardResult
+  _entryQuality: EntryQualityResult,
+  _riskReward: RiskRewardResult,
 ): TechnicalScoreResult {
-    
   const score = Math.round(
-    (
-      trend.score +
+    (trend.score +
       momentum.score +
       volume.score +
-      entryQuality.score
-    ) / 4
+      supportResistance.confidence) /
+      4,
   );
 
-  let recommendation = Recommendation.HOLD;
+  let technicalBias = Recommendation.HOLD;
 
   if (score >= 85) {
-    recommendation = Recommendation.STRONG_BUY;
+    technicalBias = Recommendation.STRONG_BUY;
   } else if (score >= 70) {
-    recommendation = Recommendation.BUY;
+    technicalBias = Recommendation.BUY;
   } else if (score <= 25) {
-    recommendation = Recommendation.STRONG_SELL;
+    technicalBias = Recommendation.STRONG_SELL;
   } else if (score <= 40) {
-    recommendation = Recommendation.SELL;
+    technicalBias = Recommendation.SELL;
   }
 
- return {
-  totalScore: score,
+  return {
+    totalScore: score,
 
-  recommendation,
+    /*
+     * Keep the existing internal property
+     * name for backward compatibility. The
+     * public UI presents it as Technical Bias.
+     */
+    recommendation: technicalBias,
 
-  confidence: score,
+    confidence: score,
 
-  breakdown: {
-    trend: trend.score,
-    momentum: momentum.score,
-    volume: volume.score,
-    supportResistance: supportResistance.confidence,
-    volatility: 0,
-    riskReward: riskReward.confidence,
-  },
+    breakdown: {
+      trend: trend.score,
 
-  explanation: `Overall Technical Score is ${score}/100 with ${recommendation} recommendation.`,
-};
+      momentum: momentum.score,
+
+      volume: volume.score,
+
+      supportResistance: supportResistance.confidence,
+
+      volatility: 0,
+
+      /*
+       * Retained only to preserve the shared
+       * result contract. It no longer affects
+       * the public score.
+       */
+      riskReward: 0,
+    },
+
+    explanation: `Overall Technical Score is ${score}/100 with ${technicalBias.replace(
+      /_/g,
+      " ",
+    )} technical bias.`,
+  };
 }

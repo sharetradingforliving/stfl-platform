@@ -2,33 +2,16 @@
  * ================================================================
  * STFL Technical Research Engine
  * File: supportResistance.ts
- * Purpose: Ranked multi-source Support & Resistance Analysis
+ * Purpose: Proximity-ordered multi-source Support & Resistance
  * ================================================================
  */
 
-import {
-  detectSwingPoints,
-} from "./swingDetector";
-
-import {
-  findDominantSwing,
-} from "./dominantSwing";
-
-import {
-  calculateFibonacciLevels,
-} from "./fibRetracement";
-
-import {
-  calculateClassicPivot,
-} from "./pivotPoints";
-
-import {
-  buildConfluenceZones,
-} from "./confluence";
-
-import {
-  buildPriceLevels,
-} from "./levelBuilder";
+import { detectSwingPoints } from "./swingDetector";
+import { findDominantSwing } from "./dominantSwing";
+import { calculateFibonacciLevels } from "./fibRetracement";
+import { calculateClassicPivot } from "./pivotPoints";
+import { buildConfluenceZones } from "./confluence";
+import { buildPriceLevels } from "./levelBuilder";
 
 import type {
   PriceZone,
@@ -36,566 +19,338 @@ import type {
   TechnicalResearchInput,
 } from "./types";
 
-function isPositiveNumber(
-  value:
-    number | null | undefined
-): value is number {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value) &&
-    value > 0
-  );
+function isPositiveNumber(value: number | null | undefined): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
 }
 
-function getDistancePercent(
-  currentPrice:
-    number,
-
-  level:
-    number
-): number {
-  if (
-    !isPositiveNumber(
-      currentPrice
-    )
-  ) {
+function getDistancePercent(currentPrice: number, level: number): number {
+  if (!isPositiveNumber(currentPrice)) {
     return 0;
   }
 
+  return (Math.abs(currentPrice - level) / currentPrice) * 100;
+}
+
+function getSourceCount(zone: PriceZone): number {
+  return new Set(zone.contributors.map((item) => item.source)).size;
+}
+
+/*
+ * Structural evidence is used only as
+ * a tie-breaker between similarly
+ * positioned zones. It cannot replace
+ * a nearer valid chart level.
+ */
+function calculateEvidenceScore(zone: PriceZone): number {
   return (
-    Math.abs(
-      currentPrice -
-      level
-    ) /
-    currentPrice
-  ) * 100;
+    zone.confidence * 0.5 +
+    zone.strength * 2 +
+    zone.touches * 10 +
+    getSourceCount(zone) * 8
+  );
 }
 
-function getSourceCount(
-  zone:
-    PriceZone
+/*
+ * Exclude zones that are extremely
+ * close to the current price and are
+ * likely to represent market noise.
+ */
+function getNoiseDistance(
+  currentPrice: number,
+  atr: number | null | undefined,
 ): number {
-  return new Set(
-    zone.contributors.map(
-      (contributor) =>
-        contributor.source
-    )
-  ).size;
+  return Math.max(currentPrice * 0.0015, isPositiveNumber(atr) ? atr * 0.1 : 0);
 }
 
-function calculateZoneScore(
-  zone:
-    PriceZone,
-
-  currentPrice:
-    number
+/*
+ * S2 and R2 must be meaningfully
+ * separated from S1 and R1.
+ *
+ * The larger of the following is used:
+ *
+ * - 0.75% of the current price
+ * - 0.50 ATR of the selected timeframe
+ *
+ * Because ATR is calculated from the
+ * selected chart timeframe, weekly
+ * levels will normally require wider
+ * separation than daily levels.
+ */
+function getDistinctDistance(
+  currentPrice: number,
+  atr: number | null | undefined,
 ): number {
-  const distancePercent =
-    getDistancePercent(
-      currentPrice,
-      zone.center
-    );
+  return Math.max(currentPrice * 0.0075, isPositiveNumber(atr) ? atr * 0.5 : 0);
+}
 
-  const sourceCount =
-    getSourceCount(
-      zone
-    );
+function prepareSupportZones(
+  currentPrice: number,
+  zones: PriceZone[],
+  atr: number | null | undefined,
+): PriceZone[] {
+  const noiseDistance = getNoiseDistance(currentPrice, atr);
+
+  const validZones = zones.filter(
+    (zone) =>
+      isPositiveNumber(zone.center) &&
+      zone.center < currentPrice &&
+      currentPrice - zone.center >= noiseDistance,
+  );
 
   /*
-   * Structural evidence is given more
-   * importance than simple proximity.
+   * Prefer zones within 20% of the
+   * current price. If none are found,
+   * retain all valid structural zones.
+   */
+  const nearbyZones = validZones.filter(
+    (zone) => getDistancePercent(currentPrice, zone.center) <= 20,
+  );
+
+  const candidates = nearbyZones.length > 0 ? nearbyZones : validZones;
+
+  /*
+   * Support zones are ordered from
+   * highest to lowest:
    *
-   * A nearby weak pivot should not
-   * automatically defeat a stronger
-   * swing/Fibonacci/MA confluence.
+   * current price > S1 > S2
    */
-  const confidenceScore =
-    zone.confidence * 0.5;
+  return candidates.slice().sort((first, second) => {
+    const distanceDifference = second.center - first.center;
 
-  const strengthScore =
-    zone.strength * 2;
+    if (Math.abs(distanceDifference) > 0.01) {
+      return distanceDifference;
+    }
 
-  const touchScore =
-    zone.touches * 10;
+    return calculateEvidenceScore(second) - calculateEvidenceScore(first);
+  });
+}
 
-  const diversityScore =
-    sourceCount * 8;
+function prepareResistanceZones(
+  currentPrice: number,
+  zones: PriceZone[],
+  atr: number | null | undefined,
+): PriceZone[] {
+  const noiseDistance = getNoiseDistance(currentPrice, atr);
+
+  const validZones = zones.filter(
+    (zone) =>
+      isPositiveNumber(zone.center) &&
+      zone.center > currentPrice &&
+      zone.center - currentPrice >= noiseDistance,
+  );
 
   /*
-   * Relevant nearby levels receive a
-   * modest proximity bonus, but the
-   * bonus cannot dominate structural
-   * evidence.
+   * Prefer zones within 20% of the
+   * current price. If none are found,
+   * retain all valid structural zones.
    */
-  const proximityScore =
-    Math.max(
-      0,
-      20 -
-      distancePercent
-    );
-
-  return (
-    confidenceScore +
-    strengthScore +
-    touchScore +
-    diversityScore +
-    proximityScore
+  const nearbyZones = validZones.filter(
+    (zone) => getDistancePercent(currentPrice, zone.center) <= 20,
   );
+
+  const candidates = nearbyZones.length > 0 ? nearbyZones : validZones;
+
+  /*
+   * Resistance zones are ordered from
+   * lowest to highest:
+   *
+   * current price < R1 < R2
+   */
+  return candidates.slice().sort((first, second) => {
+    const distanceDifference = first.center - second.center;
+
+    if (Math.abs(distanceDifference) > 0.01) {
+      return distanceDifference;
+    }
+
+    return calculateEvidenceScore(second) - calculateEvidenceScore(first);
+  });
 }
 
-function getEligibleSupportZones(
-  currentPrice:
-    number,
+function selectFirstTwoDistinctZones(
+  zones: PriceZone[],
+  currentPrice: number,
+  atr: number | null | undefined,
+): [PriceZone | undefined, PriceZone | undefined] {
+  const firstZone = zones[0];
 
-  zones:
-    PriceZone[]
-): PriceZone[] {
-  return zones.filter(
-    (zone) =>
-      isPositiveNumber(
-        zone.center
-      ) &&
-      zone.center <
-        currentPrice
-  );
-}
-
-function getEligibleResistanceZones(
-  currentPrice:
-    number,
-
-  zones:
-    PriceZone[]
-): PriceZone[] {
-  return zones.filter(
-    (zone) =>
-      isPositiveNumber(
-        zone.center
-      ) &&
-      zone.center >
-        currentPrice
-  );
-}
-
-function selectMeaningfulZone(
-  zones:
-    PriceZone[],
-
-  currentPrice:
-    number,
-
-  atr:
-    number | null | undefined
-): PriceZone | undefined {
-  if (
-    zones.length === 0
-  ) {
-    return undefined;
+  if (!firstZone) {
+    return [undefined, undefined];
   }
 
-  /*
-   * Exclude levels that are so close
-   * to price that they are likely to be
-   * intraday noise rather than useful
-   * daily support or resistance.
-   *
-   * ATR makes this threshold adjust
-   * automatically to each stock's
-   * volatility.
-   */
-  const minimumDistance =
-    isPositiveNumber(atr)
-      ? atr * 0.35
-      : 0;
+  const minimumSeparation = getDistinctDistance(currentPrice, atr);
 
-  /*
-   * Ignore extremely distant levels
-   * when selecting the immediate daily
-   * trading zone. Such levels may still
-   * be available as major levels.
-   */
-  const nearbyZones =
-    zones.filter(
-      (zone) => {
-        const absoluteDistance =
-          Math.abs(
-            currentPrice -
-            zone.center
-          );
+  const secondZone = zones.find(
+    (zone, index) =>
+      index > 0 &&
+      Math.abs(zone.center - firstZone.center) >= minimumSeparation,
+  );
 
-        const distancePercent =
-          getDistancePercent(
-            currentPrice,
-            zone.center
-          );
-
-        return (
-          absoluteDistance >=
-            minimumDistance &&
-          distancePercent <= 20
-        );
-      }
-    );
-
-  const candidates =
-    nearbyZones.length > 0
-      ? nearbyZones
-      : zones;
-
-  return candidates
-    .slice()
-    .sort(
-      (first, second) => {
-        const scoreDifference =
-          calculateZoneScore(
-            second,
-            currentPrice
-          ) -
-          calculateZoneScore(
-            first,
-            currentPrice
-          );
-
-        if (
-          Math.abs(
-            scoreDifference
-          ) > 0.001
-        ) {
-          return scoreDifference;
-        }
-
-        /*
-         * Use proximity only when two
-         * zones have almost identical
-         * evidence scores.
-         */
-        return (
-          getDistancePercent(
-            currentPrice,
-            first.center
-          ) -
-          getDistancePercent(
-            currentPrice,
-            second.center
-          )
-        );
-      }
-    )[0];
-}
-
-function selectMajorZone(
-  zones:
-    PriceZone[],
-
-  currentPrice:
-    number
-): PriceZone | undefined {
-  return zones
-    .slice()
-    .sort(
-      (first, second) => {
-        const evidenceDifference =
-          (
-            second.strength +
-            second.touches * 3 +
-            getSourceCount(
-              second
-            ) * 2
-          ) -
-          (
-            first.strength +
-            first.touches * 3 +
-            getSourceCount(
-              first
-            ) * 2
-          );
-
-        if (
-          evidenceDifference !== 0
-        ) {
-          return evidenceDifference;
-        }
-
-        return (
-          getDistancePercent(
-            currentPrice,
-            first.center
-          ) -
-          getDistancePercent(
-            currentPrice,
-            second.center
-          )
-        );
-      }
-    )[0];
+  return [firstZone, secondZone];
 }
 
 export function analyzeSupportResistance(
-  input:
-    TechnicalResearchInput
+  input: TechnicalResearchInput,
 ): SupportResistanceResult {
-  const currentPrice =
-    input.currentPrice;
+  const currentPrice = input.currentPrice;
 
-  const {
-    swingHighs,
-    swingLows,
-  } = detectSwingPoints(
-    input.priceHistory
-  );
+  const atr = input.oscillators.atr;
 
-  const dominantSwing =
-    findDominantSwing(
-      swingHighs,
-      swingLows
-    );
+  const { swingHighs, swingLows } = detectSwingPoints(input.priceHistory);
 
-  const fibonacci =
-    dominantSwing
-      ? calculateFibonacciLevels(
-          dominantSwing.high.price,
-          dominantSwing.low.price
-        )
-      : undefined;
+  const dominantSwing = findDominantSwing(swingHighs, swingLows);
 
-  const latestCandle =
-    input.priceHistory.at(-1);
+  const fibonacci = dominantSwing
+    ? calculateFibonacciLevels(
+        dominantSwing.high.price,
+        dominantSwing.low.price,
+      )
+    : undefined;
 
-  const pivots =
-    latestCandle
-      ? calculateClassicPivot(
-          latestCandle.high,
-          latestCandle.low,
-          latestCandle.close
-        )
-      : undefined;
+  const latestCandle = input.priceHistory.at(-1);
+
+  const pivots = latestCandle
+    ? calculateClassicPivot(
+        latestCandle.high,
+        latestCandle.low,
+        latestCandle.close,
+      )
+    : undefined;
 
   /*
-   * Levels are classified dynamically
-   * using current price. Moving
-   * averages are also included as
-   * support/resistance evidence.
+   * Candidate levels are built from:
+   *
+   * - recent swing highs and lows
+   * - Fibonacci retracement levels
+   * - Classical Pivot levels
+   * - moving averages
    */
-  const {
-    supportLevels,
-    resistanceLevels,
-  } = buildPriceLevels(
+  const { supportLevels, resistanceLevels } = buildPriceLevels(
     swingHighs,
     swingLows,
     fibonacci,
     pivots,
     currentPrice,
-    input.movingAverages
+    input.movingAverages,
   );
 
-  const supportZones =
-    buildConfluenceZones(
-      supportLevels,
-      "Support"
-    );
+  const supportZones = buildConfluenceZones(supportLevels, "Support");
 
-  const resistanceZones =
-    buildConfluenceZones(
-      resistanceLevels,
-      "Resistance"
-    );
+  const resistanceZones = buildConfluenceZones(resistanceLevels, "Resistance");
 
-  const eligibleSupportZones =
-    getEligibleSupportZones(
-      currentPrice,
-      supportZones
-    );
+  const orderedSupports = prepareSupportZones(currentPrice, supportZones, atr);
 
-  const eligibleResistanceZones =
-    getEligibleResistanceZones(
-      currentPrice,
-      resistanceZones
-    );
+  const orderedResistances = prepareResistanceZones(
+    currentPrice,
+    resistanceZones,
+    atr,
+  );
 
-  const nearestSupportZone =
-    selectMeaningfulZone(
-      eligibleSupportZones,
-      currentPrice,
-      input.oscillators.atr
-    );
+  const [support1Zone, support2Zone] = selectFirstTwoDistinctZones(
+    orderedSupports,
+    currentPrice,
+    atr,
+  );
 
-  const nearestResistanceZone =
-    selectMeaningfulZone(
-      eligibleResistanceZones,
-      currentPrice,
-      input.oscillators.atr
-    );
-
-  const majorSupportZone =
-    selectMajorZone(
-      eligibleSupportZones,
-      currentPrice
-    );
-
-  const majorResistanceZone =
-    selectMajorZone(
-      eligibleResistanceZones,
-      currentPrice
-    );
+  const [resistance1Zone, resistance2Zone] = selectFirstTwoDistinctZones(
+    orderedResistances,
+    currentPrice,
+    atr,
+  );
 
   /*
-   * The last candle high/low is used
-   * only as a final fallback when the
-   * engine cannot construct any valid
-   * technical zone.
+   * Latest-candle values are used only
+   * when no valid technical zone can
+   * be constructed.
    */
   const fallbackSupport =
-    latestCandle &&
-    latestCandle.low <
-      currentPrice
+    latestCandle && latestCandle.low < currentPrice
       ? latestCandle.low
       : currentPrice;
 
   const fallbackResistance =
-    latestCandle &&
-    latestCandle.high >
-      currentPrice
+    latestCandle && latestCandle.high > currentPrice
       ? latestCandle.high
       : currentPrice;
 
-  const support =
-    nearestSupportZone
-      ?.center ??
-    fallbackSupport;
+  const support1 = support1Zone?.center ?? fallbackSupport;
 
-  const resistance =
-    nearestResistanceZone
-      ?.center ??
-    fallbackResistance;
+  /*
+   * If no distinct second zone exists,
+   * retain S1/R1 for compatibility.
+   * The UI can later display "N/A"
+   * instead of duplicating the level.
+   */
+  const support2 = support2Zone?.center ?? support1;
 
-  const majorSupport =
-    majorSupportZone
-      ?.center ??
-    support;
+  const resistance1 = resistance1Zone?.center ?? fallbackResistance;
 
-  const majorResistance =
-    majorResistanceZone
-      ?.center ??
-    resistance;
+  const resistance2 = resistance2Zone?.center ?? resistance1;
 
-  const supportDistance =
-    getDistancePercent(
-      currentPrice,
-      support
-    );
+  const supportDistance = getDistancePercent(currentPrice, support1);
 
-  const resistanceDistance =
-    getDistancePercent(
-      currentPrice,
-      resistance
-    );
+  const resistanceDistance = getDistancePercent(currentPrice, resistance1);
 
-  let breakoutProbability =
-    50;
+  let breakoutProbability = 50;
 
-  if (
-    resistanceDistance < 2
-  ) {
-    breakoutProbability +=
-      15;
+  if (resistanceDistance < 2) {
+    breakoutProbability += 15;
   }
 
-  if (
-    supportDistance < 2
-  ) {
-    breakoutProbability -=
-      10;
+  if (supportDistance < 2) {
+    breakoutProbability -= 10;
   }
 
-  if (
-    nearestResistanceZone &&
-    nearestResistanceZone
-      .confidence >= 70
-  ) {
-    breakoutProbability -=
-      10;
+  if (resistance1Zone && resistance1Zone.confidence >= 70) {
+    breakoutProbability -= 10;
   }
 
-  breakoutProbability =
-    Math.max(
-      0,
-      Math.min(
-        100,
-        breakoutProbability
-      )
-    );
+  breakoutProbability = Math.max(0, Math.min(100, breakoutProbability));
 
-  const confidence =
-    Math.round(
-      (
-        (
-          nearestSupportZone
-            ?.confidence ??
-          50
-        ) +
-        (
-          nearestResistanceZone
-            ?.confidence ??
-          50
-        )
-      ) /
-      2
-    );
+  const confidence = Math.round(
+    ((support1Zone?.confidence ?? 50) + (resistance1Zone?.confidence ?? 50)) /
+      2,
+  );
 
-  const supportEvidence =
-    nearestSupportZone
-      ? nearestSupportZone
-          .explanation
-      : "Latest candle low used as fallback support.";
+  const supportEvidence = support1Zone
+    ? support1Zone.explanation
+    : "Latest candle low used as fallback support.";
 
-  const resistanceEvidence =
-    nearestResistanceZone
-      ? nearestResistanceZone
-          .explanation
-      : "Latest candle high used as fallback resistance.";
+  const resistanceEvidence = resistance1Zone
+    ? resistance1Zone.explanation
+    : "Latest candle high used as fallback resistance.";
 
   const explanation =
-    `Support ₹${support.toFixed(
-      2
-    )} and resistance ₹${resistance.toFixed(
-      2
-    )} were selected by ranking Swing, Fibonacci, Pivot and Moving Average confluence. ` +
+    `Support 1 at ₹${support1.toFixed(2)} and Support 2 at ₹${support2.toFixed(
+      2,
+    )} are ordered below the current price by proximity. ` +
+    `Resistance 1 at ₹${resistance1.toFixed(
+      2,
+    )} and Resistance 2 at ₹${resistance2.toFixed(2)} are ordered above it. ` +
+    `Secondary levels require a minimum separation of 0.75% of price or 0.50 ATR. ` +
     `${supportEvidence} ${resistanceEvidence}`;
 
   return {
-    immediateSupport:
-      Number(
-        support.toFixed(2)
-      ),
+    /*
+     * Legacy property names are
+     * retained for compatibility:
+     *
+     * immediateSupport = S1
+     * majorSupport = S2
+     * immediateResistance = R1
+     * majorResistance = R2
+     */
+    immediateSupport: Number(support1.toFixed(2)),
 
-    majorSupport:
-      Number(
-        majorSupport.toFixed(2)
-      ),
+    majorSupport: Number(support2.toFixed(2)),
 
-    immediateResistance:
-      Number(
-        resistance.toFixed(2)
-      ),
+    immediateResistance: Number(resistance1.toFixed(2)),
 
-    majorResistance:
-      Number(
-        majorResistance.toFixed(2)
-      ),
+    majorResistance: Number(resistance2.toFixed(2)),
 
-    nearestSupportDistance:
-      Number(
-        supportDistance.toFixed(
-          2
-        )
-      ),
+    nearestSupportDistance: Number(supportDistance.toFixed(2)),
 
-    nearestResistanceDistance:
-      Number(
-        resistanceDistance.toFixed(
-          2
-        )
-      ),
+    nearestResistanceDistance: Number(resistanceDistance.toFixed(2)),
 
     breakoutProbability,
 

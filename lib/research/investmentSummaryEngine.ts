@@ -2,48 +2,40 @@
  * ================================================================
  * STFL Investment Summary Engine
  * File: investmentSummaryEngine.ts
- * Purpose: Generate a unified investment summary from all research modules.
- * Version: 1.0
+ * Purpose: Generate a unified research summary from all modules.
+ * Version: 2.0
  * ================================================================
  */
 
 import type { TechnicalResearchResult } from "@/lib/technical/types";
-import {
-  Recommendation,
-  TrendDirection,
-  EntryQuality,
-} from "@/lib/technical/types";
+
+import { Recommendation, TrendDirection } from "@/lib/technical/types";
+
 const TECHNICAL_DISCLAIMER =
-  "This recommendation is generated solely from technical analysis, price action, volume and historical market data. It does not consider your financial objectives, investment horizon or risk profile. Please consult a SEBI-registered investment adviser or your financial advisor before making any investment or trading decisions.";
+  "This technical assessment is generated from price action, volume and historical market data. Support and resistance levels are analytical observations, not trade targets or stop-loss recommendations. It does not consider your financial objectives, investment horizon or risk profile. Please consult a SEBI-registered investment adviser or your financial adviser before making any investment or trading decision.";
+
 /* ================================================================
  * OUTPUT TYPE
- * ================================================================
- */
+ * ================================================================ */
 
 export interface InvestmentSummaryResult {
-  // Decision
   pattern: TrendDirection;
-  recommendation: Recommendation;
+
+  technicalBias: Recommendation;
+
   confidence: number;
+
   technicalScore: number;
 
-  // Trade Plan
   currentPrice: number;
 
-support: number;
+  support1: number;
 
-resistance: number;
+  support2: number | null;
 
-stopLoss: number;
+  resistance1: number;
 
-target: number;
-
-riskReward: number;
-
-riskRewardVerdict: string;
-
-  // Analysis
-  entryQuality: EntryQuality;
+  resistance2: number | null;
 
   summary: string;
 
@@ -55,64 +47,80 @@ riskRewardVerdict: string;
 
   risks: {
     supportResistance: string;
-    riskReward: string;
   };
 
   disclaimer: string;
 }
+
+function getDistinctSecondaryLevel(
+  primaryLevel: number,
+  secondaryLevel: number,
+): number | null {
+  if (!Number.isFinite(primaryLevel) || !Number.isFinite(secondaryLevel)) {
+    return null;
+  }
+
+  const minimumDifference = Math.max(0.01, Math.abs(primaryLevel) * 0.0001);
+
+  return Math.abs(primaryLevel - secondaryLevel) >= minimumDifference
+    ? secondaryLevel
+    : null;
+}
+
 /* ================================================================
  * INVESTMENT SUMMARY ENGINE
- * ================================================================
- */
+ * ================================================================ */
 
 export function buildInvestmentSummary(
-  technical: TechnicalResearchResult
+  technical: TechnicalResearchResult,
 ): InvestmentSummaryResult {
+  const support1 = technical.supportResistance.immediateSupport;
 
-      return {
-  // Decision
-  pattern: technical.trend.direction,
+  const support2 = getDistinctSecondaryLevel(
+    support1,
+    technical.supportResistance.majorSupport,
+  );
 
-  recommendation: technical.technicalScore.recommendation,
+  const resistance1 = technical.supportResistance.immediateResistance;
 
-  confidence: technical.technicalScore.confidence,
+  const resistance2 = getDistinctSecondaryLevel(
+    resistance1,
+    technical.supportResistance.majorResistance,
+  );
 
-  technicalScore: technical.technicalScore.totalScore,
+  return {
+    pattern: technical.trend.direction,
 
-  // Trade Plan
-  currentPrice: technical.currentPrice,
+    technicalBias: technical.technicalScore.recommendation,
 
-  support: technical.supportResistance.immediateSupport,
+    confidence: technical.technicalScore.confidence,
 
-  resistance:
-    technical.supportResistance.immediateResistance,
+    technicalScore: technical.technicalScore.totalScore,
 
-  stopLoss:
-    technical.riskReward.stopLoss,
+    currentPrice: technical.currentPrice,
 
-  target:
-    technical.riskReward.target,
+    support1,
 
-  riskReward:
-    technical.riskReward.ratio,
+    support2,
 
-  riskRewardVerdict:
-    technical.riskReward.verdict,
+    resistance1,
 
-    entryQuality: technical.entryQuality.quality,
+    resistance2,
 
     summary: technical.aiSummary,
 
     strengths: {
-  trend: technical.trend.explanation,
-  momentum: technical.momentum.explanation,
-  volume: technical.volume.explanation,
-},
+      trend: technical.trend.explanation,
 
-risks: {
-  supportResistance: technical.supportResistance.explanation,
-  riskReward: technical.riskReward.explanation,
-},
-disclaimer: TECHNICAL_DISCLAIMER,
+      momentum: technical.momentum.explanation,
+
+      volume: technical.volume.explanation,
+    },
+
+    risks: {
+      supportResistance: technical.supportResistance.explanation,
+    },
+
+    disclaimer: TECHNICAL_DISCLAIMER,
   };
 }
