@@ -80,7 +80,7 @@ export default function LoginPage() {
                 </span>
               </div>
 
-              <p className="mt-3 text-xs leading-5 text-emerald-200/70">
+              <p className="mt-3 text-xs leading-5 text-emerald-800 dark:text-emerald-200">
                 Save ₹589 compared with twelve
                 monthly payments.
               </p>
@@ -183,10 +183,10 @@ export default function LoginPage() {
                     "w-full max-w-md mx-auto",
 
                   cardBox:
-                    "!w-full !shadow-none",
+                     "!w-full !overflow-hidden !rounded-2xl !border !border-slate-800 !bg-[#07111f] !shadow-none",
 
                   card:
-                    "!w-full !border !border-slate-800 !bg-[#07111f] !shadow-none",
+                    "!w-full !rounded-none !border-0 !bg-[#07111f] !shadow-none",
 
                   headerTitle:
                     "!text-white",
@@ -219,7 +219,7 @@ export default function LoginPage() {
                     "!bg-emerald-500 !text-slate-950 hover:!bg-emerald-400",
 
                   footer:
-                    "!bg-[#07111f]",
+                    "!rounded-none !border-0 !bg-[#07111f]",
 
                   footerActionText:
                     "!text-slate-400",

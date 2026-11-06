@@ -181,28 +181,27 @@ function ValuationUpgradeCard({
   ];
 
   return (
-    <section className="mt-8 overflow-hidden rounded-2xl border border-amber-500/40 bg-slate-950">
-      <div className="border-b border-slate-800 bg-gradient-to-r from-amber-500/10 via-slate-950 to-emerald-500/10 px-6 py-7 md:px-8">
+    <section className="mt-8 overflow-hidden rounded-2xl border border-amber-300 bg-white shadow-sm dark:border-amber-500/40 dark:bg-slate-950">
+      <div className="border-b border-slate-200 bg-amber-50 px-6 py-7 dark:border-slate-800 dark:bg-slate-900 md:px-8">
         <div className="flex flex-wrap items-center gap-3">
-          <h2 className="text-2xl font-bold text-white">
-            Unlock Complete Company
-            Valuation
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+            Unlock Complete Company Valuation
           </h2>
 
-          <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-300">
+          <span className="rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900 dark:border-amber-400/40 dark:bg-amber-400/10 dark:text-amber-300">
             STFL PREMIUM
           </span>
         </div>
 
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-          Access STFL&apos;s complete
-          valuation workspace for{" "}
-          <span className="font-bold text-white">
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-700 dark:text-slate-300">
+          Access STFL&apos;s complete valuation
+          workspace for{" "}
+          <span className="font-bold text-slate-900 dark:text-white">
             {symbol.toUpperCase()}
           </span>
           , including fair-value estimates,
-          financial comparisons and
-          potential upside or downside.
+          financial comparisons and potential
+          upside or downside.
         </p>
       </div>
 
@@ -210,38 +209,42 @@ function ValuationUpgradeCard({
         {features.map((feature) => (
           <div
             key={feature}
-            className="rounded-xl border border-slate-800 bg-slate-900/70 p-4"
+            className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-amber-400/30 bg-amber-400/10 text-amber-300">
-              ✓
+            <div
+              aria-hidden="true"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+            >
+              {"\u2713"}
             </div>
 
-            <p className="mt-3 text-sm font-semibold text-slate-200">
+            <p className="mt-3 text-sm font-semibold text-slate-900 dark:text-slate-200">
               {feature}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col gap-4 border-t border-slate-800 px-6 py-5 sm:flex-row sm:items-center sm:justify-between md:px-8">
+      <div className="flex flex-col gap-4 border-t border-slate-200 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between md:px-8">
         <div>
-          <p className="font-bold text-white">
-            ₹299 monthly or ₹2,999 annually
+          <p className="font-bold text-slate-900 dark:text-white">
+            {"\u20B9"}299 monthly or{" "}
+            {"\u20B9"}2,999 annually
           </p>
 
-          <p className="mt-1 text-xs text-slate-500">
-            Includes Premium research
-            features across STFL.
+          <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+            Includes Premium research features
+            across STFL.
           </p>
         </div>
 
         <Link
           href={
             signedOut
-              ? "/sign-in"
+              ? "/login"
               : "/premium-research"
           }
-          className="inline-flex justify-center rounded-xl bg-amber-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
+          className="inline-flex justify-center rounded-xl bg-amber-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
         >
           {signedOut
             ? "Sign in to continue"

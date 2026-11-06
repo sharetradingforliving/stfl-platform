@@ -599,7 +599,7 @@ export default function PeerValuationPanel({
         </p>
 
         <Link
-          href="/sign-in"
+          href="/login"
           className="inline-flex justify-center rounded-xl bg-emerald-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-emerald-300"
         >
           Sign in to continue
