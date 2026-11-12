@@ -938,6 +938,463 @@ function addMissingBankingContexts(
   }
 }
 
+function repairBankingAnnualContext(
+  contexts: XbrlContext[],
+  facts: XbrlFact[],
+  sourceUrl: string,
+  warnings: string[]
+): void {
+  if (!/\/BANKING_/i.test(sourceUrl)) {
+    return;
+  }
+
+  const readUnique = (
+    contextId: string,
+    tag: string
+  ): string | null => {
+    const values = [
+      ...new Set(
+        facts
+          .filter(
+            (fact) =>
+              fact.contextRef === contextId &&
+              fact.localName === tag
+          )
+          .map((fact) => fact.value.trim())
+          .filter(Boolean)
+      ),
+    ];
+
+    return values.length === 1
+      ? values[0]
+      : null;
+  };
+
+  const validDate = (
+    value: string | null
+  ): value is string => {
+    if (
+      !value ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(value)
+    ) {
+      return false;
+    }
+
+    const timestamp = Date.parse(
+      `${value}T00:00:00Z`
+    );
+
+    return (
+      Number.isFinite(timestamp) &&
+      new Date(timestamp)
+        .toISOString()
+        .slice(0, 10) === value
+    );
+  };
+
+  const one = contexts.find(
+    (context) => context.id === "OneD"
+  );
+
+  const four = contexts.find(
+    (context) => context.id === "FourD"
+  );
+
+  const start = readUnique(
+    "FourD",
+    "DateOfStartOfReportingPeriod"
+  );
+
+  const end = readUnique(
+    "FourD",
+    "DateOfEndOfReportingPeriod"
+  );
+
+  const basis = readUnique(
+    "FourD",
+    "NatureOfReportStandaloneConsolidated"
+  );
+
+  if (
+    !one ||
+    !four ||
+    one.periodType !== "DURATION" ||
+    four.periodType !== "DURATION" ||
+    Object.keys(one.dimensions).length > 0 ||
+    Object.keys(four.dimensions).length > 0 ||
+    !validDate(start) ||
+    !validDate(end) ||
+    !basis ||
+    !/^(consolidated|standalone)$/i.test(basis)
+  ) {
+    return;
+  }
+
+  const days =
+    (Date.parse(end) - Date.parse(start)) /
+    86_400_000;
+
+  // Repair only an annual context that
+  // incorrectly duplicates the quarter.
+  if (
+    days < 300 ||
+    days > 380 ||
+    four.startDate !== one.startDate ||
+    four.endDate !== one.endDate ||
+    four.endDate !== end ||
+    four.startDate === start ||
+    readUnique(
+      "OneD",
+      "DateOfStartOfReportingPeriod"
+    ) !== one.startDate ||
+    readUnique(
+      "OneD",
+      "DateOfEndOfReportingPeriod"
+    ) !== one.endDate ||
+    readUnique(
+      "OneD",
+      "DateOfStartOfFinancialYear"
+    ) !== start ||
+    readUnique(
+      "OneD",
+      "DateOfEndOfFinancialYear"
+    ) !== end
+  ) {
+    return;
+  }
+
+  const previousStart = four.startDate;
+  four.startDate = start;
+
+  warnings.push(
+    `Repaired BANKING FourD start date ` +
+    `from ${previousStart} to ${start} using ` +
+    `its own reporting metadata and matching ` +
+    `financial-year dates; reporting basis: ${basis}.`
+  );
+}
+
+function addMissingIndasDurationContexts(
+  contexts: XbrlContext[],
+  facts: XbrlFact[],
+  sourceUrl: string,
+  warnings: string[]
+):
+void {
+  if (
+    !/\/INDAS_[^/]+\.xml(?:\?|$)/i.test(
+      sourceUrl
+    )
+  ) {
+    return;
+  }
+
+  const validIsoDate = (
+    value: string
+  ): boolean => {
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(value)
+    ) {
+      return false;
+    }
+
+    const timestamp = Date.parse(
+      `${value}T00:00:00Z`
+    );
+
+    return (
+      Number.isFinite(timestamp) &&
+      new Date(timestamp)
+        .toISOString()
+        .slice(0, 10) === value
+    );
+  };
+
+  for (
+    const contextId of ["OneD", "FourD"]
+  ) {
+    if (
+      contexts.some(
+        (context) =>
+          context.id === contextId
+      )
+    ) {
+      continue;
+    }
+
+    const scopedFacts = facts.filter(
+      (fact) =>
+        fact.contextRef === contextId
+    );
+
+    const readUniqueValue = (
+      tag: string
+    ): string | null => {
+      const values = [
+        ...new Set(
+          scopedFacts
+            .filter(
+              (fact) =>
+                fact.localName === tag
+            )
+            .map(
+              (fact) => fact.value.trim()
+            )
+            .filter(Boolean)
+        ),
+      ];
+
+      return values.length === 1
+        ? values[0]
+        : null;
+    };
+
+    const startDate = readUniqueValue(
+      "DateOfStartOfReportingPeriod"
+    );
+
+    const endDate = readUniqueValue(
+      "DateOfEndOfReportingPeriod"
+    );
+
+    const reportingBasis =
+      readUniqueValue(
+        "NatureOfReportStandaloneConsolidated"
+      );
+
+    const hasFinancialFacts =
+      scopedFacts.some(
+        (fact) =>
+          /^(RevenueFromOperations|RevenueFromOperationsNet|IncomeFromOperations|Revenue|ProfitBeforeTax|ProfitLossBeforeTax|ProfitLossForPeriod|ProfitOrLossAttributableToOwnersOfParent)$/i.test(
+            fact.localName
+          ) &&
+          typeof fact.numericValue ===
+            "number" &&
+          Number.isFinite(
+            fact.numericValue
+          )
+      );
+
+    if (
+      !startDate ||
+      !endDate ||
+      !validIsoDate(startDate) ||
+      !validIsoDate(endDate) ||
+      !reportingBasis ||
+      !/^(consolidated|standalone)$/i.test(
+        reportingBasis
+      ) ||
+      !hasFinancialFacts
+    ) {
+      continue;
+    }
+
+    const durationDays =
+      (
+        Date.parse(
+          `${endDate}T00:00:00Z`
+        ) -
+        Date.parse(
+          `${startDate}T00:00:00Z`
+        )
+      ) / 86_400_000;
+
+    if (
+      durationDays <= 0 ||
+      durationDays > 380
+    ) {
+      continue;
+    }
+
+    contexts.push({
+      id: contextId,
+
+      entityIdentifier:
+        readUniqueValue("Symbol"),
+
+      periodType: "DURATION",
+      startDate,
+      endDate,
+      instant: null,
+      dimensions: {},
+    });
+
+    warnings.push(
+      `Reconstructed missing legacy INDAS ` +
+      `duration context ${contextId} from ` +
+      `its own reporting metadata ` +
+      `(${startDate} to ${endDate}; ` +
+      `${reportingBasis}).`
+    );
+  }
+}
+
+function repairIndasAnnualContext(
+  contexts: XbrlContext[],
+  facts: XbrlFact[],
+  sourceUrl: string,
+  warnings: string[]
+): void {
+  if (
+    !/\/INDAS_[^/]+\.xml(?:\?|$)/i.test(sourceUrl)
+  ) {
+    return;
+  }
+
+  const readUnique = (
+    contextId: string,
+    tag: string
+  ): string | null => {
+    const values = [
+      ...new Set(
+        facts
+          .filter(
+            (fact) =>
+              fact.contextRef === contextId &&
+              fact.localName === tag
+          )
+          .map((fact) => fact.value.trim())
+          .filter(Boolean)
+      ),
+    ];
+
+    return values.length === 1
+      ? values[0]
+      : null;
+  };
+
+  const timestamp = (
+    value: string | null
+  ): number | null => {
+    if (
+      !value ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(value)
+    ) {
+      return null;
+    }
+
+    const result = Date.parse(
+      `${value}T00:00:00Z`
+    );
+
+    return Number.isFinite(result) &&
+      new Date(result).toISOString().slice(0, 10) === value
+      ? result
+      : null;
+  };
+
+  const one = contexts.find(
+    (context) => context.id === "OneD"
+  );
+
+  const four = contexts.find(
+    (context) => context.id === "FourD"
+  );
+
+  if (
+    !one ||
+    !four ||
+    one.periodType !== "DURATION" ||
+    four.periodType !== "DURATION" ||
+    Object.keys(one.dimensions).length > 0 ||
+    Object.keys(four.dimensions).length > 0 ||
+    !one.entityIdentifier ||
+    one.entityIdentifier !== four.entityIdentifier
+  ) {
+    return;
+  }
+
+  const annualStart = readUnique(
+    "FourD",
+    "DateOfStartOfReportingPeriod"
+  );
+
+  const annualEnd = readUnique(
+    "FourD",
+    "DateOfEndOfReportingPeriod"
+  );
+
+  const quarterStart = readUnique(
+    "OneD",
+    "DateOfStartOfReportingPeriod"
+  );
+
+  const quarterEnd = readUnique(
+    "OneD",
+    "DateOfEndOfReportingPeriod"
+  );
+
+  const annualBasis = readUnique(
+    "FourD",
+    "NatureOfReportStandaloneConsolidated"
+  )?.toLowerCase();
+
+  const quarterBasis = readUnique(
+    "OneD",
+    "NatureOfReportStandaloneConsolidated"
+  )?.toLowerCase();
+
+  const annualStartTime = timestamp(annualStart);
+  const annualEndTime = timestamp(annualEnd);
+  const quarterStartTime = timestamp(quarterStart);
+  const quarterEndTime = timestamp(quarterEnd);
+
+  if (
+    annualStartTime === null ||
+    annualEndTime === null ||
+    quarterStartTime === null ||
+    quarterEndTime === null ||
+    !annualBasis ||
+    !["consolidated", "standalone"].includes(annualBasis) ||
+    annualBasis !== quarterBasis
+  ) {
+    return;
+  }
+
+  const annualDays =
+    (annualEndTime - annualStartTime) / 86_400_000;
+
+  const quarterDays =
+    (quarterEndTime - quarterStartTime) / 86_400_000;
+
+  const hasAnnualFinancialFacts = facts.some(
+    (fact) =>
+      fact.contextRef === "FourD" &&
+      /^(RevenueFromOperations|RevenueFromOperationsNet|IncomeFromOperations|Revenue|ProfitBeforeTax|ProfitLossBeforeTax|ProfitLossForPeriod|ProfitOrLossAttributableToOwnersOfParent|ProfitLossAttributableToOwnersOfParent)$/i.test(
+        fact.localName
+      ) &&
+      typeof fact.numericValue === "number" &&
+      Number.isFinite(fact.numericValue)
+  );
+
+  if (
+    annualDays < 300 ||
+    annualDays > 380 ||
+    quarterDays < 70 ||
+    quarterDays > 110 ||
+    annualStartTime >= quarterStartTime ||
+    annualEnd !== quarterEnd ||
+    one.startDate !== quarterStart ||
+    one.endDate !== quarterEnd ||
+    four.startDate !== one.startDate ||
+    four.endDate !== one.endDate ||
+    !hasAnnualFinancialFacts
+  ) {
+    return;
+  }
+
+  const previousStart = four.startDate;
+  four.startDate = annualStart;
+
+  warnings.push(
+    `Repaired legacy INDAS FourD start date ` +
+      `from ${previousStart} to ${annualStart} ` +
+      `using its own annual reporting metadata ` +
+      `and matching verified quarter metadata; ` +
+      `reporting basis: ${annualBasis}.`
+  );
+}
+
 function validateXbrlUrl(
   sourceUrl: string
 ): URL {
@@ -1040,7 +1497,134 @@ export function parseNseXbrl(
   sourceUrl,
   warnings
 );
+repairBankingAnnualContext(
+  contexts,
+  facts,
+  sourceUrl,
+  warnings
+);
 
+addMissingIndasDurationContexts(
+  contexts,
+  facts,
+  sourceUrl,
+  warnings
+);
+
+repairIndasAnnualContext(
+  contexts,
+  facts,
+  sourceUrl,
+  warnings
+);
+
+  if (
+    findFactValue(facts, "Symbol")
+      ?.trim()
+      .toUpperCase() === "INDUSINDBK" &&
+    facts.some(
+      (fact) =>
+        fact.localName ===
+          "DateOfEndOfReportingPeriod" &&
+        fact.value.trim() === "2024-03-31"
+    )
+  ) {
+    console.log(
+      "INDUSIND FY24 CONTEXT DIAGNOSTIC:\n" +
+        JSON.stringify(
+          {
+            sourceUrl,
+            metadata: facts
+              .filter((fact) =>
+                /^(Symbol|ReportingQuarter|DateOfStartOfFinancialYear|DateOfEndOfFinancialYear|DateOfStartOfReportingPeriod|DateOfEndOfReportingPeriod|NatureOfReportStandaloneConsolidated)$/i.test(
+                  fact.localName
+                )
+              )
+              .map((fact) => ({
+                tag: fact.localName,
+                value: fact.value,
+                contextRef: fact.contextRef,
+              })),
+            contexts: contexts.filter(
+              (context) =>
+                ["OneD", "FourD"].includes(
+                  context.id
+                )
+            ),
+          },
+          null,
+          2
+        )
+    );
+  }
+
+const coreFacts = facts.filter(
+  (fact) =>
+    /^(RevenueFromOperations|RevenueFromOperationsNet|IncomeFromOperations|Revenue|ProfitBeforeTax|ProfitLossBeforeTax|ProfitOrLossAttributableToOwnersOfParent|ProfitLossAttributableToOwnersOfParent|ProfitLossForPeriod)$/i.test(
+      fact.localName
+    ) &&
+    fact.numericValue !== null
+);
+
+const coreContextIds = [
+  ...new Set(
+    coreFacts.map((fact) => fact.contextRef)
+  ),
+];
+
+const contextCheck = coreContextIds.map(
+  (contextId) => ({
+    contextId,
+
+    definition:
+      contexts.find(
+        (context) => context.id === contextId
+      ) ?? null,
+
+    facts: coreFacts
+      .filter(
+        (fact) =>
+          fact.contextRef === contextId
+      )
+      .map((fact) => ({
+        tag: fact.localName,
+        value: fact.numericValue,
+        unit: fact.unitRef,
+      })),
+  })
+);
+
+if (
+  sourceUrl.includes(
+    "INDAS_87411_764000_12012023042514_WEB.xml"
+  )
+) {
+  console.log(
+    "INFY DECEMBER 2022 CONTEXT CHECK:\n" +
+      JSON.stringify(
+        {
+          sourceUrl,
+
+          reportingMetadata: facts
+            .filter(
+              (fact) =>
+                /date|reportingquarter|financialyear|symbol|consolidat/i.test(
+                  fact.localName
+                )
+            )
+            .map((fact) => ({
+              tag: fact.localName,
+              value: fact.value,
+              contextRef: fact.contextRef,
+            })),
+
+          contexts: contextCheck,
+        },
+        null,
+        2
+      )
+  );
+}
   if (contexts.length === 0) {
     warnings.push(
       "No XBRL contexts were detected."
@@ -1086,10 +1670,11 @@ export async function fetchAndParseNseXbrl(
       }
     );
 
-  if (!response.ok) {
+    if (!response.ok) {
     throw new Error(
-      "Unable to download NSE XBRL: " +
-        response.status
+      `Unable to download NSE XBRL: ` +
+      `${response.status}; URL: ` +
+      validatedUrl.toString()
     );
   }
 

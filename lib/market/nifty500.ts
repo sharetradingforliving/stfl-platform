@@ -145,7 +145,8 @@ async function downloadNifty500Constituents(): Promise<Nifty500Constituent[]> {
           Accept: "text/csv,application/csv,application/octet-stream,*/*",
           "User-Agent": "Mozilla/5.0 STFL-Market-Intelligence/1.0",
         },
-        cache: "no-store",
+                cache: "no-store",
+        signal: AbortSignal.timeout(10000),
       });
 
       if (!response.ok) {

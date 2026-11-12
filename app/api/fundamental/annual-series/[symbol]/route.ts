@@ -88,15 +88,40 @@ export async function GET(
         })
       );
 
+        const derivedAnnual =
+      derived.annual.map((annual) => {
+        const quarters =
+          annual.contributingQuarters;
+
+        const consolidated =
+          quarters.length === 4
+            ? quarters.every(
+                (quarter) =>
+                  quarter.consolidated === true
+              )
+              ? true
+              : quarters.every(
+                  (quarter) =>
+                    quarter.consolidated === false
+                )
+                ? false
+                : null
+            : null;
+
+        return {
+          ...annual,
+          consolidated,
+        };
+      });
+
     const combinedAnnual = [
       ...officialAnnual,
-      ...derived.annual,
+      ...derivedAnnual,
     ].sort(
       (first, second) =>
-        second.periodEnded
-          .localeCompare(
-            first.periodEnded
-          )
+        second.periodEnded.localeCompare(
+          first.periodEnded
+        )
     );
 
     const diagnostics = [

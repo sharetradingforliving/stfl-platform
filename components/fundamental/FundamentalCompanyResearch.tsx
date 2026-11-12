@@ -3,6 +3,7 @@
 import Link from "next/link";
 import PeerValuationPanel from "./PeerValuationPanel";
 import PremiumValuationGate from "./PremiumValuationGate";
+import FinancialHistoryCard from "./FinancialHistoryCard";
 
 import {
   useEffect,
@@ -861,8 +862,12 @@ export default function FundamentalCompanyResearch({
 <PremiumValuationGate
   symbol={analytics.symbol}
 >
-  <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6 md:p-8">
-    <div className="flex flex-wrap items-center gap-3">
+  <FinancialHistoryCard
+  symbol={analytics.symbol}
+  exchange="NSE"
+/>
+
+  <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6 md:p-8">    <div className="flex flex-wrap items-center gap-3">
       <h2 className="text-2xl font-bold">
         Company valuation
       </h2>
@@ -1439,19 +1444,44 @@ function AnnualFinancialTable({
   periods: FinancialPeriod[];
   isBankingCompany: boolean;
 }) {
-  const sortedPeriods =
-    periods
-      .slice()
-      .sort(
-        (first, second) =>
-          (
-            first.endDate ??
-            first.period
-          ).localeCompare(
-            second.endDate ??
-              second.period
-          )
+    const getPeriodYear = (
+    period: FinancialPeriod
+  ): number | null => {
+    const date = period.endDate ?? period.period;
+    const match = date.match(/^(\d{4})-\d{2}-\d{2}$/);
+
+    return match ? Number(match[1]) : null;
+  };
+
+  const allSortedPeriods = periods
+    .slice()
+    .sort((first, second) =>
+      (first.endDate ?? first.period).localeCompare(
+        second.endDate ?? second.period
+      )
+    );
+
+  const availableYears = allSortedPeriods
+    .map(getPeriodYear)
+    .filter((year): year is number => year !== null);
+
+  const newestYear =
+    availableYears.length > 0
+      ? Math.max(...availableYears)
+      : null;
+
+  const sortedPeriods = allSortedPeriods.filter(
+    (period) => {
+      const year = getPeriodYear(period);
+
+      return (
+        newestYear !== null &&
+        year !== null &&
+        year >= newestYear - 4 &&
+        year <= newestYear
       );
+    }
+  );
 
   return (
     <div className="mt-8 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
@@ -1557,12 +1587,17 @@ function AnnualFinancialTable({
                 period,
                 periodIndex
               ) => {
+                                const currentYear =
+                  getPeriodYear(period);
+
                 const previousPeriod =
-                  periodIndex > 0
-                    ? sortedPeriods[
-                        periodIndex - 1
-                      ]
-                    : null;
+                  currentYear === null
+                    ? null
+                    : allSortedPeriods.find(
+                        (candidate) =>
+                          getPeriodYear(candidate) ===
+                          currentYear - 1
+                      ) ?? null;
 
                 return (
                   <tr
@@ -1645,13 +1680,13 @@ function AnnualFinancialTable({
                     )}
 
                     <td className="max-w-md px-5 py-4 leading-6 text-slate-300">
-                      {
-                        buildAnnualInterpretation(
-                          period,
-                          previousPeriod,
-                          isBankingCompany
-                        )
-                      }
+                                            {previousPeriod
+                        ? buildAnnualInterpretation(
+                            period,
+                            previousPeriod,
+                            isBankingCompany
+                          )
+                        : "A matching previous fiscal year is unavailable; year-on-year comparison is not available."}
                     </td>
                   </tr>
                 );

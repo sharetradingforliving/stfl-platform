@@ -411,89 +411,162 @@ function contextMatchesEndDate(
 }
 
 function selectDurationContext(
-  contexts: XbrlContext[],
+  document: ParsedNseXbrl,
   periodType: FinancialPeriodType,
-  periodEnded: string | null
+  periodEnded: string | null,
+  isBankingTaxonomy: boolean
 ): XbrlContext | null {
-  const candidates =
-    contexts.filter(
+  const candidates = document.contexts
+    .filter(
       (context) =>
-        context.periodType ===
-          "DURATION" &&
+        context.periodType === "DURATION" &&
         hasNoDimensions(context) &&
         contextMatchesEndDate(
           context,
           periodEnded
         )
+    )
+    .map((context) => ({
+      context,
+      days: daysBetween(
+        context.startDate,
+        context.endDate
+      ),
+    }))
+    .filter(
+      (
+        candidate
+      ): candidate is {
+        context: XbrlContext;
+        days: number;
+      } =>
+        candidate.days !== null &&
+        candidate.days > 0
     );
 
   if (candidates.length === 0) {
     return null;
   }
 
-  const candidatesWithDays =
-    candidates.map(
-      (context) => ({
-        context,
-
-        days:
-          daysBetween(
-            context.startDate,
-            context.endDate
-          ) ?? 0,
-      })
+  const hasMetric = (
+    contextId: string,
+    aliases: readonly string[]
+  ): boolean => {
+    const fact = findFact(
+      document,
+      contextId,
+      aliases
     );
 
-  if (periodType === "ANNUAL") {
     return (
-      candidatesWithDays
-        .slice()
-        .sort(
-          (first, second) =>
-            second.days -
-            first.days
-        )[0]?.context ?? null
+      typeof fact?.numericValue === "number" &&
+      Number.isFinite(fact.numericValue)
     );
-  }
+  };
 
-  if (
-    periodType === "QUARTERLY"
-  ) {
-    const quarterlyCandidates =
-      candidatesWithDays.filter(
-        ({ days }) =>
-          days >= 70 &&
-          days <= 110
-      );
+  const financialScore = (
+    context: XbrlContext
+  ): number => {
+    const id = context.id;
 
-    if (
-      quarterlyCandidates.length > 0
-    ) {
-      return (
-        quarterlyCandidates
-          .slice()
-          .sort(
-            (first, second) =>
-              Math.abs(
-                first.days - 90
-              ) -
-              Math.abs(
-                second.days - 90
-              )
-          )[0]?.context ?? null
-      );
-    }
-  }
+    const hasRevenue = isBankingTaxonomy
+      ? (
+          hasMetric(
+            id,
+            METRIC_TAGS.bankTotalIncome
+          ) ||
+          (
+            hasMetric(
+              id,
+              METRIC_TAGS.bankInterestEarned
+            ) &&
+            hasMetric(
+              id,
+              METRIC_TAGS.otherIncome
+            )
+          )
+        )
+      : hasMetric(
+          id,
+          METRIC_TAGS.corporateRevenue
+        );
 
-  return (
-    candidatesWithDays
+    return (
+      Number(hasRevenue) * 100 +
+      Number(
+        hasMetric(
+          id,
+          METRIC_TAGS.profitBeforeTax
+        )
+      ) * 20 +
+      Number(
+        hasMetric(
+          id,
+          METRIC_TAGS.netProfit
+        )
+      ) * 20
+    );
+  };
+
+  const standardCandidates =
+    candidates.filter(({ days }) =>
+      periodType === "ANNUAL"
+        ? days >= 300 && days <= 380
+        : periodType === "QUARTERLY"
+          ? days >= 70 && days <= 110
+          : true
+    );
+
+  /*
+   * Prefer genuine annual or quarterly
+   * durations before comparing facts.
+   */
+  if (standardCandidates.length > 0) {
+    return standardCandidates
       .slice()
-      .sort(
-        (first, second) =>
-          first.days -
-          second.days
-      )[0]?.context ?? null
-  );
+      .sort((first, second) => {
+        const scoreDifference =
+          financialScore(second.context) -
+          financialScore(first.context);
+
+        if (scoreDifference !== 0) {
+          return scoreDifference;
+        }
+
+        const targetDays =
+          periodType === "ANNUAL"
+            ? 365
+            : 90;
+
+        return (
+          Math.abs(first.days - targetDays) -
+          Math.abs(second.days - targetDays)
+        );
+      })[0]?.context ?? null;
+  }
+
+  /*
+   * Preserve the existing fallback:
+   * longest duration for annual requests,
+   * shortest duration for quarterly requests.
+   *
+   * The series service still validates
+   * the duration and handles cumulative Q2.
+   */
+  return candidates
+    .slice()
+    .sort((first, second) => {
+      const durationDifference =
+        periodType === "ANNUAL"
+          ? second.days - first.days
+          : first.days - second.days;
+
+      return (
+        durationDifference ||
+        financialScore(second.context) -
+          financialScore(first.context)
+      );
+    })[0]?.context ?? null;
 }
 
 function selectInstantContext(
@@ -809,25 +882,25 @@ export function normalizeNseXbrlPeriod(
         )
     );
 
+    /*
+   * A declared namespace prefix alone
+   * does not establish banking activity.
+   * Use the banking filing URL or the
+   * existing banking-fact detection.
+   */
   const isBankingTaxonomy =
-  document.taxonomyPrefixes.some(
-    (prefix) =>
-      prefix
-        .trim()
-        .toLowerCase() ===
-      "in-bse-fin"
-  ) ||
-  document.sourceUrl
-    .toUpperCase()
-    .includes("/BANKING_") ||
-  hasBankingFacts;
+    document.sourceUrl
+      .toUpperCase()
+      .includes("/BANKING_") ||
+    hasBankingFacts;
 
   const durationContext =
-    selectDurationContext(
-      document.contexts,
-      options.periodType,
-      options.periodEnded
-    );
+  selectDurationContext(
+    document,
+    options.periodType,
+    options.periodEnded,
+    isBankingTaxonomy
+  );
 
   const instantContext =
     selectInstantContext(
@@ -959,12 +1032,145 @@ export function normalizeNseXbrlPeriod(
       METRIC_TAGS.taxExpense
     );
 
-  const netProfit =
-    getDurationMetric(
-      document,
-      durationContextId,
-      METRIC_TAGS.netProfit
-    );
+  let netProfit =
+  getDurationMetric(
+    document,
+    durationContextId,
+    METRIC_TAGS.netProfit
+  );
+
+const selectedNetProfitFact = findFact(
+  document,
+  durationContextId,
+  METRIC_TAGS.netProfit
+);
+
+const selectedOwnersProfit =
+  selectedNetProfitFact !== null &&
+  [
+    "profitorlossattributabletoownersofparent",
+    "profitlossattributabletoownersofparent",
+  ].includes(
+    normalizeName(selectedNetProfitFact.localName)
+  );
+
+const reportedTotalProfit =
+  getDurationMetric(
+    document,
+    durationContextId,
+    [
+      "ProfitLossForPeriod",
+      "ProfitLossForThePeriod",
+    ]
+  );
+
+const reportedNonControllingProfit =
+  getDurationMetric(
+    document,
+    durationContextId,
+    [
+      "ProfitOrLossAttributableToNonControllingInterests",
+      "ProfitLossAttributableToNonControllingInterests",
+    ]
+  );
+
+/*
+ * Require total tax expense, rather than the
+ * CurrentTax-only fallback used by other metrics.
+ */
+const reportedTotalTax =
+  getDurationMetric(
+    document,
+    durationContextId,
+    [
+      "TaxExpense",
+      "IncomeTaxExpense",
+      "CurrentAndDeferredTax",
+    ]
+  );
+
+if (
+  !isBankingTaxonomy &&
+  selectedOwnersProfit &&
+  netProfit === 0 &&
+  reportedNonControllingProfit === 0 &&
+  reportedTotalProfit !== null &&
+  Number.isFinite(reportedTotalProfit) &&
+  reportedTotalProfit !== 0 &&
+  profitBeforeTax !== null &&
+  Number.isFinite(profitBeforeTax) &&
+  reportedTotalTax !== null &&
+  Number.isFinite(reportedTotalTax) &&
+  Math.abs(
+    profitBeforeTax -
+      reportedTotalTax -
+      reportedTotalProfit
+  ) <= 0.01
+) {
+  netProfit =
+    reportedTotalProfit -
+    reportedNonControllingProfit;
+
+  warnings.push(
+    "The reported owners' profit and non-controlling " +
+      "profit were both zero despite nonzero total " +
+      "profit. Owners' profit was reconciled as " +
+      "reported total profit minus reported " +
+      "non-controlling profit, after checking total " +
+      "profit against PBT less total tax expense."
+  );
+}
+    if (
+  options.periodType === "ANNUAL" &&
+  netProfit === 0
+) {
+  const selectedProfitFact = findFact(
+    document,
+    durationContextId,
+    METRIC_TAGS.netProfit
+  );
+
+  console.log(
+    "NSE ZERO PROFIT DIAGNOSTIC",
+    JSON.stringify(
+      {
+        sourceUrl: document.sourceUrl,
+        periodEnded: options.periodEnded,
+        durationContext,
+        profitBeforeTax,
+        taxExpense,
+        netProfit,
+
+        selectedProfitFact: selectedProfitFact
+          ? {
+              tag: selectedProfitFact.localName,
+              rawValue: selectedProfitFact.value,
+              numericValue:
+                selectedProfitFact.numericValue,
+              unit: selectedProfitFact.unitRef,
+            }
+          : null,
+
+        relatedFacts: document.facts
+          .filter(
+            (fact) =>
+              fact.contextRef === durationContextId &&
+              /profit|taxexpense|incometax/i.test(
+                fact.localName
+              )
+          )
+          .map((fact) => ({
+            tag: fact.localName,
+            rawValue: fact.value,
+            numericValue: fact.numericValue,
+            unit: fact.unitRef,
+          })),
+      },
+      null,
+      2
+    )
+  );
+}
 
   const epsBasic =
     getPerShareMetric(
@@ -1023,6 +1229,54 @@ export function normalizeNseXbrlPeriod(
     reportedOperatingIncome ??
     derivedOperatingIncome;
 
+      if (
+    revenue === null &&
+    !options.documentType?.startsWith("Revenue diagnostic")
+  ) {
+    console.log(
+      "NSE MISSING REVENUE CHECK:\n" +
+        JSON.stringify(
+          {
+            sourceUrl: document.sourceUrl,
+            periodEnded: options.periodEnded,
+            periodType: options.periodType,
+            isBankingTaxonomy,
+            durationContextId,
+
+            bankingSignals: Array.from(
+              new Set(
+                document.facts
+                  .filter((fact) =>
+                    bankingFactNames.has(
+                      normalizeName(fact.localName)
+                    )
+                  )
+                  .map((fact) => fact.localName)
+              )
+            ),
+
+            revenueAndIncomeFacts: document.facts
+              .filter(
+                (fact) =>
+                  fact.contextRef ===
+                    durationContextId &&
+                  /revenue|income|sales/i.test(
+                    fact.localName
+                  )
+              )
+              .map((fact) => ({
+                tag: fact.localName,
+                context: fact.contextRef,
+                value: fact.numericValue,
+                unit: fact.unitRef,
+              })),
+          },
+          null,
+          2
+        )
+    );
+  }
+
   if (revenue === null) {
     warnings.push(
       isBankingTaxonomy
@@ -1056,15 +1310,12 @@ export function normalizeNseXbrlPeriod(
     );
   }
 
-  const operatingCashFlow =
-    isBankingTaxonomy
-      ? null
-      : getDurationMetric(
-          document,
-          durationContextId,
-          METRIC_TAGS
-            .operatingCashFlow
-        );
+    const operatingCashFlow =
+    getDurationMetric(
+      document,
+      durationContextId,
+      METRIC_TAGS.operatingCashFlow
+    );
 
   const capitalExpenditure =
     isBankingTaxonomy
@@ -1421,25 +1672,19 @@ returnOnAssetsPercent,
 
       operatingCashFlow,
 
-      investingCashFlow:
-        isBankingTaxonomy
-          ? null
-          : getDurationMetric(
-              document,
-              durationContextId,
-              METRIC_TAGS
-                .investingCashFlow
-            ),
+            investingCashFlow:
+        getDurationMetric(
+          document,
+          durationContextId,
+          METRIC_TAGS.investingCashFlow
+        ),
 
-      financingCashFlow:
-        isBankingTaxonomy
-          ? null
-          : getDurationMetric(
-              document,
-              durationContextId,
-              METRIC_TAGS
-                .financingCashFlow
-            ),
+            financingCashFlow:
+        getDurationMetric(
+          document,
+          durationContextId,
+          METRIC_TAGS.financingCashFlow
+        ),
 
       capitalExpenditure,
       freeCashFlow,

@@ -293,9 +293,9 @@ export default function BasicCompanyDashboard({
             STFL Company Research
           </p>
 
-          <h1 className="mt-5 text-4xl font-bold">
+          <h2 className="mt-5 text-4xl font-bold">
             Market Data Unavailable
-          </h1>
+          </h2>
 
           <p className="mt-4 text-slate-400">
             {error}
@@ -345,9 +345,9 @@ export default function BasicCompanyDashboard({
             </p>
 
             <div className="mt-5 flex flex-wrap items-center gap-4">
-              <h1 className="text-5xl font-bold">
+              <h2 className="text-5xl font-bold">
                 {marketData.symbol}
-              </h1>
+              </h2>
 
               <span className="rounded-full border border-emerald-500/50 px-4 py-2 text-sm font-semibold text-emerald-400">
                 {marketData.exchange}

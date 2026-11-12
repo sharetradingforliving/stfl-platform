@@ -376,11 +376,18 @@ function normaliseFiling(
       "natureOfReport",
     ]);
 
-  const consolidated =
-    filingType
-      ?.toUpperCase()
-      .includes("CONSOLIDATED") ??
-    false;
+  const normalizedBasis = filingType
+  ?.trim()
+  .toUpperCase()
+  .replace(/[^A-Z]/g, "");
+
+const consolidated: boolean | null =
+  normalizedBasis === "CONSOLIDATED"
+    ? true
+    : normalizedBasis === "NONCONSOLIDATED" ||
+        normalizedBasis === "STANDALONE"
+      ? false
+      : firstBoolean(row, ["isConsolidated"]);
 
   const auditedText =
     firstString(row, [
@@ -421,12 +428,7 @@ function normaliseFiling(
         "reBroadcastDate",
       ]),
 
-    consolidated:
-      filingType
-        ? consolidated
-        : firstBoolean(row, [
-            "isConsolidated",
-          ]),
+    consolidated,
 
     audited:
       auditedText
@@ -514,6 +516,31 @@ async function fetchPeriodFilings(
 
   const rows =
     extractRows(payload);
+
+    if (symbol === "ABBOTINDIA") {
+  console.log(
+    "ABBOTINDIA legacy filing discovery",
+    JSON.stringify(
+      {
+        period,
+        payloadType: Array.isArray(payload)
+          ? "array"
+          : typeof payload,
+        payloadKeys:
+          asRecord(payload)
+            ? Object.keys(payload as JsonRecord)
+            : [],
+        extractedRows: rows.length,
+        matchingRows: rows.filter((row) =>
+          rowMatchesSymbol(row, symbol)
+        ).length,
+        sampleRows: rows.slice(0, 2),
+      },
+      null,
+      2
+    )
+  );
+}
 
   return rows
     .filter((row) =>

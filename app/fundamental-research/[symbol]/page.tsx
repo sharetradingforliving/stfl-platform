@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import FundamentalCompanyResearch from "@/components/fundamental/FundamentalCompanyResearch";
 
 type FundamentalCompanyPageProps = {
@@ -16,22 +18,29 @@ export default async function FundamentalCompanyPage({
   searchParams,
 }: FundamentalCompanyPageProps) {
   const { symbol } = await params;
-  const { exchange, method } =
-    await searchParams;
+  const { exchange, method } = await searchParams;
 
-  const stockSymbol =
-    symbol.trim().toUpperCase();
+  let stockSymbol: string;
 
-  const selectedExchange:
-    | "NSE"
-    | "BSE" =
-    exchange?.toUpperCase() === "BSE"
+  try {
+    stockSymbol = decodeURIComponent(symbol)
+      .trim()
+      .toUpperCase();
+  } catch {
+    notFound();
+  }
+
+  if (!/^[A-Z0-9&._-]{1,30}$/.test(stockSymbol)) {
+    notFound();
+  }
+
+  const selectedExchange: "NSE" | "BSE" =
+    exchange?.trim().toUpperCase() === "BSE"
       ? "BSE"
       : "NSE";
 
   const selectedMethod =
-    method?.trim().toLowerCase() ??
-    "composite";
+    method?.trim().toLowerCase() ?? "composite";
 
   return (
     <FundamentalCompanyResearch

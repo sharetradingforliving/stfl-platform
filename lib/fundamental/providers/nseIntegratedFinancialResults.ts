@@ -731,10 +731,14 @@ export async function getNseIntegratedFinancialFilings(
       await createNseSession();
 
     const query =
-      new URLSearchParams({
-        index: "equities",
-        symbol,
-      }).toString();
+  new URLSearchParams({
+    index: "equities",
+    symbol,
+    type: "Integrated Filing- Financials",
+    period_ended: "all",
+    page: "1",
+    size: "1000",
+  }).toString();
 
     const endpointCandidates = [
       `/api/integrated-filing-results?${query}`,

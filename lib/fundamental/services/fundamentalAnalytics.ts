@@ -283,12 +283,19 @@ function derivedToRecord(
       official: false,
       derived: true,
 
-      consolidated:
-        annual.contributingQuarters.every(
-          (quarter) =>
-            quarter.consolidated === true
-        )
-          ? true
+            consolidated:
+        annual.contributingQuarters.length === 4
+          ? annual.contributingQuarters.every(
+              (quarter) =>
+                quarter.consolidated === true
+            )
+            ? true
+            : annual.contributingQuarters.every(
+                (quarter) =>
+                  quarter.consolidated === false
+              )
+              ? false
+              : null
           : null,
 
       audited:
@@ -746,6 +753,53 @@ export async function getFundamentalAnalytics(
       series.quarterly,
       series.annual
     );
+
+      console.log(
+    `${symbol} ANNUAL DERIVATION CHECK:\n${JSON.stringify(
+      {
+        fy2024Quarters: series.quarterly
+          .filter((quarter) =>
+            [
+              "2023-06-30",
+              "2023-09-30",
+              "2023-12-31",
+              "2024-03-31",
+            ].includes(quarter.periodEnded)
+          )
+          .map((quarter) => ({
+            periodEnded: quarter.periodEnded,
+            startDate:
+              quarter.financialPeriod.startDate,
+            endDate:
+              quarter.financialPeriod.endDate,
+            durationDays: quarter.durationDays,
+            consolidated: quarter.consolidated,
+            currency:
+              quarter.financialPeriod.currency,
+            unit: quarter.financialPeriod.unit,
+            revenue:
+              quarter.financialPeriod.revenue,
+            pbt:
+              quarter.financialPeriod.profitBeforeTax,
+            pat:
+              quarter.financialPeriod.netProfit,
+          })),
+
+        derivedAnnualDates:
+          derived.annual.map(
+            (annual) => annual.periodEnded
+          ),
+
+        incompleteFiscalYears:
+          derived.incompleteFiscalYears,
+
+        derivationWarnings:
+          derived.warnings,
+      },
+      null,
+      2
+    )}`
+  );
 
   const combinedRecords =
   combineAnnualRecords(

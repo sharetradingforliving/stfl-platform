@@ -22,8 +22,9 @@ async function downloadInstrumentMaster(): Promise<
 > {
   const response = await fetch(
     "https://assets.upstox.com/market-quote/instruments/exchange/complete.json.gz",
-    {
+        {
       cache: "no-store",
+      signal: AbortSignal.timeout(15000),
     }
   );
 

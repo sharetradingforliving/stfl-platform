@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  getNseIntegratedFinancialFilings,
-} from "@/lib/fundamental/providers/nseIntegratedFinancialResults";
+import { getNseIntegratedFinancialFilings } from "@/lib/fundamental/providers/nseIntegratedFinancialResults";
 
 type RouteContext = {
   params: Promise<{
@@ -10,16 +8,11 @@ type RouteContext = {
   }>;
 };
 
-export async function GET(
-  _request: Request,
-  { params }: RouteContext
-) {
+export async function GET(_request: Request, { params }: RouteContext) {
   try {
     const { symbol } = await params;
 
-    const stockSymbol = symbol
-      .trim()
-      .toUpperCase();
+    const stockSymbol = symbol.trim().toUpperCase();
 
     if (!stockSymbol) {
       return NextResponse.json(
@@ -29,33 +22,33 @@ export async function GET(
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
-    const result =
-      await getNseIntegratedFinancialFilings(
-        stockSymbol
-      );
+    const result = await getNseIntegratedFinancialFilings(stockSymbol);
+
+    return NextResponse.json(result, {
+      status: result.status === "unavailable" ? 404 : 200,
+
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    });
   } catch (error) {
-    console.error(
-      "NSE integrated financial filings route error:",
-      error
-    );
+    console.error("NSE integrated financial filings route error:", error);
 
     return NextResponse.json(
       {
         status: "error",
-        error:
-          "Unable to retrieve NSE integrated financial filings.",
-        details:
-          error instanceof Error
-            ? error.message
-            : "Unknown error",
+
+        error: "Unable to retrieve NSE integrated financial filings.",
+
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

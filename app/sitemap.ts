@@ -1,11 +1,39 @@
 import type { MetadataRoute } from "next";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://sharetradingforliving.com";
 
   const lastModified = new Date("2026-10-26");
 
-  return [
+      const cataloguePath = path.join(
+    process.cwd(),
+    "data",
+    "seo",
+    "company-sitemap.json"
+  );
+
+  const catalogue = JSON.parse(
+    await readFile(cataloguePath, "utf8")
+  ) as {
+    companies: {
+      symbol: string;
+      isin: string;
+    }[];
+  };
+
+  const companyPages: MetadataRoute.Sitemap =
+    catalogue.companies.map(({ symbol }) => ({
+      url:
+        `${baseUrl}/company/` +
+        encodeURIComponent(symbol),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    }));
+
+   return [
+        ...companyPages,
     {
       url: baseUrl,
       lastModified,
