@@ -1,5 +1,12 @@
 {
-  "generatedAt": "2026-11-12T13:04:56.444Z",
+  "generatedAt": "2026-11-13T04:44:39.694Z",
+  "nifty500Audit": {
+    "source": "https://nsearchives.nseindia.com/content/indices/ind_nifty500list.csv",
+    "checkedAt": "2026-11-13T04:44:39.694Z",
+    "checked": 500,
+    "passed": 420,
+    "reviewRequired": 80
+  },
   "companies": [
     {
       "symbol": "20MICRONS",
@@ -334,6 +341,42 @@
       "isin": "INE121R01077"
     },
     {
+      "symbol": "AMBER",
+      "isin": "INE371P01015"
+    },
+    {
+      "symbol": "AMBUJACEM",
+      "isin": "INE079A01024"
+    },
+    {
+      "symbol": "ANANDRATHI",
+      "isin": "INE463V01026"
+    },
+    {
+      "symbol": "ANANTRAJ",
+      "isin": "INE242C01024"
+    },
+    {
+      "symbol": "ANGELONE",
+      "isin": "INE732I01021"
+    },
+    {
+      "symbol": "ANTHEM",
+      "isin": "INE0CZ201020"
+    },
+    {
+      "symbol": "ANURAS",
+      "isin": "INE930P01018"
+    },
+    {
+      "symbol": "APARINDS",
+      "isin": "INE372A01015"
+    },
+    {
+      "symbol": "APLAPOLLO",
+      "isin": "INE702C01027"
+    },
+    {
       "symbol": "APOLLO",
       "isin": "INE713T01028"
     },
@@ -346,8 +389,64 @@
       "isin": "INE126J01016"
     },
     {
+      "symbol": "APOLLOTYRE",
+      "isin": "INE438A01022"
+    },
+    {
+      "symbol": "APTUS",
+      "isin": "INE852O01025"
+    },
+    {
+      "symbol": "ARE&M",
+      "isin": "INE885A01032"
+    },
+    {
+      "symbol": "ASAHIINDIA",
+      "isin": "INE439A01020"
+    },
+    {
+      "symbol": "ASHOKLEY",
+      "isin": "INE208A01029"
+    },
+    {
+      "symbol": "ASIANPAINT",
+      "isin": "INE021A01026"
+    },
+    {
+      "symbol": "ASTERDM",
+      "isin": "INE914M01019"
+    },
+    {
+      "symbol": "ASTRAL",
+      "isin": "INE006I01046"
+    },
+    {
+      "symbol": "ATGL",
+      "isin": "INE399L01023"
+    },
+    {
+      "symbol": "ATUL",
+      "isin": "INE100A01010"
+    },
+    {
+      "symbol": "AUROPHARMA",
+      "isin": "INE406A01037"
+    },
+    {
+      "symbol": "AVANTIFEED",
+      "isin": "INE871C01038"
+    },
+    {
+      "symbol": "AWL",
+      "isin": "INE699H01024"
+    },
+    {
       "symbol": "AXISBANK",
       "isin": "INE238A01034"
+    },
+    {
+      "symbol": "AZAD",
+      "isin": "INE02IJ01035"
     },
     {
       "symbol": "BAJAJ-AUTO",
@@ -362,8 +461,24 @@
       "isin": "INE193E01025"
     },
     {
+      "symbol": "BAJAJFINSV",
+      "isin": "INE918I01026"
+    },
+    {
+      "symbol": "BAJAJHLDNG",
+      "isin": "INE118A01012"
+    },
+    {
       "symbol": "BAJFINANCE",
       "isin": "INE296A01032"
+    },
+    {
+      "symbol": "BALKRISIND",
+      "isin": "INE787D01026"
+    },
+    {
+      "symbol": "BALRAMCHIN",
+      "isin": "INE119A01028"
     },
     {
       "symbol": "BANCOINDIA",
@@ -374,12 +489,84 @@
       "isin": "INE028A01039"
     },
     {
+      "symbol": "BANKINDIA",
+      "isin": "INE084A01016"
+    },
+    {
       "symbol": "BATAINDIA",
       "isin": "INE176A01028"
     },
     {
+      "symbol": "BBOX",
+      "isin": "INE676A01027"
+    },
+    {
+      "symbol": "BEL",
+      "isin": "INE263A01024"
+    },
+    {
+      "symbol": "BELRISE",
+      "isin": "INE894V01022"
+    },
+    {
+      "symbol": "BEML",
+      "isin": "INE258A01024"
+    },
+    {
+      "symbol": "BERGEPAINT",
+      "isin": "INE463A01038"
+    },
+    {
+      "symbol": "BHARATFORG",
+      "isin": "INE465A01025"
+    },
+    {
+      "symbol": "BHARTIARTL",
+      "isin": "INE397D01024"
+    },
+    {
+      "symbol": "BHEL",
+      "isin": "INE257A01026"
+    },
+    {
+      "symbol": "BIOCON",
+      "isin": "INE376G01013"
+    },
+    {
+      "symbol": "BLS",
+      "isin": "INE153T01027"
+    },
+    {
+      "symbol": "BLUESTARCO",
+      "isin": "INE472A01039"
+    },
+    {
+      "symbol": "BOSCHLTD",
+      "isin": "INE323A01026"
+    },
+    {
+      "symbol": "BPCL",
+      "isin": "INE029A01011"
+    },
+    {
+      "symbol": "BRIGADE",
+      "isin": "INE791I01019"
+    },
+    {
+      "symbol": "BRITANNIA",
+      "isin": "INE216A01030"
+    },
+    {
       "symbol": "BSE",
       "isin": "INE118H01025"
+    },
+    {
+      "symbol": "BSOFT",
+      "isin": "INE836A01035"
+    },
+    {
+      "symbol": "CAMS",
+      "isin": "INE596I01020"
     },
     {
       "symbol": "CANBK",
@@ -390,24 +577,324 @@
       "isin": "INE475E01026"
     },
     {
+      "symbol": "CARBORUNIV",
+      "isin": "INE120A01034"
+    },
+    {
+      "symbol": "CARTRADE",
+      "isin": "INE290S01011"
+    },
+    {
+      "symbol": "CCL",
+      "isin": "INE421D01022"
+    },
+    {
+      "symbol": "CDSL",
+      "isin": "INE736A01011"
+    },
+    {
+      "symbol": "CEATLTD",
+      "isin": "INE482A01020"
+    },
+    {
+      "symbol": "CEMPRO",
+      "isin": "INE686A01026"
+    },
+    {
+      "symbol": "CENTRALBK",
+      "isin": "INE483A01010"
+    },
+    {
+      "symbol": "CESC",
+      "isin": "INE486A01021"
+    },
+    {
+      "symbol": "CGCL",
+      "isin": "INE180C01042"
+    },
+    {
+      "symbol": "CGPOWER",
+      "isin": "INE067A01029"
+    },
+    {
+      "symbol": "CHAMBLFERT",
+      "isin": "INE085A01013"
+    },
+    {
+      "symbol": "CHENNPETRO",
+      "isin": "INE178A01016"
+    },
+    {
+      "symbol": "CHOICEIN",
+      "isin": "INE102B01014"
+    },
+    {
+      "symbol": "CHOLAFIN",
+      "isin": "INE121A01024"
+    },
+    {
+      "symbol": "CHOLAHLDNG",
+      "isin": "INE149A01033"
+    },
+    {
+      "symbol": "CIEINDIA",
+      "isin": "INE536H01010"
+    },
+    {
+      "symbol": "CIPLA",
+      "isin": "INE059A01026"
+    },
+    {
+      "symbol": "CLEAN",
+      "isin": "INE227W01023"
+    },
+    {
+      "symbol": "COALINDIA",
+      "isin": "INE522F01014"
+    },
+    {
+      "symbol": "COCHINSHIP",
+      "isin": "INE704P01025"
+    },
+    {
+      "symbol": "COFORGE",
+      "isin": "INE591G01025"
+    },
+    {
+      "symbol": "COHANCE",
+      "isin": "INE03QK01018"
+    },
+    {
+      "symbol": "CONCOR",
+      "isin": "INE111A01025"
+    },
+    {
       "symbol": "CONCORDBIO",
       "isin": "INE338H01029"
+    },
+    {
+      "symbol": "COROMANDEL",
+      "isin": "INE169A01031"
+    },
+    {
+      "symbol": "CPPLUS",
+      "isin": "INE819V01029"
+    },
+    {
+      "symbol": "CRAFTSMAN",
+      "isin": "INE00LO01017"
+    },
+    {
+      "symbol": "CREDITACC",
+      "isin": "INE741K01010"
+    },
+    {
+      "symbol": "CRISIL",
+      "isin": "INE007A01025"
+    },
+    {
+      "symbol": "CROMPTON",
+      "isin": "INE299U01018"
+    },
+    {
+      "symbol": "CUMMINSIND",
+      "isin": "INE298A01020"
+    },
+    {
+      "symbol": "CUPID",
+      "isin": "INE509F01029"
+    },
+    {
+      "symbol": "CYIENT",
+      "isin": "INE136B01020"
+    },
+    {
+      "symbol": "DABUR",
+      "isin": "INE016A01026"
+    },
+    {
+      "symbol": "DALBHARAT",
+      "isin": "INE00R701025"
+    },
+    {
+      "symbol": "DEEPAKFERT",
+      "isin": "INE501A01019"
+    },
+    {
+      "symbol": "DEEPAKNTR",
+      "isin": "INE288B01029"
+    },
+    {
+      "symbol": "DELHIVERY",
+      "isin": "INE148O01028"
+    },
+    {
+      "symbol": "DEVYANI",
+      "isin": "INE872J01023"
+    },
+    {
+      "symbol": "DIVISLAB",
+      "isin": "INE361B01024"
+    },
+    {
+      "symbol": "DIXON",
+      "isin": "INE935N01020"
     },
     {
       "symbol": "DLF",
       "isin": "INE271C01023"
     },
     {
+      "symbol": "DMART",
+      "isin": "INE192R01011"
+    },
+    {
+      "symbol": "DOMS",
+      "isin": "INE321T01012"
+    },
+    {
+      "symbol": "DRREDDY",
+      "isin": "INE089A01031"
+    },
+    {
+      "symbol": "ECLERX",
+      "isin": "INE738I01010"
+    },
+    {
+      "symbol": "EICHERMOT",
+      "isin": "INE066A01021"
+    },
+    {
+      "symbol": "EIDPARRY",
+      "isin": "INE126A01031"
+    },
+    {
+      "symbol": "EIHOTEL",
+      "isin": "INE230A01023"
+    },
+    {
+      "symbol": "ELECON",
+      "isin": "INE205B01031"
+    },
+    {
+      "symbol": "ELGIEQUIP",
+      "isin": "INE285A01027"
+    },
+    {
+      "symbol": "EMAMILTD",
+      "isin": "INE548C01032"
+    },
+    {
+      "symbol": "EMCURE",
+      "isin": "INE168P01015"
+    },
+    {
+      "symbol": "EMMVEE",
+      "isin": "INE1C6T01020"
+    },
+    {
+      "symbol": "ENDURANCE",
+      "isin": "INE913H01037"
+    },
+    {
+      "symbol": "ENGINERSIN",
+      "isin": "INE510A01028"
+    },
+    {
       "symbol": "EPL",
       "isin": "INE255A01020"
+    },
+    {
+      "symbol": "ESCORTS",
+      "isin": "INE042A01014"
+    },
+    {
+      "symbol": "ETERNAL",
+      "isin": "INE758T01015"
+    },
+    {
+      "symbol": "EXIDEIND",
+      "isin": "INE302A01020"
+    },
+    {
+      "symbol": "FACT",
+      "isin": "INE188A01015"
     },
     {
       "symbol": "FDC",
       "isin": "INE258B01022"
     },
     {
+      "symbol": "FEDERALBNK",
+      "isin": "INE171A01029"
+    },
+    {
+      "symbol": "FINCABLES",
+      "isin": "INE235A01022"
+    },
+    {
+      "symbol": "FIRSTCRY",
+      "isin": "INE02RE01045"
+    },
+    {
+      "symbol": "FLUOROCHEM",
+      "isin": "INE09N301011"
+    },
+    {
+      "symbol": "FORCEMOT",
+      "isin": "INE451A01017"
+    },
+    {
+      "symbol": "FORTIS",
+      "isin": "INE061F01013"
+    },
+    {
+      "symbol": "FRACTAL",
+      "isin": "INE212S01015"
+    },
+    {
+      "symbol": "FSL",
+      "isin": "INE684F01012"
+    },
+    {
+      "symbol": "GABRIEL",
+      "isin": "INE524A01029"
+    },
+    {
+      "symbol": "GAIL",
+      "isin": "INE129A01019"
+    },
+    {
       "symbol": "GALLANTT",
       "isin": "INE297H01019"
+    },
+    {
+      "symbol": "GESHIP",
+      "isin": "INE017A01032"
+    },
+    {
+      "symbol": "GLAND",
+      "isin": "INE068V01023"
+    },
+    {
+      "symbol": "GLAXO",
+      "isin": "INE159A01016"
+    },
+    {
+      "symbol": "GLENMARK",
+      "isin": "INE935A01035"
+    },
+    {
+      "symbol": "GMDCLTD",
+      "isin": "INE131A01031"
+    },
+    {
+      "symbol": "GMRAIRPORT",
+      "isin": "INE776C01039"
+    },
+    {
+      "symbol": "GODFRYPHLP",
+      "isin": "INE260B01028"
     },
     {
       "symbol": "GODREJAGRO",
@@ -426,6 +913,30 @@
       "isin": "INE484J01027"
     },
     {
+      "symbol": "GPIL",
+      "isin": "INE177H01039"
+    },
+    {
+      "symbol": "GRANULES",
+      "isin": "INE101D01020"
+    },
+    {
+      "symbol": "GRAPHITE",
+      "isin": "INE371A01025"
+    },
+    {
+      "symbol": "GRASIM",
+      "isin": "INE047A01021"
+    },
+    {
+      "symbol": "GRAVITA",
+      "isin": "INE024L01027"
+    },
+    {
+      "symbol": "GROWW",
+      "isin": "INE0HOQ01053"
+    },
+    {
       "symbol": "HAL",
       "isin": "INE066F01020"
     },
@@ -434,20 +945,144 @@
       "isin": "INE176B01034"
     },
     {
+      "symbol": "HBLENGINE",
+      "isin": "INE292B01021"
+    },
+    {
       "symbol": "HCC",
       "isin": "INE549A01026"
+    },
+    {
+      "symbol": "HCLTECH",
+      "isin": "INE860A01027"
+    },
+    {
+      "symbol": "HDFCAMC",
+      "isin": "INE127D01025"
     },
     {
       "symbol": "HDFCBANK",
       "isin": "INE040A01034"
     },
     {
+      "symbol": "HEGAM",
+      "isin": "INE545A01024"
+    },
+    {
+      "symbol": "HEROMOTOCO",
+      "isin": "INE158A01026"
+    },
+    {
+      "symbol": "HEXT",
+      "isin": "INE093A01041"
+    },
+    {
+      "symbol": "HFCL",
+      "isin": "INE548A01028"
+    },
+    {
+      "symbol": "HINDALCO",
+      "isin": "INE038A01020"
+    },
+    {
+      "symbol": "HINDCOPPER",
+      "isin": "INE531E01026"
+    },
+    {
+      "symbol": "HINDPETRO",
+      "isin": "INE094A01015"
+    },
+    {
+      "symbol": "HINDUNILVR",
+      "isin": "INE030A01027"
+    },
+    {
+      "symbol": "HINDZINC",
+      "isin": "INE267A01025"
+    },
+    {
+      "symbol": "HONASA",
+      "isin": "INE0J5401028"
+    },
+    {
+      "symbol": "HSCL",
+      "isin": "INE019C01026"
+    },
+    {
+      "symbol": "HUDCO",
+      "isin": "INE031A01017"
+    },
+    {
+      "symbol": "HYUNDAI",
+      "isin": "INE0V6F01027"
+    },
+    {
       "symbol": "ICICIBANK",
       "isin": "INE090A01021"
     },
     {
+      "symbol": "IDBI",
+      "isin": "INE008A01015"
+    },
+    {
+      "symbol": "IDEA",
+      "isin": "INE669E01016"
+    },
+    {
+      "symbol": "IDFCFIRSTB",
+      "isin": "INE092T01019"
+    },
+    {
+      "symbol": "IEX",
+      "isin": "INE022Q01020"
+    },
+    {
+      "symbol": "IFCI",
+      "isin": "INE039A01010"
+    },
+    {
+      "symbol": "IGIL",
+      "isin": "INE0Q9301021"
+    },
+    {
+      "symbol": "IGL",
+      "isin": "INE203G01027"
+    },
+    {
+      "symbol": "IIFL",
+      "isin": "INE530B01024"
+    },
+    {
+      "symbol": "IKS",
+      "isin": "INE115Q01022"
+    },
+    {
+      "symbol": "INDHOTEL",
+      "isin": "INE053A01029"
+    },
+    {
+      "symbol": "INDIACEM",
+      "isin": "INE383A01012"
+    },
+    {
+      "symbol": "INDIAMART",
+      "isin": "INE933S01016"
+    },
+    {
+      "symbol": "INDIANB",
+      "isin": "INE562A01011"
+    },
+    {
+      "symbol": "INDIGO",
+      "isin": "INE646L01027"
+    },
+    {
       "symbol": "INDUSINDBK",
       "isin": "INE095A01012"
+    },
+    {
+      "symbol": "INDUSTOWER",
+      "isin": "INE121J01017"
     },
     {
       "symbol": "INFY",
@@ -466,12 +1101,32 @@
       "isin": "INE066P01011"
     },
     {
+      "symbol": "INTELLECT",
+      "isin": "INE306R01017"
+    },
+    {
       "symbol": "IOB",
       "isin": "INE565A01014"
     },
     {
       "symbol": "IOC",
       "isin": "INE242A01010"
+    },
+    {
+      "symbol": "IPCALAB",
+      "isin": "INE571A01038"
+    },
+    {
+      "symbol": "IRB",
+      "isin": "INE821I01022"
+    },
+    {
+      "symbol": "IRCON",
+      "isin": "INE962Y01021"
+    },
+    {
+      "symbol": "IRCTC",
+      "isin": "INE335Y01020"
     },
     {
       "symbol": "IREDA",
@@ -482,16 +1137,216 @@
       "isin": "INE154A01025"
     },
     {
+      "symbol": "ITCHOTELS",
+      "isin": "INE379A01028"
+    },
+    {
+      "symbol": "ITI",
+      "isin": "INE248A01017"
+    },
+    {
+      "symbol": "J&KBANK",
+      "isin": "INE168A01041"
+    },
+    {
+      "symbol": "JAINREC",
+      "isin": "INE0YD401026"
+    },
+    {
+      "symbol": "JBMA",
+      "isin": "INE927D01051"
+    },
+    {
+      "symbol": "JINDALSAW",
+      "isin": "INE324A01032"
+    },
+    {
+      "symbol": "JINDALSTEL",
+      "isin": "INE749A01030"
+    },
+    {
+      "symbol": "JIOFIN",
+      "isin": "INE758E01017"
+    },
+    {
+      "symbol": "JKCEMENT",
+      "isin": "INE823G01014"
+    },
+    {
+      "symbol": "JKTYRE",
+      "isin": "INE573A01042"
+    },
+    {
+      "symbol": "JMFINANCIL",
+      "isin": "INE780C01023"
+    },
+    {
+      "symbol": "JPPOWER",
+      "isin": "INE351F01018"
+    },
+    {
+      "symbol": "JSL",
+      "isin": "INE220G01021"
+    },
+    {
+      "symbol": "JSWCEMENT",
+      "isin": "INE718I01012"
+    },
+    {
+      "symbol": "JSWENERGY",
+      "isin": "INE121E01018"
+    },
+    {
+      "symbol": "JSWINFRA",
+      "isin": "INE880J01026"
+    },
+    {
+      "symbol": "JSWSTEEL",
+      "isin": "INE019A01038"
+    },
+    {
+      "symbol": "JUBLFOOD",
+      "isin": "INE797F01020"
+    },
+    {
+      "symbol": "JUBLINGREA",
+      "isin": "INE0BY001018"
+    },
+    {
+      "symbol": "JWL",
+      "isin": "INE209L01016"
+    },
+    {
+      "symbol": "JYOTICNC",
+      "isin": "INE980O01024"
+    },
+    {
+      "symbol": "KAJARIACER",
+      "isin": "INE217B01036"
+    },
+    {
+      "symbol": "KALYANKJIL",
+      "isin": "INE303R01014"
+    },
+    {
+      "symbol": "KAYNES",
+      "isin": "INE918Z01012"
+    },
+    {
+      "symbol": "KEC",
+      "isin": "INE389H01022"
+    },
+    {
+      "symbol": "KEI",
+      "isin": "INE878B01027"
+    },
+    {
+      "symbol": "KFINTECH",
+      "isin": "INE138Y01010"
+    },
+    {
+      "symbol": "KIMS",
+      "isin": "INE967H01025"
+    },
+    {
+      "symbol": "KIRLOSBROS",
+      "isin": "INE732A01036"
+    },
+    {
+      "symbol": "KIRLOSENG",
+      "isin": "INE146L01010"
+    },
+    {
+      "symbol": "KOTAKBANK",
+      "isin": "INE237A01036"
+    },
+    {
+      "symbol": "KPIL",
+      "isin": "INE220B01022"
+    },
+    {
+      "symbol": "KPITTECH",
+      "isin": "INE04I401011"
+    },
+    {
+      "symbol": "KPRMILL",
+      "isin": "INE930H01031"
+    },
+    {
+      "symbol": "KSB",
+      "isin": "INE999A01023"
+    },
+    {
+      "symbol": "LALPATHLAB",
+      "isin": "INE600L01024"
+    },
+    {
       "symbol": "LAURUSLABS",
       "isin": "INE947Q01028"
+    },
+    {
+      "symbol": "LEMONTREE",
+      "isin": "INE970X01018"
+    },
+    {
+      "symbol": "LENSKART",
+      "isin": "INE956O01016"
+    },
+    {
+      "symbol": "LICHSGFIN",
+      "isin": "INE115A01026"
+    },
+    {
+      "symbol": "LINDEINDIA",
+      "isin": "INE473A01011"
+    },
+    {
+      "symbol": "LLOYDSME",
+      "isin": "INE281B01032"
+    },
+    {
+      "symbol": "LODHA",
+      "isin": "INE670K01029"
     },
     {
       "symbol": "LT",
       "isin": "INE018A01030"
     },
     {
+      "symbol": "LTF",
+      "isin": "INE498L01015"
+    },
+    {
+      "symbol": "LTFOODS",
+      "isin": "INE818H01020"
+    },
+    {
+      "symbol": "LTM",
+      "isin": "INE214T01019"
+    },
+    {
+      "symbol": "LTTS",
+      "isin": "INE010V01017"
+    },
+    {
       "symbol": "LUPIN",
       "isin": "INE326A01037"
+    },
+    {
+      "symbol": "M&M",
+      "isin": "INE101A01026"
+    },
+    {
+      "symbol": "M&MFIN",
+      "isin": "INE774D01024"
+    },
+    {
+      "symbol": "MAHABANK",
+      "isin": "INE457A01014"
+    },
+    {
+      "symbol": "MANAPPURAM",
+      "isin": "INE522D01027"
     },
     {
       "symbol": "MANKIND",
@@ -506,68 +1361,432 @@
       "isin": "INE585B01010"
     },
     {
+      "symbol": "MAXHEALTH",
+      "isin": "INE027H01010"
+    },
+    {
+      "symbol": "MAZDOCK",
+      "isin": "INE249Z01020"
+    },
+    {
+      "symbol": "MEDANTA",
+      "isin": "INE474Q01031"
+    },
+    {
+      "symbol": "MEESHO",
+      "isin": "INE0VDM01015"
+    },
+    {
+      "symbol": "MFSL",
+      "isin": "INE180A01020"
+    },
+    {
+      "symbol": "MGL",
+      "isin": "INE002S01010"
+    },
+    {
+      "symbol": "MINDACORP",
+      "isin": "INE842C01021"
+    },
+    {
+      "symbol": "MMTC",
+      "isin": "INE123F01029"
+    },
+    {
+      "symbol": "MOTHERSON",
+      "isin": "INE775A01035"
+    },
+    {
+      "symbol": "MOTILALOFS",
+      "isin": "INE338I01027"
+    },
+    {
+      "symbol": "MPHASIS",
+      "isin": "INE356A01018"
+    },
+    {
+      "symbol": "MRF",
+      "isin": "INE883A01011"
+    },
+    {
+      "symbol": "MRPL",
+      "isin": "INE103A01014"
+    },
+    {
+      "symbol": "MTARTECH",
+      "isin": "INE864I01014"
+    },
+    {
+      "symbol": "MUTHOOTFIN",
+      "isin": "INE414G01012"
+    },
+    {
+      "symbol": "NAM-INDIA",
+      "isin": "INE298J01013"
+    },
+    {
+      "symbol": "NATCOPHARM",
+      "isin": "INE987B01026"
+    },
+    {
+      "symbol": "NATIONALUM",
+      "isin": "INE139A01034"
+    },
+    {
+      "symbol": "NAUKRI",
+      "isin": "INE663F01032"
+    },
+    {
+      "symbol": "NAVA",
+      "isin": "INE725A01030"
+    },
+    {
+      "symbol": "NAVINFLUOR",
+      "isin": "INE048G01026"
+    },
+    {
+      "symbol": "NBCC",
+      "isin": "INE095N01031"
+    },
+    {
+      "symbol": "NCC",
+      "isin": "INE868B01028"
+    },
+    {
       "symbol": "NESTLEIND",
       "isin": "INE239A01024"
+    },
+    {
+      "symbol": "NEULANDLAB",
+      "isin": "INE794A01010"
     },
     {
       "symbol": "NEWGEN",
       "isin": "INE619B01017"
     },
     {
+      "symbol": "NH",
+      "isin": "INE410P01011"
+    },
+    {
+      "symbol": "NHPC",
+      "isin": "INE848E01016"
+    },
+    {
+      "symbol": "NLCINDIA",
+      "isin": "INE589A01014"
+    },
+    {
+      "symbol": "NMDC",
+      "isin": "INE584A01023"
+    },
+    {
+      "symbol": "NTPC",
+      "isin": "INE733E01010"
+    },
+    {
+      "symbol": "NTPCGREEN",
+      "isin": "INE0ONG01011"
+    },
+    {
+      "symbol": "NUVAMA",
+      "isin": "INE531F01023"
+    },
+    {
+      "symbol": "NUVOCO",
+      "isin": "INE118D01016"
+    },
+    {
       "symbol": "NYKAA",
       "isin": "INE388Y01029"
+    },
+    {
+      "symbol": "OBEROIRLTY",
+      "isin": "INE093I01010"
+    },
+    {
+      "symbol": "OFSS",
+      "isin": "INE881D01027"
+    },
+    {
+      "symbol": "OIL",
+      "isin": "INE274J01014"
+    },
+    {
+      "symbol": "OLAELEC",
+      "isin": "INE0LXG01040"
+    },
+    {
+      "symbol": "OLECTRA",
+      "isin": "INE260D01016"
+    },
+    {
+      "symbol": "ONESOURCE",
+      "isin": "INE013P01021"
+    },
+    {
+      "symbol": "ONGC",
+      "isin": "INE213A01029"
+    },
+    {
+      "symbol": "PARADEEP",
+      "isin": "INE088F01024"
+    },
+    {
+      "symbol": "PATANJALI",
+      "isin": "INE619A01035"
     },
     {
       "symbol": "PAYTM",
       "isin": "INE982J01020"
     },
     {
+      "symbol": "PCBL",
+      "isin": "INE602A01031"
+    },
+    {
       "symbol": "PENIND",
       "isin": "INE932A01024"
+    },
+    {
+      "symbol": "PERSISTENT",
+      "isin": "INE262H01021"
+    },
+    {
+      "symbol": "PETRONET",
+      "isin": "INE347G01014"
+    },
+    {
+      "symbol": "PFC",
+      "isin": "INE134E01011"
+    },
+    {
+      "symbol": "PFOCUS",
+      "isin": "INE367G01038"
     },
     {
       "symbol": "PGEL",
       "isin": "INE457L01029"
     },
     {
+      "symbol": "PHOENIXLTD",
+      "isin": "INE211B01039"
+    },
+    {
+      "symbol": "PIDILITIND",
+      "isin": "INE318A01026"
+    },
+    {
+      "symbol": "PIIND",
+      "isin": "INE603J01030"
+    },
+    {
+      "symbol": "PINELABS",
+      "isin": "INE15B701018"
+    },
+    {
+      "symbol": "PNB",
+      "isin": "INE160A01022"
+    },
+    {
+      "symbol": "PNBHOUSING",
+      "isin": "INE572E01012"
+    },
+    {
+      "symbol": "POLICYBZR",
+      "isin": "INE417T01026"
+    },
+    {
+      "symbol": "POLYCAB",
+      "isin": "INE455K01017"
+    },
+    {
+      "symbol": "POLYMED",
+      "isin": "INE205C01021"
+    },
+    {
+      "symbol": "POONAWALLA",
+      "isin": "INE511C01022"
+    },
+    {
       "symbol": "POWERGRID",
       "isin": "INE752E01010"
+    },
+    {
+      "symbol": "PPLPHARMA",
+      "isin": "INE0DK501011"
+    },
+    {
+      "symbol": "PREMIERENE",
+      "isin": "INE0BS701011"
+    },
+    {
+      "symbol": "PRESTIGE",
+      "isin": "INE811K01011"
+    },
+    {
+      "symbol": "PRIVISCL",
+      "isin": "INE959A01019"
     },
     {
       "symbol": "PTC",
       "isin": "INE877F01012"
     },
     {
+      "symbol": "PTCIL",
+      "isin": "INE596F01018"
+    },
+    {
       "symbol": "PVRINOX",
       "isin": "INE191H01014"
+    },
+    {
+      "symbol": "PWL",
+      "isin": "INE0LP301011"
+    },
+    {
+      "symbol": "RADICO",
+      "isin": "INE944F01028"
     },
     {
       "symbol": "RAILTEL",
       "isin": "INE0DD101019"
     },
     {
+      "symbol": "RAINBOW",
+      "isin": "INE961O01016"
+    },
+    {
+      "symbol": "RAMCOCEM",
+      "isin": "INE331A01037"
+    },
+    {
+      "symbol": "RBLBANK",
+      "isin": "INE976G01028"
+    },
+    {
+      "symbol": "RECLTD",
+      "isin": "INE020B01018"
+    },
+    {
+      "symbol": "REDINGTON",
+      "isin": "INE891D01026"
+    },
+    {
       "symbol": "RELIANCE",
       "isin": "INE002A01018"
+    },
+    {
+      "symbol": "RHIM",
+      "isin": "INE743M01012"
+    },
+    {
+      "symbol": "RITES",
+      "isin": "INE320J01015"
+    },
+    {
+      "symbol": "RKFORGE",
+      "isin": "INE399G01023"
+    },
+    {
+      "symbol": "RPOWER",
+      "isin": "INE614G01033"
+    },
+    {
+      "symbol": "RRKABEL",
+      "isin": "INE777K01022"
+    },
+    {
+      "symbol": "RUBICON",
+      "isin": "INE506V01022"
     },
     {
       "symbol": "RVNL",
       "isin": "INE415G01027"
     },
     {
+      "symbol": "SAGILITY",
+      "isin": "INE0W2G01015"
+    },
+    {
+      "symbol": "SAIL",
+      "isin": "INE114A01011"
+    },
+    {
+      "symbol": "SAILIFE",
+      "isin": "INE570L01029"
+    },
+    {
+      "symbol": "SAMMAANCAP",
+      "isin": "INE148I01020"
+    },
+    {
+      "symbol": "SANSERA",
+      "isin": "INE953O01021"
+    },
+    {
       "symbol": "SAPPHIRE",
       "isin": "INE806T01020"
+    },
+    {
+      "symbol": "SARDAEN",
+      "isin": "INE385C01021"
     },
     {
       "symbol": "SBIN",
       "isin": "INE062A01020"
     },
     {
+      "symbol": "SCHAEFFLER",
+      "isin": "INE513A01022"
+    },
+    {
+      "symbol": "SCI",
+      "isin": "INE109A01011"
+    },
+    {
+      "symbol": "SHREECEM",
+      "isin": "INE070A01015"
+    },
+    {
+      "symbol": "SHRIPISTON",
+      "isin": "INE526E01018"
+    },
+    {
       "symbol": "SHRIRAMFIN",
       "isin": "INE721A01047"
     },
     {
+      "symbol": "SHYAMMETL",
+      "isin": "INE810G01011"
+    },
+    {
+      "symbol": "SIEMENS",
+      "isin": "INE003A01024"
+    },
+    {
+      "symbol": "SIGNATURE",
+      "isin": "INE903U01023"
+    },
+    {
+      "symbol": "SJVN",
+      "isin": "INE002L01015"
+    },
+    {
       "symbol": "SKIPPER",
       "isin": "INE439E01022"
+    },
+    {
+      "symbol": "SOBHA",
+      "isin": "INE671H01015"
+    },
+    {
+      "symbol": "SOLARINDS",
+      "isin": "INE343H01029"
+    },
+    {
+      "symbol": "SONACOMS",
+      "isin": "INE073K01018"
     },
     {
       "symbol": "SONATSOFTW",
@@ -578,12 +1797,48 @@
       "isin": "INE647A01010"
     },
     {
+      "symbol": "SUMICHEM",
+      "isin": "INE258G01013"
+    },
+    {
+      "symbol": "SUNDARMFIN",
+      "isin": "INE660A01013"
+    },
+    {
       "symbol": "SUNPHARMA",
       "isin": "INE044A01036"
     },
     {
+      "symbol": "SUNTV",
+      "isin": "INE424H01027"
+    },
+    {
+      "symbol": "SUPREMEIND",
+      "isin": "INE195A01028"
+    },
+    {
       "symbol": "SUZLON",
       "isin": "INE040H01021"
+    },
+    {
+      "symbol": "SWANCORP",
+      "isin": "INE665A01038"
+    },
+    {
+      "symbol": "SWIGGY",
+      "isin": "INE00H001014"
+    },
+    {
+      "symbol": "SYNGENE",
+      "isin": "INE398R01022"
+    },
+    {
+      "symbol": "SYRMA",
+      "isin": "INE0DYJ01015"
+    },
+    {
+      "symbol": "TARIL",
+      "isin": "INE763I01026"
     },
     {
       "symbol": "TATACAP",
@@ -602,12 +1857,104 @@
       "isin": "INE192A01025"
     },
     {
+      "symbol": "TATAINVEST",
+      "isin": "INE672A01026"
+    },
+    {
+      "symbol": "TATAPOWER",
+      "isin": "INE245A01021"
+    },
+    {
+      "symbol": "TATASTEEL",
+      "isin": "INE081A01020"
+    },
+    {
+      "symbol": "TATATECH",
+      "isin": "INE142M01025"
+    },
+    {
+      "symbol": "TBOTEK",
+      "isin": "INE673O01025"
+    },
+    {
       "symbol": "TCS",
       "isin": "INE467B01029"
     },
     {
+      "symbol": "TDPOWERSYS",
+      "isin": "INE419M01035"
+    },
+    {
+      "symbol": "TECHM",
+      "isin": "INE669C01036"
+    },
+    {
+      "symbol": "TECHNOE",
+      "isin": "INE285K01026"
+    },
+    {
+      "symbol": "TEGA",
+      "isin": "INE011K01018"
+    },
+    {
+      "symbol": "TEJASNET",
+      "isin": "INE010J01012"
+    },
+    {
+      "symbol": "THERMAX",
+      "isin": "INE152A01029"
+    },
+    {
+      "symbol": "TIINDIA",
+      "isin": "INE974X01010"
+    },
+    {
       "symbol": "TITAGARH",
       "isin": "INE615H01020"
+    },
+    {
+      "symbol": "TITAN",
+      "isin": "INE280A01028"
+    },
+    {
+      "symbol": "TMCV",
+      "isin": "INE1TAE01010"
+    },
+    {
+      "symbol": "TMPV",
+      "isin": "INE155A01022"
+    },
+    {
+      "symbol": "TORNTPHARM",
+      "isin": "INE685A01028"
+    },
+    {
+      "symbol": "TORNTPOWER",
+      "isin": "INE813H01021"
+    },
+    {
+      "symbol": "TRENT",
+      "isin": "INE849A01020"
+    },
+    {
+      "symbol": "TRIDENT",
+      "isin": "INE064C01022"
+    },
+    {
+      "symbol": "TRITURBINE",
+      "isin": "INE152M01016"
+    },
+    {
+      "symbol": "TVSMOTOR",
+      "isin": "INE494B01023"
+    },
+    {
+      "symbol": "UBL",
+      "isin": "INE686F01025"
+    },
+    {
+      "symbol": "UCOBANK",
+      "isin": "INE691A01018"
     },
     {
       "symbol": "URBANCO",
@@ -661,14 +2008,6 @@
     },
     {
       "symbol": "AASTHA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ABB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ABBOTINDIA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -776,19 +2115,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "AMBER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "AMBICAAGAR",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "AMBIKCO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "AMBUJACEM",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -804,14 +2135,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ANANDRATHI",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ANANTRAJ",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ANDHRAPAP",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -821,10 +2144,6 @@
     },
     {
       "symbol": "ANDREWYU",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ANGELONE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -852,10 +2171,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ANTHEM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ANUHPHR",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -864,15 +2179,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ANURAS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "AONESTEELS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "APARINDS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -888,15 +2195,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "APLAPOLLO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "APLLTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "APOLLOTYRE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -909,10 +2208,6 @@
     },
     {
       "symbol": "APTECHT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "APTUS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -933,10 +2228,6 @@
     },
     {
       "symbol": "ARCL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ARE&M",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1016,10 +2307,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ASAHIINDIA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ASAHISONG",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1056,19 +2343,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ASHOKLEY",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ASIANENE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "ASIANHOTNR",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ASIANPAINT",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1104,14 +2383,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ASTERDM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ASTRAL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ASTRAMICRO",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1128,14 +2399,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ATGL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ATHERENERG",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ATL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1148,15 +2411,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ATUL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ATULAUTO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "AUBANK",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1165,10 +2420,6 @@
     },
     {
       "symbol": "AURIONPRO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "AUROPHARMA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1212,10 +2463,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "AVANTIFEED",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "AVG",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1244,10 +2491,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "AWL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "AXISCADES",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1268,10 +2511,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "AZAD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "AZADIND",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1288,23 +2527,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BAJAJFINSV",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BAJAJHCARE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BAJAJHFL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BAJAJHIND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BAJAJHLDNG",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1340,15 +2567,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BALKRISIND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BALMLAWRIE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BALRAMCHIN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1364,19 +2583,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BANDHANBNK",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BANG",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "BANKA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BANKINDIA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1408,10 +2619,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BBOX",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BBTC",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1436,10 +2643,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BDL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BEARDSELL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1456,23 +2659,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BEL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BELDING",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "BELLACASA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BELRISE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BEML",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1485,10 +2676,6 @@
     },
     {
       "symbol": "BEPL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BERGEPAINT",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1520,14 +2707,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BHARATCOAL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BHARATFORG",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BHARATGEAR",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1544,14 +2723,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BHARTIHEXA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BHARTIARTL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BIGBLOC",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1565,10 +2736,6 @@
     },
     {
       "symbol": "BIMETAL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BIOCON",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1620,10 +2787,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BLS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BLSE",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1645,10 +2808,6 @@
     },
     {
       "symbol": "BLUEJET",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BLUESTARCO",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1712,14 +2871,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BOSCHLTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BPCL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BPL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1732,10 +2883,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "BRIGADE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "BRIGHOTEL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1745,10 +2892,6 @@
     },
     {
       "symbol": "BRIGHTOUTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BRITANNIA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1765,10 +2908,6 @@
     },
     {
       "symbol": "BSL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "BSOFT",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1804,18 +2943,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CAMS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CANFINHOME",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CANHLIFE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CANTABIL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1832,10 +2959,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CARBORUNIV",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CARERATING",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -1844,15 +2967,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CARTRADE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CARYSIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CASTROLIND",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1865,18 +2980,6 @@
     },
     {
       "symbol": "CCHHL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CCL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CDSL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CEATLTD",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1896,19 +2999,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CEMPRO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CENTENKA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "CENTEXT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CENTRALBK",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1928,19 +3023,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CESC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CEWATER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CGCL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CGPOWER",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1949,10 +3032,6 @@
     },
     {
       "symbol": "CHALET",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CHAMBLFERT",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -1980,27 +3059,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CHENNPETRO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CHEVIOT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CHOICEIN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CHOLAFIN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CHOLAHLDNG",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CIEINDIA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2016,18 +3075,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CIPLA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CLEAN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CLEANMAX",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CLEDUCATE",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2037,10 +3084,6 @@
     },
     {
       "symbol": "CMLL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CMPDI",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2056,15 +3099,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "COALINDIA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "COASTCORP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "COCHINSHIP",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2073,18 +3108,6 @@
     },
     {
       "symbol": "COFFEEDAY",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "COFORGE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "COHANCE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "COLPAL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2097,10 +3120,6 @@
     },
     {
       "symbol": "COMSYN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CONCOR",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2124,10 +3143,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "COROMANDEL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CORONA",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2148,14 +3163,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CPPLUS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CRAFTSMAN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CRAMC",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2168,10 +3175,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CREDITACC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CREST",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2180,15 +3183,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CRISIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CRIZAC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CROMPTON",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2208,18 +3203,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CUB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CUMMINSIND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "CUPID",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CURAA",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2228,19 +3211,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "CYIENT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "CYIENTDLM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "DABUR",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "DALBHARAT",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2261,10 +3232,6 @@
     },
     {
       "symbol": "DATAMATICS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "DATAPATTNS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2352,19 +3319,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "DEEPAKFERT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "DEEPAKNTR",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "DEEPINDS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "DELHIVERY",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2393,10 +3348,6 @@
     },
     {
       "symbol": "DEVX",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "DEVYANI",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2484,23 +3435,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "DIVISLAB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "DIXON",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "DJML",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "DLINKINDIA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "DMART",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2532,10 +3471,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "DOMS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "DONEAR",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2557,10 +3492,6 @@
     },
     {
       "symbol": "DREDGECORP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "DRREDDY",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2620,10 +3551,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ECLERX",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ECORECO",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2644,14 +3571,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "EICHERMOT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "EIDPARRY",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "EIEL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2661,10 +3580,6 @@
     },
     {
       "symbol": "EIHAHOTELS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "EIHOTEL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2688,10 +3603,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ELECON",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ELECTCAST",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2701,10 +3612,6 @@
     },
     {
       "symbol": "ELEVATE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ELGIEQUIP",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2728,10 +3635,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "EMAMILTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "EMAMIPAP",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2744,10 +3647,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "EMCURE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "EMIL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2757,10 +3656,6 @@
     },
     {
       "symbol": "EMMBI",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "EMMVEE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2780,15 +3675,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ENDURANCE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ENERGYDEV",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ENGINERSIN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2797,10 +3684,6 @@
     },
     {
       "symbol": "ENKEIWHEL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ENRIN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2836,10 +3719,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ESCORTS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ESDS",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2853,10 +3732,6 @@
     },
     {
       "symbol": "ESTER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ETERNAL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2900,10 +3775,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "EXIDEIND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "EXPLEOSOL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2913,10 +3784,6 @@
     },
     {
       "symbol": "FABTECH",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "FACT",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2937,10 +3804,6 @@
     },
     {
       "symbol": "FEDDERSHOL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "FEDERALBNK",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -2968,10 +3831,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "FINCABLES",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "FINEORG",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -2988,15 +3847,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "FIRSTCRY",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "FISCHER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "FIVESTAR",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3005,10 +3856,6 @@
     },
     {
       "symbol": "FLEXITUFF",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "FLUOROCHEM",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3028,19 +3875,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "FORCEMOT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "FORTIS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "FOSECOIND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "FRACTAL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3052,10 +3887,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "FSL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "FUSION",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -3064,15 +3895,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "GABRIEL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "GAEL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GAIL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3192,10 +4015,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "GESHIP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "GHCL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -3208,15 +4027,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "GICRE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "GILLANDERS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GILLETTE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3244,19 +4055,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "GLAND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "GLASSWALL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GLAXO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GLENMARK",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3296,19 +4095,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "GMDCLTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "GMMPFAUDLR",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "GMRP&UI",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GMRAIRPORT",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3337,10 +4128,6 @@
     },
     {
       "symbol": "GODAVARIB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GODFRYPHLP",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3380,10 +4167,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "GPIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "GPPL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -3400,23 +4183,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "GRANULES",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GRAPHITE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GRASIM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "GRAUWEIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GRAVITA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3456,15 +4223,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "GROWW",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "GRPLTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GRSE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3529,10 +4288,6 @@
     },
     {
       "symbol": "GVPIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "GVT&D",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3604,10 +4359,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "HBLENGINE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "HBPOR",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -3621,22 +4372,6 @@
     },
     {
       "symbol": "HCL-INSYS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "HCLTECH",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "HDBFS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "HDFCAMC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "HDFCLIFE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3656,10 +4391,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "HEGAM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "HEIDELBERG",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -3676,10 +4407,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "HEROMOTOCO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "HEROMOTORS",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -3693,10 +4420,6 @@
     },
     {
       "symbol": "HEXATRADEX",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "HEXT",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3728,10 +4451,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "HINDALCO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "HINDALUMI",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -3740,27 +4459,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "HINDCOPPER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "HINDOILEXP",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "HINDPETRO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "HINDUNILVR",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "HINDWAREAP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "HINDZINC",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3796,18 +4499,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "HOMEFIRST",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "HONASA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "HONAUT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "HONDAPOWER",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -3832,10 +4523,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "HSCL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "HTEL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -3848,19 +4535,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "HUDCO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "HUHTAMAKI",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "HYBRIDFIN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "HYUNDAI",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3872,18 +4551,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ICICIAMC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ICICIGI",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ICICILIFE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ICIL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -3892,23 +4559,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "IDBI",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IDEA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "IDEAFORGE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IDFCFIRSTB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IEX",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3917,10 +4568,6 @@
     },
     {
       "symbol": "IFBIND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IFCI",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3936,19 +4583,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "IGIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IGL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "IGPL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IIFL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -3965,10 +4600,6 @@
     },
     {
       "symbol": "IKIO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IKS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4000,23 +4631,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "INDHOTEL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "INDIACEM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "INDIAGLYCO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "INDIAMART",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "INDIANB",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4029,10 +4644,6 @@
     },
     {
       "symbol": "INDIASHLTR",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "INDIGO",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4116,10 +4727,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "INDUSTOWER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "INFOBEAN",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -4152,10 +4759,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "INTELLECT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "INTENTECH",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -4184,31 +4787,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "IPCALAB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "IPL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "IPRINGLTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IRB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IRCON",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IRCTC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "IRFC",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4236,15 +4819,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ITCHOTELS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ITDC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ITI",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4272,10 +4847,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "J&KBANK",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "IZMO",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -4293,10 +4864,6 @@
     },
     {
       "symbol": "JAICORPLTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "JAINREC",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4336,10 +4903,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "JBMA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "JENBURPH",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -4360,14 +4923,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "JINDALSAW",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "JINDALSTEL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "JINDRILL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -4376,19 +4931,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "JIOFIN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "JISLJALEQS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "JITFINFRA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "JKCEMENT",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4408,19 +4955,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "JKTYRE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "JLHL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "JMA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "JMFINANCIL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4444,15 +4983,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "JPPOWER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "JSFB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "JSL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4460,27 +4991,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "JSWCEMENT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "JSWDULUX",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "JSWENERGY",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "JSWHL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "JSWINFRA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "JSWSTEEL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4496,14 +5011,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "JUBLFOOD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "JUBLINGREA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "JUBLPHARMA",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -4516,23 +5023,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "JWL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "JYOTHYLAB",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "JYOTICNC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "JYOTIRES",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "KAJARIACER",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4549,10 +5044,6 @@
     },
     {
       "symbol": "KALPATARU",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "KALYANKJIL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4608,15 +5099,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "KARURVYSYA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "KAUSHALYA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "KAYNES",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4636,19 +5119,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "KEC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "KECL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "KEEPLEARN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "KEI",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4669,10 +5144,6 @@
     },
     {
       "symbol": "KEYFINSERV",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "KFINTECH",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4700,10 +5171,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "KIMS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "KINGFA",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -4721,14 +5188,6 @@
     },
     {
       "symbol": "KIRLFER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "KIRLOSBROS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "KIRLOSENG",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4800,10 +5259,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "KOTAKBANK",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "KOTHARIPET",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -4832,19 +5287,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "KPIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "KPITTECH",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "KPL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "KPRMILL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4897,10 +5340,6 @@
     },
     {
       "symbol": "KRYSTAL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "KSB",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -4957,10 +5396,6 @@
     },
     {
       "symbol": "LALITHAA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "LALPATHLAB",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5024,14 +5459,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "LEMONTREE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "LENSKART",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "LEXUS",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -5044,23 +5471,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "LGEINDIA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "LIBAS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "LIBERTSHOE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "LICHSGFIN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "LICI",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5076,10 +5491,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "LINDEINDIA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "LKPSEC",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -5092,15 +5503,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "LLOYDSME",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "LMW",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "LODHA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5136,22 +5539,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "LTF",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "LTFOODS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "LTM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "LTTS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "LUMAXIND",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -5165,14 +5552,6 @@
     },
     {
       "symbol": "LUXIND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "M&M",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "M&MFIN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5213,10 +5592,6 @@
     },
     {
       "symbol": "MAGNUM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MAHABANK",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5281,10 +5656,6 @@
     },
     {
       "symbol": "MANALIPETC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MANAPPURAM",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5388,10 +5759,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "MAXHEALTH",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "MAXIND",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -5401,10 +5768,6 @@
     },
     {
       "symbol": "MAZDA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MAZDOCK",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5436,14 +5799,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "MCX",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MEDANTA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "MEDIASSIST",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -5457,10 +5812,6 @@
     },
     {
       "symbol": "MEDPLUS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MEESHO",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5500,15 +5851,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "MFSL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "MGEL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MGL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5525,10 +5868,6 @@
     },
     {
       "symbol": "MIIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MINDACORP",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5569,10 +5908,6 @@
     },
     {
       "symbol": "MMP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MMTC",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5648,14 +5983,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "MOTHERSON",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MOTILALOFS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "MOTISONS",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -5664,19 +5991,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "MPHASIS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "MPIMANIPAL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "MPSLTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MRF",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5689,14 +6008,6 @@
     },
     {
       "symbol": "MSTCLTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MSUMI",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MTARTECH",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5737,10 +6048,6 @@
     },
     {
       "symbol": "MUTHOOTCAP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "MUTHOOTFIN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5788,10 +6095,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "NAM-INDIA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "NARMADA",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -5800,31 +6103,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "NATCOPHARM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "NATHBIOGEN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "NATIONALUM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "NATIONSTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NAUKRI",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NAVA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NAVINFLUOR",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5844,15 +6127,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "NBCC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "NBIFIN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NCC",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5912,15 +6187,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "NETWEB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "NETWORK18",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NEULANDLAB",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -5937,18 +6204,6 @@
     },
     {
       "symbol": "NGLFINE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NH",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NHPC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NIACL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6036,14 +6291,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "NLCINDIA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NMDC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "NOCIL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -6076,31 +6323,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "NSLNISP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "NTCIND",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "NTPC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NTPCGREEN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "NUCLEUS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NUVAMA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "NUVOCO",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6109,10 +6336,6 @@
     },
     {
       "symbol": "OBCL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "OBEROIRLTY",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6128,23 +6351,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "OFSS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "OIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "OILCOUNTUB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "OLAELEC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "OLECTRA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6169,14 +6376,6 @@
     },
     {
       "symbol": "ONEPOINT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ONESOURCE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ONGC",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6292,10 +6491,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "PAGEIND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "PAISALO",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -6340,10 +6535,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "PARADEEP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "PARAS",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -6376,10 +6567,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "PATANJALI",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "PATELENG",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -6401,10 +6588,6 @@
     },
     {
       "symbol": "PBMPOLY",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PCBL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6436,23 +6619,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "PERSISTENT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PETRONET",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PFC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "PFIZER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PFOCUS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6472,10 +6639,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "PHOENIXLTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "PHOENXINTL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -6484,23 +6647,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "PIDILITIND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "PIGL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "PIIND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "PILITA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PINELABS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6509,10 +6660,6 @@
     },
     {
       "symbol": "PIONRINV",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PIRAMALFIN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6540,15 +6687,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "PNB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "PNBGILTS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PNBHOUSING",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6584,18 +6723,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "POLICYBZR",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "POLYCAB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "POLYMED",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "POLYPLEX",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -6608,15 +6735,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "POONAWALLA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "POWERICA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "POWERINDIA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6629,10 +6748,6 @@
     },
     {
       "symbol": "PPL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PPLPHARMA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6696,15 +6811,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "PREMIERENE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "PREMIERPOL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PRESTIGE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6729,10 +6836,6 @@
     },
     {
       "symbol": "PRITIKAUTO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PRIVISCL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6768,10 +6871,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "PTCIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "PTL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -6789,10 +6888,6 @@
     },
     {
       "symbol": "PVSL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "PWL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6832,19 +6927,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "RADICO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "RADIOCITY",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "RAIN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "RAINBOW",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6881,10 +6968,6 @@
     },
     {
       "symbol": "RAMAPHO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "RAMCOCEM",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -6940,19 +7023,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "RBLBANK",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "RCF",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "RECLTD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "REDINGTON",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7024,10 +7095,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "RHIM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "RHL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -7052,15 +7119,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "RITES",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "RKDL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "RKFORGE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7124,10 +7183,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "RPOWER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "RPPINFRA",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -7145,10 +7200,6 @@
     },
     {
       "symbol": "RRIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "RRKABEL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7181,10 +7232,6 @@
     },
     {
       "symbol": "RUBFILA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "RUBICON",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7264,10 +7311,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SAGILITY",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SAHLIBHFI",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -7277,14 +7320,6 @@
     },
     {
       "symbol": "SAICAPI",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SAIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SAILIFE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7340,10 +7375,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SAMMAANCAP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SAMPANN",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -7380,19 +7411,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SANSERA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SANSTAR",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "SAPPL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SARDAEN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7448,15 +7471,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SBICARD",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SBIFUNDS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SBILIFE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7464,19 +7479,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SCHAEFFLER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SCHAND",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SCHNEIDER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SCI",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7724,10 +7727,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SHREECEM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SHREEJISPG",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -7748,10 +7747,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SHRIPISTON",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SHRIRAMPPS",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -7765,10 +7760,6 @@
     },
     {
       "symbol": "SHYAMCENT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SHYAMMETL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7788,19 +7779,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SIEMENS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SIGACHI",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "SIGMA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SIGNATURE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7864,10 +7847,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SJVN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SKFINDIA",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -7916,19 +7895,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SOBHA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SOFTTECH",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "SOLARA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SOLARINDS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -7953,10 +7924,6 @@
     },
     {
       "symbol": "SONA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SONACOMS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8080,10 +8047,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "STARHEALTH",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "STARPAPER",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -8188,10 +8151,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SUMICHEM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SUMIT",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -8205,10 +8164,6 @@
     },
     {
       "symbol": "SUNDARAM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SUNDARMFIN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8248,10 +8203,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SUNTV",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SUPERHOUSE",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -8265,10 +8216,6 @@
     },
     {
       "symbol": "SUPREME",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SUPREMEIND",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8344,10 +8291,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "SWANCORP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "SWARAJENG",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -8357,10 +8300,6 @@
     },
     {
       "symbol": "SWELECTES",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SWIGGY",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8381,14 +8320,6 @@
     },
     {
       "symbol": "SYNCOMF",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SYNGENE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "SYRMA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8436,10 +8367,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "TARIL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "TARMAT",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -8452,31 +8379,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "TATAELXSI",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TATAINVEST",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TATAPOWER",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TATASTEEL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TATATECH",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "TATVA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TBOTEK",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8500,10 +8403,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "TDPOWERSYS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "TEAMGTY",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -8512,15 +8411,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "TECHM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "TECHNOCRAF",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TECHNOE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8532,23 +8423,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "TEGA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TEJASNET",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "TEMBO",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "TEMPSENS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TENNIND",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8596,10 +8475,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "THANGAMAYL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "THEINVEST",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -8613,10 +8488,6 @@
     },
     {
       "symbol": "THEMISMED",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "THERMAX",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8648,10 +8519,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "TIINDIA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "TIL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -8661,10 +8528,6 @@
     },
     {
       "symbol": "TIMEX",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TIMKEN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8684,19 +8547,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "TITAN",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "TMB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TMCV",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TMPV",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8717,14 +8568,6 @@
     },
     {
       "symbol": "TONBO",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TORNTPHARM",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TORNTPOWER",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8776,15 +8619,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "TRENT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "TRF",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TRIDENT",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8793,10 +8628,6 @@
     },
     {
       "symbol": "TRITONV",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "TRITURBINE",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8832,10 +8663,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "TTML",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "TURTLEMINT",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -8848,10 +8675,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "TVSMOTOR",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "TVSSCS",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -8861,14 +8684,6 @@
     },
     {
       "symbol": "TVTODAY",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "UBL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "UCOBANK",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8893,10 +8708,6 @@
     },
     {
       "symbol": "UJJIVANSFB",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ULTRACEMCO",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8940,15 +8751,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "UNIONBANK",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "UNIPARTS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "UNITDSPR",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8968,15 +8771,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "UNOMINDA",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "UPHOT",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "UPL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -8988,15 +8783,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "USHAMART",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "USK",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "UTIAMC",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -9040,10 +8827,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "VAML",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "VARDHACRLC",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -9069,10 +8852,6 @@
     },
     {
       "symbol": "VEDAVAAG",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "VEDPOWER",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -9133,10 +8912,6 @@
     },
     {
       "symbol": "VIDYAWIRES",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "VIJAYA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -9224,10 +8999,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "VISL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "VITAL",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -9272,19 +9043,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "VOGL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "VOITHPAPR",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "VOLTAMP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "VOLTAS",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -9313,14 +9076,6 @@
     },
     {
       "symbol": "VSTTILLERS",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "VTL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "WAAREEENER",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -9372,10 +9127,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "WELCORP",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "WELENT",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -9385,10 +9136,6 @@
     },
     {
       "symbol": "WELSPLSOL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "WELSPUNLIV",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -9416,19 +9163,11 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "WHIRLPOOL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "WINDMACHIN",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
       "symbol": "WIPL",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "WOCKPHARMA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -9484,10 +9223,6 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "YESBANK",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "YOGI",
       "reason": "Public-page eligibility checks did not pass."
     },
@@ -9497,10 +9232,6 @@
     },
     {
       "symbol": "ZAGGLE",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ZEEL",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -9516,19 +9247,7 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
-      "symbol": "ZENSARTECH",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ZENTEC",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
       "symbol": "ZETWERK",
-      "reason": "Public-page eligibility checks did not pass."
-    },
-    {
-      "symbol": "ZFCVINDIA",
       "reason": "Public-page eligibility checks did not pass."
     },
     {
@@ -9564,8 +9283,884 @@
       "reason": "Public-page eligibility checks did not pass."
     },
     {
+      "symbol": "ABB",
+      "isin": "INE117A01022",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "ABB India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ABBOTINDIA",
+      "isin": "INE358A01014",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Abbott India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ATHERENERG",
+      "isin": "INE0LEZ01016",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Ather Energy Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "AUBANK",
+      "isin": "INE949L01017",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "AU Small Finance Bank Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "BAGMANE",
+      "isin": "INE2OVN25015",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Bagmane Prime Office REIT",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "BAJAJHFL",
+      "isin": "INE377Y01014",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Bajaj Housing Finance Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "BANDHANBNK",
+      "isin": "INE545U01014",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Bandhan Bank Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "BDL",
+      "isin": "INE171Z01026",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Bharat Dynamics Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "BHARATCOAL",
+      "isin": "INE05XR01022",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Bharat Coking Coal Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "BHARTIHEXA",
+      "isin": "INE343G01021",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Bharti Hexacom Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "BIRET",
+      "isin": "INE0FDU25010",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Brookfield India Real Estate Trust",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "CANFINHOME",
+      "isin": "INE477A01020",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Can Fin Homes Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "CANHLIFE",
+      "isin": "INE01TY01017",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Canara HSBC Life Insurance Company Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "CASTROLIND",
+      "isin": "INE172A01027",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Castrol India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "CLEANMAX",
+      "isin": "INE647U01026",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Clean Max Enviro Energy Solutions Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "CMPDI",
+      "isin": "INE05HV01027",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Central Mine Planning & Design Institute Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "COLPAL",
+      "isin": "INE259A01022",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Colgate Palmolive (India) Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "CUB",
+      "isin": "INE491A01021",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "City Union Bank Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "DATAPATTNS",
+      "isin": "INE0IX101010",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Data Patterns (India) Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "EMBASSY",
+      "isin": "INE041025011",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "EMBASSY OFFICE PARKS REIT",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ENRIN",
+      "isin": "INE1NPP01017",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Siemens Energy India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "FIVESTAR",
+      "isin": "INE128S01021",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Five-Star Business Finance Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "GICRE",
+      "isin": "INE481Y01014",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "General Insurance Corporation of India",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "GILLETTE",
+      "isin": "INE322A01010",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Gillette India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "GRSE",
+      "isin": "INE382Z01011",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Garden Reach Shipbuilders & Engineers Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "GVT&D",
+      "isin": "INE200A01026",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "GE Vernova T&D India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "HDBFS",
+      "isin": "INE756I01012",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "HDB Financial Services Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "HDFCLIFE",
+      "isin": "INE795G01014",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "HDFC Life Insurance Company Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "HOMEFIRST",
+      "isin": "INE481N01025",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Home First Finance Company India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "HONAUT",
+      "isin": "INE671A01010",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Honeywell Automation India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ICICIAMC",
+      "isin": "INE346A01027",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "ICICI Prudential Asset Management Company Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ICICIGI",
+      "isin": "INE765G01017",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "ICICI Lombard General Insurance Company Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ICICILIFE",
+      "isin": "INE726G01019",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "ICICI Life Insurance Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "IRFC",
+      "isin": "INE053F01010",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Indian Railway Finance Corporation Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "KARURVYSYA",
+      "isin": "INE036D01028",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Karur Vysya Bank Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "LGEINDIA",
+      "isin": "INE324D01010",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "LG Electronics India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "LICI",
+      "isin": "INE0J1Y01017",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Life Insurance Corporation of India",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "MCX",
+      "isin": "INE745G01043",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Multi Commodity Exchange of India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "MSUMI",
+      "isin": "INE0FS801015",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Motherson Sumi Wiring India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "NETWEB",
+      "isin": "INE0NT901020",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Netweb Technologies India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "NIACL",
+      "isin": "INE470Y01017",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "The New India Assurance Company Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "NSLNISP",
+      "isin": "INE0NNS01018",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "NMDC Steel Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "PAGEIND",
+      "isin": "INE761H01022",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Page Industries Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "PIRAMALFIN",
+      "isin": "INE202B01038",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Piramal Finance Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "POWERINDIA",
+      "isin": "INE07Y701011",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Hitachi Energy India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "SBICARD",
+      "isin": "INE018E01016",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "SBI Cards and Payment Services Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "SBILIFE",
+      "isin": "INE123W01016",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "SBI Life Insurance Company Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "SCHNEIDER",
+      "isin": "INE839M01018",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Schneider Electric Infrastructure Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "STARHEALTH",
+      "isin": "INE575P01011",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Star Health and Allied Insurance Company Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "STLTECH",
+      "isin": "INE089C01029",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Sterlite Technologies Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "TATAELXSI",
+      "isin": "INE670A01012",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Tata Elxsi Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "TENNIND",
+      "isin": "INE19RI01016",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Tenneco Clean Air India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "THANGAMAYL",
+      "isin": "INE085J01014",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Thangamayil Jewellery Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "TIMKEN",
+      "isin": "INE325A01013",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Timken India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "TTML",
+      "isin": "INE517B01013",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Tata Teleservices (Maharashtra) Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ULTRACEMCO",
+      "isin": "INE481G01011",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "UltraTech Cement Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "UNIONBANK",
+      "isin": "INE692A01016",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Union Bank of India",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "UNITDSPR",
+      "isin": "INE854D01024",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "United Spirits Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "UNOMINDA",
+      "isin": "INE405E01023",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "UNO Minda Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "UPL",
+      "isin": "INE628A01036",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "UPL Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "USHAMART",
+      "isin": "INE228A01035",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Usha Martin Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "UTIAMC",
+      "isin": "INE094J01016",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "UTI Asset Management Company Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "VAML",
+      "isin": "INE1CDF01017",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Vedanta Aluminium Metal Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "VEDPOWER",
+      "isin": "INE694L01019",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Vedanta Power Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "VIJAYA",
+      "isin": "INE043W01024",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Vijaya Diagnostic Centre Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "VISL",
+      "isin": "INE1CLE01013",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Vedanta Iron and Steel Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "VOGL",
+      "isin": "INE704J01044",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Vedanta Oil and Gas Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "VOLTAS",
+      "isin": "INE226A01021",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Voltas Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "VTL",
+      "isin": "INE825A01020",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Vardhman Textiles Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "WAAREEENER",
+      "isin": "INE377N01017",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Waaree Energies Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "WELCORP",
+      "isin": "INE191B01025",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Welspun Corp Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "WELSPUNLIV",
+      "isin": "INE192B01031",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Welspun Living Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "WHIRLPOOL",
+      "isin": "INE716A01013",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Whirlpool of India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "WOCKPHARMA",
+      "isin": "INE049B01025",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Wockhardt Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "YESBANK",
+      "isin": "INE528G01035",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Yes Bank Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ZEEL",
+      "isin": "INE256A01028",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Zee Entertainment Enterprises Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ZENSARTECH",
+      "isin": "INE520A01027",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Zensar Technolgies Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ZENTEC",
+      "isin": "INE251B01027",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Zen Technologies Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
+      "symbol": "ZFCVINDIA",
+      "isin": "INE342J01019",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "ZF Commercial Vehicle Control Systems India Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
+    },
+    {
       "symbol": "ZYDUSWELL",
-      "reason": "Public-page eligibility checks did not pass."
+      "isin": "INE768C01028",
+      "scope": "NIFTY_500",
+      "passed": false,
+      "http": 200,
+      "heading": "Zydus Wellness Ltd.",
+      "reasons": [
+        "Public financial highlights missing."
+      ]
     }
   ]
 }

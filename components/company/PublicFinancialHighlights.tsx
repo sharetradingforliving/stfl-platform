@@ -86,10 +86,18 @@ export default async function PublicFinancialHighlights({
     }
 
     data = (await response.json()) as HistoryResponse;
-  } catch {
-    // Company information and the dashboard remain available.
-    return null;
-  }
+  } catch (error) {
+  console.error("Public highlights request failed", {
+    symbol,
+    exchange,
+    errorName:
+      error instanceof Error ? error.name : "Unknown",
+    errorMessage:
+      error instanceof Error ? error.message : "Unknown",
+  });
+
+  return null;
+}
 
   if (
     data.status !== "success" ||

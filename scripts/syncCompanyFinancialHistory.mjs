@@ -1,259 +1,157 @@
-import {
-  appendFile,
-  mkdir,
-  readFile,
-} from "node:fs/promises";
-
+import { appendFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  auditPage,
+  getNifty500,
+  origin,
+  request,
+  requireLocalOrigin,
+} from "./companyAuditHelpers.mjs";
 
-const token =
-  process.env.FINANCIAL_HISTORY_SYNC_TOKEN;
+async function main() {
+  requireLocalOrigin();
 
-if (!token) {
-  throw new Error(
-    "FINANCIAL_HISTORY_SYNC_TOKEN is missing."
-  );
-}
-
-const origin = "http://localhost:3000";
-
-const limitArgument = process.argv[2] ?? "50";
-
-const limit =
-  limitArgument === "all"
-    ? Infinity
-    : Number(limitArgument);
-
-if (
-  limit !== Infinity &&
-  (!Number.isInteger(limit) || limit < 1)
-) {
-  throw new Error(
-    "Provide a positive batch size or 'all'."
-  );
-}
-
-const catalogue = JSON.parse(
-  await readFile(
-    "./data/seo/company-sitemap.json",
-    "utf8"
-  )
-);
-
-if (
-  !Array.isArray(catalogue.companies) ||
-  !Array.isArray(catalogue.reviewRequired)
-) {
-  throw new Error("Invalid sitemap catalogue.");
-}
-
-const progressDirectory = path.join(
-  process.cwd(),
-  ".cache",
-  "financial-history"
-);
-
-const progressFile = path.join(
-  progressDirectory,
-  "sync-progress.jsonl"
-);
-
-await mkdir(progressDirectory, {
-  recursive: true,
-});
-
-const latestResults = new Map();
-
-try {
-  const previous = await readFile(
-    progressFile,
-    "utf8"
-  );
-
-  for (const line of previous.split(/\r?\n/)) {
-    if (!line.trim()) continue;
-
-    const result = JSON.parse(line);
-
-    latestResults.set(result.symbol, result);
-  }
-} catch (error) {
-  if (error.code !== "ENOENT") {
-    throw error;
-  }
-}
-
-const selected = new Set(
-  catalogue.companies.map(
-    (company) => company.symbol
-  )
-);
-
-const candidates = [...new Set(
-  catalogue.reviewRequired
-    .map((item) => item.symbol)
-    .filter(
-      (symbol) =>
-        typeof symbol === "string" &&
-        /^[A-Z0-9&._-]{1,30}$/.test(symbol)
-    )
-)].sort();
-
-const pending = candidates.filter((symbol) => {
-  if (selected.has(symbol)) {
-    return false;
+  const token = process.env.FINANCIAL_HISTORY_SYNC_TOKEN;
+  if (!token) {
+    throw new Error("FINANCIAL_HISTORY_SYNC_TOKEN is missing.");
   }
 
-  const previous = latestResults.get(symbol);
+  const argument = process.argv[2] || "50";
+  const limit = argument === "all" ? Infinity : Number(argument);
+  const retry = process.argv.includes("--retry");
 
-  return ![
-    "verified",
-    "no_records_written",
-  ].includes(previous?.outcome);
-});
+  if (limit !== Infinity && (!Number.isInteger(limit) || limit < 1)) {
+    throw new Error("Provide a positive batch size or 'all'.");
+  }
 
-const batch = pending.slice(0, limit);
+  const { companies } = await getNifty500();
 
-console.log({
-  pending: pending.length,
-  thisBatch: batch.length,
-  progressFile,
-});
-
-async function saveResult(result) {
-  await appendFile(
-    progressFile,
-    JSON.stringify({
-      ...result,
-      checkedAt: new Date().toISOString(),
-    }) + "\n",
-    "utf8"
-  );
-}
-
-let verified = 0;
-let noRecords = 0;
-let failed = 0;
-
-for (const [index, symbol] of batch.entries()) {
-  console.log(
-    `[${index + 1}/${batch.length}] ${symbol}`
+  const directory = path.join(
+    process.cwd(), ".cache", "financial-history"
   );
 
-  let result;
-  let stop = false;
+  // Separate progress from the older all-company script.
+  const progressFile = path.join(
+    directory, "nifty500-sync-v2.jsonl"
+  );
+
+  await mkdir(directory, { recursive: true });
+
+  const latest = new Map();
 
   try {
-    const response = await fetch(
-      `${origin}/api/internal/financial-history/sync/` +
-        encodeURIComponent(symbol),
-      {
-        method: "POST",
-        redirect: "error",
-        headers: {
-          "X-STFL-Sync-Token": token,
-        },
-        signal: AbortSignal.timeout(600_000),
-      }
-    );
-
-    if ([401, 403, 503].includes(response.status)) {
-      stop = true;
-
-      throw new Error(
-        `Authorization/configuration failure: HTTP ${response.status}`
-      );
+    const saved = await readFile(progressFile, "utf8");
+    for (const line of saved.split(/\r?\n/)) {
+      if (!line.trim()) continue;
+      const result = JSON.parse(line);
+      latest.set(result.symbol, result);
     }
-
-    if (!response.ok) {
-      throw new Error(
-        `Synchronization returned HTTP ${response.status}`
-      );
-    }
-
-    const body = await response.json();
-
-    if (![
-      "synchronized",
-      "no_records_written",
-    ].includes(body.status)) {
-      throw new Error(
-        "Unexpected synchronization response."
-      );
-    }
-
-    const page = await fetch(
-      `${origin}/company/` +
-        encodeURIComponent(symbol),
-      {
-        redirect: "error",
-        signal: AbortSignal.timeout(60_000),
-      }
-    );
-
-    if (!page.ok) {
-      throw new Error(
-        `Company page returned HTTP ${page.status}`
-      );
-    }
-
-    const highlights = (
-      await page.text()
-    ).includes('id="public-financial-highlights"');
-
-    const outcome = highlights
-      ? "verified"
-      : body.status === "no_records_written"
-        ? "no_records_written"
-        : "highlights_missing";
-
-    result = {
-      symbol,
-      sync: body.status,
-      highlights,
-      outcome,
-    };
   } catch (error) {
-    result = {
-      symbol,
-      outcome: "request_failed",
-      error: error.message,
-    };
-
-    // Stop on connection failures or timeouts.
-    // A timed-out server task might still be running.
-    stop = true;
+    if (error.code !== "ENOENT") throw error;
   }
 
-  await saveResult(result);
+  // Retry unresolved results after 24 hours, or explicitly with --retry.
+  const retryAfter = 24 * 60 * 60 * 1000;
 
-  console.log(result);
+  const pending = companies.filter((company) => {
+    const previous = latest.get(company.symbol);
+    if (!previous || previous.isin !== company.isin || retry) return true;
 
-  if (result.outcome === "verified") {
-    verified += 1;
-  } else if (
-    result.outcome === "no_records_written"
-  ) {
-    noRecords += 1;
-  } else {
-    failed += 1;
-  }
+    if (previous.outcome === "page_passed") return false;
 
-  if (stop) {
-    console.log(
-      "Stopped. Progress saved; inspect the error before resuming."
+    const timestamp = Date.parse(previous.checkedAt);
+    return !Number.isFinite(timestamp) ||
+      Date.now() - timestamp >= retryAfter;
+  });
+
+  const batch = pending.slice(0, limit);
+  const counts = { pagePassed: 0, reviewRequired: 0, failed: 0 };
+
+  console.log({
+    scope: "NIFTY_500",
+    constituents: companies.length,
+    pending: pending.length,
+    thisBatch: batch.length,
+    progressFile,
+  });
+
+  for (const [index, company] of batch.entries()) {
+    console.log(`[${index + 1}/${batch.length}] ${company.symbol}`);
+
+    let result;
+    let stop = false;
+
+    try {
+      const response = await request(
+        `${origin}/api/internal/financial-history/sync/` +
+          encodeURIComponent(company.symbol),
+        {
+          method: "POST",
+          headers: { "X-STFL-Sync-Token": token },
+        },
+        600000
+      );
+
+      if (!response.ok) {
+        // Avoid repeated upstream failures or overlapping timed-out tasks.
+        throw new Error(`Sync returned HTTP ${response.status}`);
+      }
+
+      const body = JSON.parse(response.text);
+
+      if (
+        body.symbol !== company.symbol ||
+        !["synchronized", "no_records_written"].includes(body.status)
+      ) {
+        throw new Error("Unexpected synchronization response.");
+      }
+
+      const audit = await auditPage(company);
+
+      result = {
+        symbol: company.symbol,
+        isin: company.isin,
+        sync: body.status,
+        outcome: audit.passed ? "page_passed" : "review_required",
+        audit,
+      };
+
+      if (audit.passed) counts.pagePassed++;
+      else counts.reviewRequired++;
+    } catch (error) {
+      result = {
+        symbol: company.symbol,
+        isin: company.isin,
+        outcome: "request_failed",
+        error: error.message,
+      };
+      counts.failed++;
+      stop = true;
+    }
+
+    result.checkedAt = new Date().toISOString();
+
+    await appendFile(
+      progressFile,
+      JSON.stringify(result) + "\n",
+      "utf8"
     );
-    break;
+
+    console.log(result);
+
+    if (stop) {
+      console.log("Stopped; progress saved. Inspect the error before retrying.");
+      process.exitCode = 1;
+      break;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
-  await new Promise((resolve) =>
-    setTimeout(resolve, 1000)
-  );
+  console.log({ ...counts, progressFile });
 }
 
-console.log({
-  verified,
-  noRecords,
-  failed,
-  progressFile,
+main().catch((error) => {
+  console.error(error.message);
+  process.exitCode = 1;
 });

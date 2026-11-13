@@ -21,12 +21,20 @@ export const getCompanyIdentity = cache(
       const companies =
         await getNifty500Constituents();
 
-      const company = companies.find(
-        (item) =>
-          item.symbol === normalizedSymbol &&
-          Boolean(item.companyName.trim()) &&
-          (item.series === "EQ" || item.series === "")
-      );
+      const matches = companies.filter(
+  (item) =>
+    item.symbol.trim().toUpperCase() === normalizedSymbol &&
+    item.companyName.trim().length > 0 &&
+    item.companyName.trim().toUpperCase() !== normalizedSymbol &&
+    /^IN[A-Z0-9]{10}$/.test(item.isin.trim().toUpperCase())
+);
+
+const identities = new Set(
+  matches.map((item) => item.isin.trim().toUpperCase())
+);
+
+const company =
+  identities.size === 1 ? matches[0] : undefined;
 
       if (company) {
         return {

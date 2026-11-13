@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 import BasicCompanyDashboard from "./BasicCompanyDashboard";
 import Link from "next/link";
-
+import { notFound } from "next/navigation";
 import {
   getCompanyIdentity,
 } from "@/lib/seo/companyIdentity";
@@ -22,6 +22,24 @@ type CompanyPageProps = {
 
 const SITE_URL = "https://sharetradingforliving.com";
 
+function normalizeCompanySymbol(value: string): string {
+  let decoded: string;
+
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    notFound();
+  }
+
+  const normalized = decoded.trim().toUpperCase();
+
+  if (!/^[A-Z0-9&._-]{1,30}$/.test(normalized)) {
+    notFound();
+  }
+
+  return normalized;
+}
+
 export async function generateMetadata({
   params,
   searchParams,
@@ -29,7 +47,7 @@ export async function generateMetadata({
   const { symbol } = await params;
   const { exchange } = await searchParams;
 
-  const stockSymbol = symbol.trim().toUpperCase();
+  const stockSymbol = normalizeCompanySymbol(symbol);
 
   const selectedExchange =
     exchange?.toUpperCase() === "BSE"
@@ -100,7 +118,7 @@ export default async function CompanyPage({
       ? "BSE"
       : "NSE";
 
-  const stockSymbol = symbol.trim().toUpperCase();
+  const stockSymbol = normalizeCompanySymbol(symbol);
 
   const company =
     selectedExchange === "NSE"
@@ -111,7 +129,6 @@ export default async function CompanyPage({
     company?.status === "verified"
       ? company.companyName
       : stockSymbol;
-
   return (
     <>
       <section
