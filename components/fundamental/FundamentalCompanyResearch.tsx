@@ -411,101 +411,114 @@ export default function FundamentalCompanyResearch({
   symbol,
 ]);
 
-  useEffect(() => {
-  const controller =
-    new AbortController();
+    useEffect(() => {
+    const controller = new AbortController();
+    let requestIsActive = true;
+    let requestTimedOut = false;
 
-  let requestIsActive = true;
+    const timeoutId = window.setTimeout(() => {
+      requestTimedOut = true;
+      controller.abort();
+    }, 30_000);
 
-  async function loadAnalytics() {
-    try {
+    async function loadAnalytics() {
       setIsLoading(true);
       setError("");
       setAnalytics(null);
 
-      const assumptions =
-  new URLSearchParams({
-    exchange,
-    forecastYears: "5",
-    riskFreeRate: "6.8",
-    beta: "1.05",
-    equityRiskPremium: "6",
-    freeCashFlowGrowthRate:
-      "8",
-    terminalGrowthRate: "5",
-  });
+      try {
+        const assumptions = new URLSearchParams({
+          exchange,
+          forecastYears: "5",
+          riskFreeRate: "6.8",
+          beta: "1.05",
+          equityRiskPremium: "6",
+          freeCashFlowGrowthRate: "8",
+          terminalGrowthRate: "5",
+        });
 
-      const response = await fetch(
-        `/api/fundamental/analytics/${encodeURIComponent(
-          symbol
-        )}?${assumptions.toString()}`,
-        {
-          method: "GET",
-          cache: "no-store",
-          signal:
-            controller.signal,
+        const response = await fetch(
+          `/api/fundamental/analytics/${encodeURIComponent(
+            symbol
+          )}?${assumptions.toString()}`,
+          {
+            method: "GET",
+            cache: "no-store",
+            signal: controller.signal,
+          }
+        );
+
+        const contentType =
+          response.headers.get("content-type") ?? "";
+
+        if (!contentType.toLowerCase().includes("application/json")) {
+          throw new Error(
+            response.status === 504
+              ? "The research service timed out. Please try again shortly."
+              : `The research service returned an unexpected response (HTTP ${response.status}).`
+          );
         }
-      );
 
-      const data =
-        (await response.json()) as
-          AnalyticsResponse;
+        const data =
+          (await response.json()) as AnalyticsResponse;
 
-      if (!response.ok) {
-        throw new Error(
-          data.details ??
+        if (!response.ok) {
+          throw new Error(
             data.error ??
-            "Unable to load fundamental research."
+              (response.status === 404
+                ? "Verified financial research is not currently available for this company."
+                : "Unable to load fundamental research.")
+          );
+        }
+
+        if (
+          !["success", "partial"].includes(data.status) ||
+          !Array.isArray(data.annualFinancials) ||
+          data.annualFinancials.length === 0
+        ) {
+          throw new Error(
+            "Verified financial research is not currently available for this company."
+          );
+        }
+
+        if (requestIsActive) {
+          setAnalytics(data);
+        }
+      } catch (requestError) {
+        // Ignore requests cancelled by navigation or component cleanup.
+        if (!requestIsActive) {
+          return;
+        }
+
+        console.error(
+          "Fundamental research error:",
+          requestError
         );
-      }
 
-      if (requestIsActive) {
-        setAnalytics(data);
-      }
-    } catch (requestError) {
-      if (
-        requestError instanceof Error &&
-        requestError.name ===
-          "AbortError"
-      ) {
-        return;
-      }
-
-      console.error(
-        "Fundamental research error:",
-        requestError
-      );
-
-      if (requestIsActive) {
         setError(
-          requestError instanceof Error
-            ? requestError.message
-            : "Unable to load fundamental research."
+          requestTimedOut
+            ? "Research is taking longer than expected. Please try again shortly."
+            : requestError instanceof Error
+              ? requestError.message
+              : "Unable to load fundamental research."
         );
-      }
-    } finally {
-      /*
-       * An aborted older request must
-       * not change the loading state of
-       * the new company request.
-       */
-      if (
-        requestIsActive &&
-        !controller.signal.aborted
-      ) {
-        setIsLoading(false);
+      } finally {
+        window.clearTimeout(timeoutId);
+
+        if (requestIsActive) {
+          setIsLoading(false);
+        }
       }
     }
-  }
 
-  loadAnalytics();
+    void loadAnalytics();
 
-  return () => {
-    requestIsActive = false;
-    controller.abort();
-  };
-}, [symbol, exchange]);
-          
+    return () => {
+      requestIsActive = false;
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [symbol, exchange]);
 
   const latestAnnual = useMemo(
     () =>
@@ -916,12 +929,12 @@ export default function FundamentalCompanyResearch({
 
           {(analytics.warnings?.length ??
             0) > 0 && (
-            <div className="mt-8 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6">
-              <h2 className="font-bold text-amber-300">
-                Data warnings
-              </h2>
+            <div className="mt-8 rounded-2xl border border-amber-300 bg-amber-50 p-6 dark:border-amber-500/30 dark:bg-amber-500/10">
+              <h2 className="font-bold text-amber-900 dark:text-amber-300">
+  Financial data notes
+</h2>
 
-              <ul className="mt-4 space-y-2 text-sm text-amber-100/80">
+              <ul className="mt-4 space-y-2 text-sm leading-6 text-amber-950 dark:text-amber-100">
                 {analytics.warnings?.map(
                   (warning) => (
                     <li key={warning}>

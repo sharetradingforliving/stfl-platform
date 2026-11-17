@@ -591,8 +591,8 @@ async function createNseSession(): Promise<
         headers:
           DEFAULT_HEADERS,
 
-        cache:
-          "no-store",
+        cache: "no-store",
+signal: AbortSignal.timeout(8000),
       }
     );
 
@@ -638,8 +638,8 @@ async function fetchCorporateActionsJson(
             : {}),
         },
 
-        cache:
-          "no-store",
+        cache: "no-store",
+signal: AbortSignal.timeout(8000),
       }
     );
 
@@ -1072,6 +1072,7 @@ async function fetchMarketCorporateActionsJson(
         },
 
         cache: "no-store",
+signal: AbortSignal.timeout(8000),
       }
     );
 

@@ -1667,6 +1667,7 @@ export async function fetchAndParseNseXbrl(
         method: "GET",
         headers: XML_HEADERS,
         cache: "no-store",
+signal: AbortSignal.timeout(20000),
       }
     );
 

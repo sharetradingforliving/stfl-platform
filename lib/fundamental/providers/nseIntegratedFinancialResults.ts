@@ -262,6 +262,7 @@ async function createNseSession(): Promise<
       method: "GET",
       headers: DEFAULT_HEADERS,
       cache: "no-store",
+signal: AbortSignal.timeout(15000),
     }
   );
 
@@ -296,6 +297,7 @@ async function requestJson(
           : {}),
       },
       cache: "no-store",
+signal: AbortSignal.timeout(15000),
     }
   );
 

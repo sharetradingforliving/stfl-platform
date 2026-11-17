@@ -1,543 +1,111 @@
-import {
-  auth,
-} from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import type { MarketSnapshot } from "@/lib/fundamental/types";
+import { getStoredFundamentalAnalytics as getFundamentalAnalytics } from "@/lib/fundamental/services/storedFundamentalAnalytics";
 
-import type {
-  MarketSnapshot,
-} from "@/lib/fundamental/types";
-
-import {
-  getFundamentalAnalytics,
-} from "@/lib/fundamental/services/fundamentalAnalytics";
-
-type RouteContext = {
-  params: Promise<{
-    symbol: string;
-  }>;
-};
-
-type UpstoxQuoteResponse = {
-  currentPrice?: number | null;
-  previousClose?: number | null;
-  change?: number | null;
-  changePercent?: number | null;
-  lastUpdated?: string | null;
-  source?: string | null;
-};
-
-type SubscriptionStatusResponse = {
-  authenticated?: boolean;
-  entitlement?: string;
-  is_premium?: boolean;
+type RouteContext = { params: Promise<{ symbol: string }> };
+const responseHeaders = {
+  "Cache-Control": "private, no-store, max-age=0",
+  Vary: "Cookie, Authorization",
 };
 
 async function hasPremiumValuationAccess(): Promise<boolean> {
   try {
-    const {
-      userId,
-      getToken,
-    } = await auth();
-
-    if (!userId) {
-      return false;
-    }
-
-    const token =
-      await getToken();
-
-    if (!token) {
-      return false;
-    }
-
-    const backendUrl =
-      process.env.STFL_BACKEND_URL;
-
-    if (!backendUrl) {
-      console.error(
-        "STFL_BACKEND_URL is missing. Valuation access was denied."
-      );
-
-      return false;
-    }
-
-    const response = await fetch(
-      `${backendUrl.replace(
-        /\/$/,
-        ""
-      )}/api/subscription/status`,
-      {
-        method: "GET",
-
-        headers: {
-          Accept:
-            "application/json",
-
-          Authorization:
-            `Bearer ${token}`,
-        },
-
-        cache: "no-store",
-      }
-    );
-
-    if (!response.ok) {
-      return false;
-    }
-
-    const subscription =
-      (await response.json()) as
-        SubscriptionStatusResponse;
-
-    return (
-      subscription.is_premium ===
-        true ||
-      subscription.entitlement
-        ?.trim()
-        .toUpperCase() ===
-        "PREMIUM"
-    );
+    const { userId, getToken } = await auth();
+    if (!userId) return false;
+    const token = await getToken();
+    const base = process.env.STFL_BACKEND_URL?.replace(/\/+$/, "");
+    if (!token || !base) return false;
+    const response = await fetch(`${base}/api/subscription/status`, {
+      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+      cache: "no-store", signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) return false;
+    const subscription = await response.json() as {
+      is_premium?: boolean; entitlement?: string;
+    };
+    return subscription.is_premium === true ||
+      subscription.entitlement?.trim().toUpperCase() === "PREMIUM";
   } catch (error) {
-    console.error(
-      "Valuation entitlement check failed:",
-      error
-    );
-
-    /*
-     * Fail closed. Public financial data
-     * remains available, but Premium
-     * valuation output is not exposed.
-     */
+    console.error("Valuation entitlement check failed:", error);
     return false;
   }
 }
 
-async function getMarketSnapshot(
-  request: Request,
-  symbol: string,
-  exchange: "NSE" | "BSE"
-): Promise<MarketSnapshot | null> {
+async function getMarketSnapshot(request: Request, symbol: string, exchange: "NSE" | "BSE"): Promise<MarketSnapshot | null> {
   try {
-    const requestUrl =
-      new URL(request.url);
-
-    const quoteUrl =
-      new URL(
-        `/api/upstox/quote/${encodeURIComponent(
-          symbol
-        )}`,
-        requestUrl.origin
-      );
-
-    quoteUrl.searchParams.set(
-  "exchange",
-  exchange
-);
-
-    /*
-     * Forward the browser cookie because
-     * the Upstox quote route reads the
-     * access token from cookies.
-     */
-    const cookieHeader =
-      request.headers.get("cookie");
-
-    const headers: HeadersInit = {
-      Accept: "application/json",
-    };
-
-    if (cookieHeader) {
-      headers.Cookie =
-        cookieHeader;
-    }
-
-    const response =
-      await fetch(
-        quoteUrl.toString(),
-        {
-          method: "GET",
-          headers,
-          cache: "no-store",
-        }
-      );
-
-    if (!response.ok) {
-      console.warn(
-        "Fundamental market quote unavailable:",
-        response.status
-      );
-
-      return null;
-    }
-
-    const quote =
-      (await response.json()) as
-        UpstoxQuoteResponse;
-
-    if (
-      typeof quote.currentPrice !==
-        "number" ||
-      !Number.isFinite(
-        quote.currentPrice
-      )
-    ) {
-      return null;
-    }
-
+    const url = new URL(`/api/upstox/quote/${encodeURIComponent(symbol)}`, new URL(request.url).origin);
+    url.searchParams.set("exchange", exchange);
+    const headers: Record<string, string> = { Accept: "application/json" };
+    const cookie = request.headers.get("cookie");
+    if (cookie) headers.Cookie = cookie;
+    const response = await fetch(url, {
+      headers, cache: "no-store", signal: AbortSignal.timeout(8000),
+    });
+    if (!response.ok) return null;
+    const quote = await response.json() as Partial<MarketSnapshot>;
+    if (typeof quote.currentPrice !== "number" || !Number.isFinite(quote.currentPrice)) return null;
     return {
-      currentPrice:
-        quote.currentPrice,
-
-      previousClose:
-        quote.previousClose ??
-        null,
-
-      change:
-        quote.change ?? null,
-
-      changePercent:
-        quote.changePercent ??
-        null,
-
-      /*
-       * The verified NSE annual share
-       * count is preferred later by the
-       * valuation calculator.
-       */
+      currentPrice: quote.currentPrice,
+      previousClose: quote.previousClose ?? null,
+      change: quote.change ?? null,
+      changePercent: quote.changePercent ?? null,
+      lastUpdated: quote.lastUpdated ?? null,
+      source: quote.source ?? "Upstox",
       sharesOutstanding: null,
-
-      /*
-       * These are calculated from the
-       * verified share count and financial
-       * statement values by the valuation
-       * engine.
-       */
       marketCapitalization: null,
       enterpriseValue: null,
-
-      lastUpdated:
-        quote.lastUpdated ??
-        null,
-
-      source:
-        quote.source ??
-        "Upstox",
     };
   } catch (error) {
-    console.warn(
-      "Unable to prepare market snapshot:",
-      error
-    );
-
-    /*
-     * Fundamental analysis must continue
-     * even if live market data is
-     * temporarily unavailable.
-     */
+    console.warn("Market snapshot unavailable:", error);
     return null;
   }
 }
 
-export async function GET(
-  request: Request,
-  { params }: RouteContext
-) {
+export async function GET(request: Request, { params }: RouteContext) {
   try {
-    const { symbol } =
-      await params;
-
-    const stockSymbol =
-      symbol.trim().toUpperCase();
-
-    if (!stockSymbol) {
-      return NextResponse.json(
-        {
-          status: "error",
-          error:
-            "Stock symbol is required.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    const { searchParams } =
-      new URL(request.url);
-
-      const selectedExchange:
-  | "NSE"
-  | "BSE" =
-  searchParams
-    .get("exchange")
-    ?.trim()
-    .toUpperCase() === "BSE"
-    ? "BSE"
-    : "NSE";
-
-    /*
-     * Invalid or unavailable assumptions
-     * remain null. The valuation engines
-     * must not invent missing values.
-     */
-    const parseAssumption = (
-      name: string
-    ): number | null => {
-      const rawValue =
-        searchParams.get(name);
-
-      if (
-        rawValue === null ||
-        rawValue.trim() === ""
-      ) {
-        return null;
-      }
-
-      const parsedValue =
-        Number(rawValue);
-
-      return Number.isFinite(
-        parsedValue
-      )
-        ? parsedValue
-        : null;
+    const symbol = (await params).symbol.trim().toUpperCase();
+    if (!symbol) return NextResponse.json({ status: "error", error: "Stock symbol is required." }, { status: 400, headers: responseHeaders });
+    const query = new URL(request.url).searchParams;
+    const exchange = query.get("exchange")?.trim().toUpperCase() === "BSE" ? "BSE" : "NSE";
+    const assumption = (name: string): number | null => {
+      const raw = query.get(name);
+      if (raw === null || !raw.trim()) return null;
+      const value = Number(raw);
+      return Number.isFinite(value) ? value : null;
     };
-
-    const parseWeight = (
-      name: string
-    ): number => {
-      const value =
-        parseAssumption(name);
-
-      if (
-        value === null ||
-        value <= 0
-      ) {
-        return 0;
-      }
-
-      return value;
-    };
-
-    /*
-     * WACC assumptions.
-     */
-    const waccAssumptions = {
-      riskFreeRate:
-        parseAssumption(
-          "riskFreeRate"
-        ),
-
-      beta:
-        parseAssumption(
-          "beta"
-        ),
-
-      equityRiskPremium:
-        parseAssumption(
-          "equityRiskPremium"
-        ),
-    };
-
-    /*
-     * DCF assumptions.
-     */
-    const forecastYearsValue =
-      parseAssumption(
-        "forecastYears"
-      );
-
-    const dcfAssumptions = {
-      forecastYears:
-        forecastYearsValue !== null
-          ? Math.trunc(
-              forecastYearsValue
-            )
-          : null,
-
-      freeCashFlowGrowthRate:
-        parseAssumption(
-          "freeCashFlowGrowthRate"
-        ),
-
-      terminalGrowthRate:
-        parseAssumption(
-          "terminalGrowthRate"
-        ),
-    };
-
-    /*
-     * Relative valuation benchmarks.
-     *
-     * Historical medians should come
-     * from the company's verified
-     * historical trading multiples.
-     *
-     * Industry medians should come from
-     * the selected industry or verified
-     * peer group.
-     *
-     * No benchmark is estimated here.
-     */
-    const relativeBenchmarks = {
-      priceToEarnings: {
-        historicalMedian:
-          parseAssumption(
-            "historicalPe"
-          ),
-
-        industryMedian:
-          parseAssumption(
-            "industryPe"
-          ),
-
-        weight:
-          parseWeight(
-            "peWeight"
-          ),
+    const weight = (name: string): number => Math.max(0, assumption(name) ?? 0);
+    const forecastYears = assumption("forecastYears");
+    const [market, premium] = await Promise.all([
+      getMarketSnapshot(request, symbol, exchange),
+      hasPremiumValuationAccess(),
+    ]);
+    const analytics = await getFundamentalAnalytics(symbol, market, {
+      riskFreeRate: assumption("riskFreeRate"), beta: assumption("beta"),
+      equityRiskPremium: assumption("equityRiskPremium"),
+    }, {
+      forecastYears: forecastYears === null ? null : Math.trunc(forecastYears),
+      freeCashFlowGrowthRate: assumption("freeCashFlowGrowthRate"),
+      terminalGrowthRate: assumption("terminalGrowthRate"),
+    }, {
+      priceToEarnings: { historicalMedian: assumption("historicalPe"), industryMedian: assumption("industryPe"), weight: weight("peWeight") },
+      priceToBook: { historicalMedian: assumption("historicalPb"), industryMedian: assumption("industryPb"), weight: weight("pbWeight") },
+      enterpriseValueToEbitda: { historicalMedian: assumption("historicalEvEbitda"), industryMedian: assumption("industryEvEbitda"), weight: weight("evEbitdaWeight") },
+      enterpriseValueToSales: { historicalMedian: assumption("historicalEvSales"), industryMedian: assumption("industryEvSales"), weight: weight("evSalesWeight") },
+    });
+    return NextResponse.json({
+      ...analytics,
+      valuation: premium ? analytics.valuation : null,
+      valuationAccess: {
+        available: premium,
+        entitlement: premium ? "PREMIUM" : "FREE",
+        reason: premium ? "ACTIVE_PAID_SUBSCRIPTION" : "PREMIUM_REQUIRED",
       },
-
-      priceToBook: {
-        historicalMedian:
-          parseAssumption(
-            "historicalPb"
-          ),
-
-        industryMedian:
-          parseAssumption(
-            "industryPb"
-          ),
-
-        weight:
-          parseWeight(
-            "pbWeight"
-          ),
-      },
-
-      enterpriseValueToEbitda: {
-        historicalMedian:
-          parseAssumption(
-            "historicalEvEbitda"
-          ),
-
-        industryMedian:
-          parseAssumption(
-            "industryEvEbitda"
-          ),
-
-        weight:
-          parseWeight(
-            "evEbitdaWeight"
-          ),
-      },
-
-      enterpriseValueToSales: {
-        historicalMedian:
-          parseAssumption(
-            "historicalEvSales"
-          ),
-
-        industryMedian:
-          parseAssumption(
-            "industryEvSales"
-          ),
-
-        weight:
-          parseWeight(
-            "evSalesWeight"
-          ),
-      },
-    };
-
-    const marketSnapshot =
-  await getMarketSnapshot(
-    request,
-    stockSymbol,
-    selectedExchange
-  );
-
-    const analytics =
-  await getFundamentalAnalytics(
-    stockSymbol,
-    marketSnapshot,
-    waccAssumptions,
-    dcfAssumptions,
-    relativeBenchmarks
-  );
-
-const hasPremiumAccess =
-  await hasPremiumValuationAccess();
-
-/*
- * Public financial statements remain
- * available to everyone. Detailed
- * valuation calculations are returned
- * only to an active Premium subscriber.
- */
-const responseAnalytics =
-  hasPremiumAccess
-    ? {
-        ...analytics,
-
-        valuationAccess: {
-          available: true,
-          entitlement: "PREMIUM",
-          reason:
-            "ACTIVE_PAID_SUBSCRIPTION",
-        },
-      }
-    : {
-        ...analytics,
-
-        valuation: null,
-
-        valuationAccess: {
-          available: false,
-          entitlement: "FREE",
-          reason:
-            "PREMIUM_REQUIRED",
-        },
-      };
-
-return NextResponse.json(
-  responseAnalytics,
-  {
-    status:
-      analytics.status ===
-      "unavailable"
-        ? 404
-        : 200,
-
-    headers: {
-      "Cache-Control":
-        "private, no-store, max-age=0",
-
-      Vary:
-        "Cookie, Authorization",
-    },
-  }
-);
+    }, { status: analytics.status === "unavailable" ? 404 : 200, headers: responseHeaders });
   } catch (error) {
-    console.error(
-      "Fundamental analytics route error:",
-      error
-    );
-
-    return NextResponse.json(
-      {
-        status: "error",
-
-        error:
-          "Unable to calculate fundamental analytics.",
-
-        details:
-          error instanceof Error
-            ? error.message
-            : "Unknown error",
-      },
-      {
-        status: 500,
-      }
-    );
+    console.error("Fundamental analytics route error:", error);
+    return NextResponse.json({ status: "error", error: "Financial research is temporarily unavailable. Please try again shortly." }, {
+      status: 503, headers: responseHeaders,
+    });
   }
 }
