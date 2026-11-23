@@ -1,359 +1,81 @@
 "use client";
 
 import type { CompanyResearch } from "@/lib/types/research";
-
 import { formatPrice } from "@/lib/utils/formatters";
 
-type SummaryMetricProps = {
-  label: string;
-  value: string;
-  status: SummaryStatus;
+type Status = "positive" | "negative" | "warning" | "neutral";
+const colours: Record<Status, string> = {
+  positive: "text-emerald-800", negative: "text-red-700",
+  warning: "text-amber-800", neutral: "text-slate-700",
 };
-
-type SummaryStatus = "positive" | "negative" | "warning" | "neutral";
-
-function formatLabel(value: string | null | undefined): string {
-  if (!value) {
-    return "Insufficient Data";
-  }
-
-  return value
-    .replace(/_/g, " ")
-    .toLowerCase()
-    .replace(/\b\w/g, (character) => character.toUpperCase());
+function label(value: string | null | undefined) {
+  return value ? value.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) : "Insufficient Data";
 }
-
-function getAssessment(recommendation: string | null | undefined): {
-  label: string;
-  status: SummaryStatus;
-} {
-  if (recommendation === "STRONG_BUY" || recommendation === "BUY") {
-    return {
-      label: "Positive Technical Structure",
-      status: "positive",
-    };
-  }
-
-  if (recommendation === "STRONG_SELL" || recommendation === "SELL") {
-    return {
-      label: "Weak Technical Structure",
-      status: "negative",
-    };
-  }
-
-  if (recommendation === "HOLD") {
-    return {
-      label: "Neutral Technical Structure",
-      status: "warning",
-    };
-  }
-
-  return {
-    label: "Insufficient Technical Data",
-    status: "neutral",
-  };
+function biasStatus(value: string | null | undefined): Status {
+  if (value === "STRONG_BUY" || value === "BUY") return "positive";
+  if (value === "STRONG_SELL" || value === "SELL") return "negative";
+  return value === "HOLD" ? "warning" : "neutral";
 }
-
-function getTechnicalStatus(
-  recommendation: string | null | undefined,
-): SummaryStatus {
-  if (recommendation === "STRONG_BUY" || recommendation === "BUY") {
-    return "positive";
-  }
-
-  if (recommendation === "STRONG_SELL" || recommendation === "SELL") {
-    return "negative";
-  }
-
-  if (recommendation === "HOLD") {
-    return "warning";
-  }
-
-  return "neutral";
+function momentumStatus(value: string | null | undefined): Status {
+  if (value === "VERY_STRONG" || value === "STRONG") return "positive";
+  if (value === "VERY_WEAK" || value === "WEAK") return "negative";
+  return value === "MODERATE" ? "warning" : "neutral";
 }
-
-function getMomentumStatus(strength: string | null | undefined): SummaryStatus {
-  if (strength === "VERY_STRONG" || strength === "STRONG") {
-    return "positive";
-  }
-
-  if (strength === "VERY_WEAK" || strength === "WEAK") {
-    return "negative";
-  }
-
-  if (strength === "MODERATE") {
-    return "warning";
-  }
-
-  return "neutral";
+function price(value: number | null | undefined) {
+  return typeof value === "number" && Number.isFinite(value) ? formatPrice(value) : "Not Available";
 }
-
-function getVolumeDescription(
-  accumulation: boolean | undefined,
-
-  distribution: boolean | undefined,
-
-  breakoutConfirmed: boolean | undefined,
-
-  relativeVolume: number | null | undefined,
-): {
-  label: string;
-  status: SummaryStatus;
-} {
-  if (breakoutConfirmed) {
-    return {
-      label: "Breakout Confirmed",
-      status: "positive",
-    };
-  }
-
-  if (accumulation && !distribution) {
-    return {
-      label: "Accumulation",
-      status: "positive",
-    };
-  }
-
-  if (distribution) {
-    return {
-      label: "Distribution",
-      status: "negative",
-    };
-  }
-
-  if (typeof relativeVolume === "number" && Number.isFinite(relativeVolume)) {
-    if (relativeVolume >= 1.5) {
-      return {
-        label: `High Volume (${relativeVolume.toFixed(2)}x)`,
-        status: "positive",
-      };
-    }
-
-    if (relativeVolume < 0.75) {
-      return {
-        label: `Low Volume (${relativeVolume.toFixed(2)}x)`,
-        status: "warning",
-      };
-    }
-
-    return {
-      label: `Normal Volume (${relativeVolume.toFixed(2)}x)`,
-      status: "neutral",
-    };
-  }
-
-  return {
-    label: "Insufficient Data",
-    status: "neutral",
-  };
+function Metric({ name, value, status = "neutral" }: { name: string; value: string; status?: Status }) {
+  return <div className="flex items-start justify-between gap-4 border-b border-slate-100 py-2 text-sm"><span className="text-slate-600">{name}</span><span className={`text-right font-semibold ${colours[status]}`}>{value}</span></div>;
 }
-
-function SummaryMetric({ label, value, status }: SummaryMetricProps) {
-  const statusClass: Record<SummaryStatus, string> = {
-    positive: "text-emerald-400",
-
-    negative: "text-red-400",
-
-    warning: "text-yellow-400",
-
-    neutral: "text-slate-400",
-  };
-
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-lg bg-slate-950/40 px-3 py-2">
-      <p className="text-sm text-slate-400">{label}</p>
-
-      <p className={`text-right text-sm font-semibold ${statusClass[status]}`}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
-export default function InvestmentSummary({
-  research,
-}: {
-  research: CompanyResearch | null;
-}) {
+export default function InvestmentSummary({ research }: { research: CompanyResearch | null }) {
   const technical = research?.technical;
-
   const summary = research?.investmentSummary;
-
-  const technicalBias = summary?.technicalBias;
-
-  const assessment = getAssessment(technicalBias);
-
-  const volumeDescription = getVolumeDescription(
-    technical?.volume.accumulation,
-
-    technical?.volume.distribution,
-
-    technical?.volume.breakoutConfirmed,
-
-    technical?.volumeData.relativeVolume,
-  );
-
-  const reasons = [
-    summary?.strengths?.trend,
-
-    summary?.strengths?.momentum,
-
-    summary?.strengths?.volume,
-
-    summary?.risks?.supportResistance,
-  ].filter(
-    (reason): reason is string =>
-      typeof reason === "string" && reason.trim().length > 0,
-  );
-
-  const assessmentColour =
-    assessment.status === "positive"
-      ? "text-emerald-400"
-      : assessment.status === "negative"
-        ? "text-red-400"
-        : assessment.status === "warning"
-          ? "text-yellow-400"
-          : "text-slate-400";
-
+  const status = biasStatus(summary?.technicalBias);
+  const assessment = status === "positive" ? "Positive Technical Structure" : status === "negative" ? "Weak Technical Structure" : status === "warning" ? "Neutral Technical Structure" : "Insufficient Technical Data";
+  let volume: { value: string; status: Status } = { value: "Insufficient Data", status: "neutral" };
+  const relativeVolume = technical?.volumeData.relativeVolume;
+  if (technical?.volume.breakoutConfirmed) volume = { value: "Breakout Confirmed", status: "positive" };
+  else if (technical?.volume.accumulation && !technical.volume.distribution) volume = { value: "Accumulation", status: "positive" };
+  else if (technical?.volume.distribution) volume = { value: "Distribution", status: "negative" };
+  else if (typeof relativeVolume === "number" && Number.isFinite(relativeVolume)) {
+    volume = { value: `${relativeVolume >= 1.5 ? "High" : relativeVolume < 0.75 ? "Low" : "Normal"} Volume (${relativeVolume.toFixed(2)}x)`, status: relativeVolume >= 1.5 ? "positive" : relativeVolume < 0.75 ? "warning" : "neutral" };
+  }
+  const reasons = [summary?.strengths?.trend, summary?.strengths?.momentum, summary?.strengths?.volume, summary?.risks?.supportResistance].filter((reason): reason is string => typeof reason === "string" && reason.trim().length > 0);
   return (
-    <div className="rounded-xl border border-slate-700 bg-slate-900 shadow-lg">
-      <div className="border-b border-slate-700 px-4 py-3">
-        <h2 className="text-lg font-semibold text-white">Research Summary</h2>
-
-        <p className="mt-1 text-xs text-slate-500">
-          Live, evidence-based STFL technical observations
-        </p>
-      </div>
-
-      <div className="p-4">
-        <div className="mb-4 rounded-lg bg-slate-800 p-3">
-          <p className="text-sm text-slate-400">Technical Assessment</p>
-
-          <h3 className={`mt-1 text-xl font-bold ${assessmentColour}`}>
-            {assessment.label}
-          </h3>
-
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-xs uppercase tracking-wider text-slate-500">
-              Confidence
-            </p>
-
-            <p className="text-sm font-semibold text-white">
-              {summary?.confidence ?? "--"}%
-            </p>
-          </div>
-
-          <div className="mt-2 flex items-center justify-between">
-            <p className="text-xs uppercase tracking-wider text-slate-500">
-              Technical Score
-            </p>
-
-            <p className="text-sm font-semibold text-white">
-              {summary?.technicalScore ?? "--"}
-              /100
-            </p>
+    <section className="rounded-xl bg-white p-4 text-slate-900 sm:p-5">
+      <header className="mb-4 border-b border-slate-200 pb-3">
+        <h2 className="text-base font-semibold">Research Summary</h2>
+        <p className="mt-1 text-xs text-slate-600">Technical observations from the selected timeframe and available data</p>
+      </header>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-600">Technical assessment</p>
+          <h3 className={`mt-2 text-xl font-bold ${colours[status]}`}>{assessment}</h3>
+          <Metric name="Confidence" value={summary?.confidence != null ? `${summary.confidence}%` : "Not Available"} />
+          <Metric name="Technical score" value={summary?.technicalScore != null ? `${summary.technicalScore}/100` : "Not Available"} />
+          <Metric name="Current price" value={price(summary?.currentPrice)} />
+          <p className="mt-3 text-xs leading-5 text-slate-600">Confidence is the research engine’s score; it is not a probability of a profitable trade.</p>
+        </div>
+        <div>
+          <Metric name="Technical trend" value={label(summary?.pattern)} status={status} />
+          <Metric name="Technical bias" value={label(summary?.technicalBias)} status={status} />
+          <Metric name="Momentum" value={label(technical?.momentum.momentumStrength)} status={momentumStatus(technical?.momentum.momentumStrength)} />
+          <Metric name="Volume" value={volume.value} status={volume.status} />
+          <Metric name="Support 1" value={price(summary?.support1)} status="positive" />
+          <Metric name="Support 2" value={price(summary?.support2)} status="positive" />
+          <Metric name="Resistance 1" value={price(summary?.resistance1)} status="negative" />
+          <Metric name="Resistance 2" value={price(summary?.resistance2)} status="negative" />
+        </div>
+        <div>
+          <h3 className="mb-3 text-sm font-semibold">Supporting observations</h3>
+          {reasons.length ? <ul className="list-disc space-y-2 pl-4 text-sm leading-6 text-slate-700">{reasons.map((reason, index) => <li key={`${index}-${reason}`}>{reason}</li>)}</ul> : <p className="text-sm text-slate-600">Technical observations are not available yet.</p>}
+          <div className="mt-4">
+            <Metric name="Fundamental" value={research?.fundamental ? "Available" : "Not Connected"} status={research?.fundamental ? "positive" : "neutral"} />
+            <Metric name="Valuation" value={research?.valuation ? "Available" : "Not Connected"} status={research?.valuation ? "positive" : "neutral"} />
           </div>
         </div>
-
-        <div className="space-y-2">
-          <SummaryMetric
-            label="Current Price"
-            value={summary ? formatPrice(summary.currentPrice) : "--"}
-            status="neutral"
-          />
-
-          <SummaryMetric
-            label="Technical Trend"
-            value={formatLabel(summary?.pattern)}
-            status={getTechnicalStatus(technicalBias)}
-          />
-
-          <SummaryMetric
-            label="Technical Bias"
-            value={formatLabel(technicalBias)}
-            status={getTechnicalStatus(technicalBias)}
-          />
-
-          <SummaryMetric
-            label="Momentum"
-            value={formatLabel(technical?.momentum.momentumStrength)}
-            status={getMomentumStatus(technical?.momentum.momentumStrength)}
-          />
-
-          <SummaryMetric
-            label="Volume"
-            value={volumeDescription.label}
-            status={volumeDescription.status}
-          />
-
-          <SummaryMetric
-            label="Support 1"
-            value={summary ? formatPrice(summary.support1) : "--"}
-            status="positive"
-          />
-
-          <SummaryMetric
-            label="Support 2"
-            value={
-              summary?.support2 != null
-                ? formatPrice(summary.support2)
-                : "Not Available"
-            }
-            status="positive"
-          />
-
-          <SummaryMetric
-            label="Resistance 1"
-            value={summary ? formatPrice(summary.resistance1) : "--"}
-            status="negative"
-          />
-
-          <SummaryMetric
-            label="Resistance 2"
-            value={
-              summary?.resistance2 != null
-                ? formatPrice(summary.resistance2)
-                : "Not Available"
-            }
-            status="negative"
-          />
-
-          <SummaryMetric
-            label="Fundamental"
-            value={research?.fundamental ? "Available" : "Not Connected"}
-            status={research?.fundamental ? "positive" : "neutral"}
-          />
-
-          <SummaryMetric
-            label="Valuation"
-            value={research?.valuation ? "Available" : "Not Connected"}
-            status={research?.valuation ? "positive" : "neutral"}
-          />
-        </div>
-
-        <div className="mt-4 max-h-52 overflow-y-auto border-t border-slate-800 pt-3 pr-2">
-          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
-            Why {assessment.label}
-          </h4>
-
-          {reasons.length > 0 ? (
-            <ul className="space-y-2 text-sm text-slate-300">
-              {reasons.map((reason, index) => (
-                <li key={`${index}-${reason}`}>• {reason}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-slate-500">
-              Technical observations are loading.
-            </p>
-          )}
-        </div>
-
-        <p className="mt-4 border-t border-slate-800 pt-3 text-xs leading-5 text-slate-500">
-          {summary?.disclaimer ??
-            "Technical analysis is for research purposes and does not constitute investment advice."}
-        </p>
       </div>
-    </div>
+      <p className="mt-4 border-t border-slate-200 pt-3 text-xs leading-5 text-slate-600">{summary?.disclaimer ?? "Technical analysis is for research purposes and does not constitute investment advice."}</p>
+    </section>
   );
 }

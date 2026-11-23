@@ -1,5 +1,6 @@
 "use client";
 
+import DrawingTools from "@/components/charts/DrawingTools";
 import ChartToolbar from "@/components/charts/ChartToolbar";
 import PriceChart from "@/components/charts/PriceChart";
 import CompanySearch from "@/components/search/CompanySearch";
@@ -12,14 +13,7 @@ import type {
 } from "@/lib/types/research";
 
 import Link from "next/link";
-import {
-  MousePointer2,
-  Minus,
-  MoveVertical,
-  Ratio,
-  Square,
-  Trash2,
-} from "lucide-react";
+
 
 import {
   useEffect,
@@ -56,7 +50,9 @@ type ChartCommand =
   | "zoomIn"
   | "zoomOut"
   | "reset"
-  | "clearDrawings";
+  | "clearDrawings"
+  | "undoDrawing"
+  | "redoDrawing";
 
 export default function BasicCompanyDashboard({
   symbol,
@@ -98,10 +94,12 @@ export default function BasicCompanyDashboard({
     setActiveIndicators,
   ] = useState<string[]>([]);
 
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+
   const [
     isCrosshairActive,
     setIsCrosshairActive,
-  ] = useState(false);
+  ] = useState(true);
 
   const [
     activeDrawingTool,
@@ -120,6 +118,28 @@ export default function BasicCompanyDashboard({
     action: ChartCommand;
     id: number;
   } | null>(null);
+
+  useEffect(() => {
+    setResearch(null);
+  }, [symbol, exchange, timeframe]);
+
+  const settingsKey = `stfl:chart-settings:v1:${exchange}:${symbol}`;
+  const [settingsReadyKey, setSettingsReadyKey] = useState("");
+  useEffect(() => {
+    let savedTimeframe = "D";
+    let savedIndicators: string[] = [];
+    try {
+      const saved = JSON.parse(localStorage.getItem(settingsKey) || "null");
+      if (["1m","5m","15m","30m","1H","4H","D","W","M"].includes(saved?.timeframe)) savedTimeframe = saved.timeframe;
+      if (Array.isArray(saved?.indicators)) savedIndicators = [...new Set<string>(saved.indicators.filter((v: unknown): v is string => typeof v === "string" && ["SMA20","SMA50","SMA100","SMA200","EMA20","EMA50","EMA100","EMA200","RSI","MACD"].includes(v)))];
+    } catch {}
+    setTimeframe(savedTimeframe); setActiveIndicators(savedIndicators); setSettingsReadyKey(settingsKey);
+    setActiveDrawingTool(null);
+  }, [settingsKey]);
+  useEffect(() => {
+    if (settingsReadyKey !== settingsKey) return;
+    try { localStorage.setItem(settingsKey, JSON.stringify({version:1,timeframe,indicators:activeIndicators})); } catch {}
+  }, [settingsKey, settingsReadyKey, timeframe, activeIndicators]);
 
   function handleIndicatorToggle(
     indicator: string
@@ -193,6 +213,17 @@ export default function BasicCompanyDashboard({
   }, []);
 
   useEffect(() => {
+    const cancelDrawing = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActiveDrawingTool(null);
+    };
+    window.addEventListener("keydown", cancelDrawing);
+    return () => window.removeEventListener("keydown", cancelDrawing);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+    setMarketData(null);
     async function fetchMarketData() {
       try {
         setIsLoading(true);
@@ -200,9 +231,10 @@ export default function BasicCompanyDashboard({
 
         const response =
           await fetch(
-            `/api/upstox/quote/${symbol}?exchange=${exchange}`,
+            `/api/upstox/quote/${encodeURIComponent(symbol)}?exchange=${encodeURIComponent(exchange)}`,
             {
               cache: "no-store",
+              signal: controller.signal,
             }
           );
 
@@ -216,8 +248,9 @@ export default function BasicCompanyDashboard({
           );
         }
 
-        setMarketData(data);
+        if (active) setMarketData(data);
       } catch (error) {
+        if (!active || controller.signal.aborted) return;
         console.error(
           "Basic company dashboard error:",
           error
@@ -229,11 +262,12 @@ export default function BasicCompanyDashboard({
             : "Unable to load market data"
         );
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     }
 
     fetchMarketData();
+    return () => { active = false; controller.abort(); };
   }, [symbol, exchange]);
 
   function formatPrice(
@@ -277,8 +311,8 @@ export default function BasicCompanyDashboard({
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-        <p className="text-lg text-slate-400">
+      <main className="flex min-h-screen items-center justify-center bg-white text-slate-900">
+        <p className="text-lg text-slate-600">
           Loading live market data...
         </p>
       </main>
@@ -287,9 +321,9 @@ export default function BasicCompanyDashboard({
 
   if (error || !marketData) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">
+      <main className="flex min-h-screen items-center justify-center bg-white px-6 text-slate-900">
         <div className="max-w-xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-700">
             STFL Company Research
           </p>
 
@@ -297,7 +331,7 @@ export default function BasicCompanyDashboard({
             Market Data Unavailable
           </h2>
 
-          <p className="mt-4 text-slate-400">
+          <p className="mt-4 text-slate-600">
             {error}
           </p>
 
@@ -316,14 +350,14 @@ export default function BasicCompanyDashboard({
     marketData.change >= 0;
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <header className="border-b border-slate-800 px-6 py-5">
-        <section className="border-b border-slate-800 bg-[#020817] px-5 py-5">
+    <main className="min-h-screen bg-white text-slate-900">
+      <header className="border-b border-slate-200 px-6 py-5">
+        <section className="border-b border-slate-200 bg-white px-5 py-5">
           <div className="mx-auto max-w-7xl">
             
             <Link
               href="/company-research"
-              className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-400 transition hover:text-emerald-400"
+              className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-emerald-700"
             >
               <span>←</span>
 
@@ -337,10 +371,10 @@ export default function BasicCompanyDashboard({
         </section>
       </header>
 
-      <section className="mx-auto max-w-7xl px-6 py-14">
+      <section className="mx-auto max-w-[1600px] px-3 py-6 sm:px-6">
         <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-400">
+            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-700">
               STFL Live Market Dashboard
             </p>
 
@@ -349,23 +383,23 @@ export default function BasicCompanyDashboard({
                 {marketData.symbol}
               </h2>
 
-              <span className="rounded-full border border-emerald-500/50 px-4 py-2 text-sm font-semibold text-emerald-400">
+              <span className="rounded-full border border-emerald-500/50 px-4 py-2 text-sm font-semibold text-emerald-700">
                 {marketData.exchange}
               </span>
             </div>
 
-            <p className="mt-5 text-lg font-medium text-slate-300">
+            <p className="mt-5 text-lg font-medium text-slate-700">
               {marketData.companyName}
             </p>
 
-            <p className="mt-2 text-slate-400">
+            <p className="mt-2 text-slate-600">
               Live market overview
               powered by Upstox
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 lg:min-w-96">
-            <p className="text-sm text-slate-400">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 lg:min-w-96">
+            <p className="text-sm text-slate-600">
               Current Market Price
             </p>
 
@@ -379,8 +413,8 @@ export default function BasicCompanyDashboard({
               <p
                 className={`pb-1 font-semibold ${
                   isPositive
-                    ? "text-emerald-400"
-                    : "text-red-400"
+                    ? "text-emerald-700"
+                    : "text-red-700"
                 }`}
               >
                 {isPositive
@@ -408,45 +442,37 @@ export default function BasicCompanyDashboard({
         </div>
 
         {/* STFL Research Terminal */}
-        <div className="mt-12 rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
+        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-2 sm:p-3">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-400">
+              <p className="text-sm font-semibold uppercase tracking-[0.35em] text-emerald-700">
                 STFL Research Terminal
               </p>
 
-              <h2 className="mt-2 text-3xl font-bold">
-                Interactive Professional
-                Chart
+              <h2 className="mt-1 text-xl font-bold">
+                Price chart & technical analysis
               </h2>
 
-              <p className="mt-2 text-slate-400">
-                Professional market
-                analysis powered by
-                Upstox data and STFL AI
-                research.
+              <p className="mt-2 text-slate-600">
+                Upstox candles · STFL technical research
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-black hover:bg-emerald-400"
-              >
-                🧠 STFL AI Research
-              </button>
-            </div>
+
           </div>
 
           <div
   ref={chartContainerRef}
   className={
     isChartFullscreen
-      ? "h-screen overflow-auto bg-slate-950 p-6"
-      : "mt-8"
+      ? "h-screen overflow-auto bg-white p-3"
+      : "mt-3"
   }
 >
             <ChartToolbar
+              symbol={symbol}
+              isSummaryOpen={isSummaryOpen}
+              onAnalyse={() => setIsSummaryOpen((open) => !open)}
               timeframe={timeframe}
               onTimeframeChange={
                 setTimeframe
@@ -483,8 +509,8 @@ export default function BasicCompanyDashboard({
             <div
   className={
     isChartFullscreen
-      ? "mt-6 grid grid-cols-1"
-      : "mt-6 grid grid-cols-1 items-start gap-6 xl:grid-cols-10"
+      ? "mt-2 grid grid-cols-1"
+      : "mt-2 grid grid-cols-1 items-start gap-3"
   }
 >
               {/* Left side */}
@@ -492,199 +518,15 @@ export default function BasicCompanyDashboard({
   className={
     isChartFullscreen
       ? "min-w-0"
-      : "min-w-0 xl:col-span-7"
+      : "min-w-0"
   }
 >
-                <div className="flex min-w-0 items-start gap-2">
-  {/* Desktop sticky drawing rail */}
-  <aside
-    className={`hidden shrink-0 md:block ${
-      isChartFullscreen
-        ? "sticky top-4"
-        : "sticky top-24"
-    } z-40`}
-  >
-    <div className="flex w-12 flex-col items-center gap-1 rounded-xl border border-slate-700 bg-slate-950/95 p-1.5 shadow-xl backdrop-blur">
-      <button
-        type="button"
-        title="Pointer / Stop drawing"
-        aria-label="Pointer / Stop drawing"
-        onClick={() =>
-          setActiveDrawingTool(null)
-        }
-        className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
-          activeDrawingTool === null
-            ? "bg-emerald-500 text-slate-950"
-            : "text-slate-300 hover:bg-slate-800 hover:text-white"
-        }`}
-      >
-        <MousePointer2
-          className="h-4 w-4"
-          aria-hidden="true"
-        />
-      </button>
-
-      <div className="my-1 h-px w-7 bg-slate-800" />
-
-      <button
-        type="button"
-        title="Horizontal Line"
-        aria-label="Horizontal Line"
-        onClick={() =>
-          setActiveDrawingTool(
-            (currentTool) =>
-              currentTool === "horizontal-line"
-                ? null
-                : "horizontal-line"
-          )
-        }
-        className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
-          activeDrawingTool === "horizontal-line"
-            ? "bg-cyan-500 text-slate-950"
-            : "text-slate-300 hover:bg-slate-800 hover:text-cyan-400"
-        }`}
-      >
-        <Minus
-          className="h-5 w-5"
-          aria-hidden="true"
-        />
-      </button>
-
-      <button
-        type="button"
-        title="Fibonacci Retracement"
-        aria-label="Fibonacci Retracement"
-        onClick={() =>
-          setActiveDrawingTool(
-            (currentTool) =>
-              currentTool === "fibonacci"
-                ? null
-                : "fibonacci"
-          )
-        }
-        className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
-          activeDrawingTool === "fibonacci"
-            ? "bg-emerald-500 text-slate-950"
-            : "text-slate-300 hover:bg-slate-800 hover:text-emerald-400"
-        }`}
-      >
-        <span className="text-[10px] font-bold tracking-wide">
-  FIB
-</span>
-      </button>
-
-      <div className="my-1 h-px w-7 bg-slate-800" />
-
-      <button
-        type="button"
-        disabled
-        title="Vertical Line — coming next"
-        aria-label="Vertical Line — coming next"
-        className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-lg text-slate-600"
-      >
-        <MoveVertical
-          className="h-5 w-5"
-          aria-hidden="true"
-        />
-      </button>
-
-      <button
-  type="button"
-  disabled
-  title="Rectangle / Zone — coming next"
-  aria-label="Rectangle / Zone — coming next"
-  className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-lg text-slate-600"
->
-  <Square
-    className="h-5 w-5"
-    aria-hidden="true"
-  />
-</button>
-
-<div className="my-1 h-px w-7 bg-slate-800" />
-
-<button
-  type="button"
-  title="Clear all drawings"
-  aria-label="Clear all drawings"
-  onClick={() => {
-    handleChartCommand(
-      "clearDrawings"
-    );
-    setActiveDrawingTool(null);
-  }}
-  className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition hover:bg-red-500/15 hover:text-red-400"
->
-  <Trash2
-    className="h-4 w-4"
-    aria-hidden="true"
-  />
-</button>
-    </div>
-  </aside>
-
-  {/* Mobile drawing rail */}
-  <div className="mb-2 flex gap-1 rounded-xl border border-slate-700 bg-slate-950 p-1.5 md:hidden">
-    <button
-      type="button"
-      title="Pointer / Stop drawing"
-      onClick={() =>
-        setActiveDrawingTool(null)
-      }
-      className={`flex h-9 w-9 items-center justify-center rounded-lg ${
-        activeDrawingTool === null
-          ? "bg-emerald-500 text-slate-950"
-          : "text-slate-300"
-      }`}
-    >
-      <MousePointer2 className="h-4 w-4" />
-    </button>
-
-    <button
-      type="button"
-      title="Horizontal Line"
-      onClick={() =>
-        setActiveDrawingTool(
-          (currentTool) =>
-            currentTool === "horizontal-line"
-              ? null
-              : "horizontal-line"
-        )
-      }
-      className={`flex h-9 w-9 items-center justify-center rounded-lg ${
-        activeDrawingTool === "horizontal-line"
-          ? "bg-cyan-500 text-slate-950"
-          : "text-slate-300"
-      }`}
-    >
-      <Minus className="h-5 w-5" />
-    </button>
-
-    <button
-      type="button"
-      title="Fibonacci Retracement"
-      onClick={() =>
-        setActiveDrawingTool(
-          (currentTool) =>
-            currentTool === "fibonacci"
-              ? null
-              : "fibonacci"
-        )
-      }
-      className={`flex h-9 w-9 items-center justify-center rounded-lg ${
-        activeDrawingTool === "fibonacci"
-          ? "bg-emerald-500 text-slate-950"
-          : "text-slate-300"
-      }`}
-    >
-      <span className="text-[10px] font-bold tracking-wide">
-  FIB
-</span>
-    </button>
-  </div>
+                <div className="flex min-w-0 flex-col items-stretch gap-0 md:flex-row">
+  <DrawingTools activeTool={activeDrawingTool} onSelect={setActiveDrawingTool} />
 
   <div className="min-w-0 flex-1">
     <PriceChart
+      onDrawingComplete={() => setActiveDrawingTool(null)}
       symbol={symbol}
       exchange={exchange}
       instrumentKey={
@@ -713,13 +555,24 @@ export default function BasicCompanyDashboard({
   </div>
 </div>
 
+              {/* Collapsible research below the chart */}
+{isSummaryOpen && (
+  <aside id="stfl-chart-summary" className="min-w-0">
+    <div className="rounded-xl border border-slate-200">
+      <InvestmentSummary
+        research={research}
+      />
+    </div>
+  </aside>
+)}
+
                 {/* Market Snapshot now follows the chart */}
                 <div className="mt-6">
-                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-400">
+                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-700">
                     Market Snapshot
                   </p>
 
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
                     <MetricCard
                       label="Previous Close"
                       value={formatPrice(
@@ -780,16 +633,7 @@ export default function BasicCompanyDashboard({
                 </div>
               </div>
 
-              {/* Right side — hidden in chart fullscreen */}
-{!isChartFullscreen && (
-  <aside className="min-w-0 xl:col-span-3">
-    <div className="xl:sticky xl:top-6">
-      <InvestmentSummary
-        research={research}
-      />
-    </div>
-  </aside>
-)}
+
           </div>
         </div>
       </div>
@@ -812,11 +656,11 @@ export default function BasicCompanyDashboard({
 
         <div className="mt-12 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-6 md:flex md:items-center md:justify-between md:gap-8">
   <div>
-    <p className="font-semibold text-emerald-300">
+    <p className="font-semibold text-emerald-800">
       Explore Detailed Fundamental Research
     </p>
 
-    <p className="mt-2 leading-7 text-slate-400">
+    <p className="mt-2 leading-7 text-slate-600">
       Review verified annual financial statements,
       growth, profitability, banking metrics,
       valuation methods and peer comparisons for{" "}
@@ -851,16 +695,16 @@ function MetricCard({
   small?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-      <p className="text-sm text-slate-400">
+    <div className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+      <p className="text-xs text-slate-600">
         {label}
       </p>
 
       <p
-        className={`mt-2 font-bold text-white ${
+        className={`mt-1 font-semibold text-slate-900 ${
           small
-            ? "break-all text-sm"
-            : "text-xl"
+            ? "break-all text-xs"
+            : "text-base"
         }`}
       >
         {value}

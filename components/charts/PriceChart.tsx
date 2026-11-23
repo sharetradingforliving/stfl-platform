@@ -11,11 +11,16 @@ import {
   CandlestickSeries,
   HistogramSeries,
   LineSeries,
+  AreaSeries,
+  BarSeries,
+  type IChartApi,
+  type ISeriesApi,
   ColorType,
   CrosshairMode,
   type Time,
-  type IPriceLine,
 } from "lightweight-charts";
+
+import DrawingWorkspace from "./DrawingWorkspace";
 
 import { buildPriceHistory } from "@/lib/technical/builders/buildPriceHistory";
 import { buildTechnicalInput } from "@/lib/technical/builders/technicalInputBuilder";
@@ -32,7 +37,9 @@ type ChartCommand =
   | "zoomIn"
   | "zoomOut"
   | "reset"
-  | "clearDrawings";
+  | "clearDrawings"
+  | "undoDrawing"
+  | "redoDrawing";
 
 type PriceChartProps = {
   symbol: string;
@@ -47,6 +54,7 @@ type PriceChartProps = {
     action: ChartCommand;
     id: number;
   } | null;
+  onDrawingComplete?: () => void;
   onResearchReady?: (
     research: CompanyResearch
   ) => void;
@@ -100,19 +108,40 @@ export default function PriceChart({
     isFullscreen,
     chartCommand,
   onResearchReady,
+  onDrawingComplete,
   }: PriceChartProps) {
       const chartRef = useRef<HTMLDivElement>(null);
       const chartInstanceRef = useRef<ReturnType<
   typeof createChart
 > | null>(null);
 
+  type Style = "candles" | "line" | "area" | "bars";
+  const [chartStyle, setChartStyle] = useState<Style>("candles");
+  const [styleReadyKey, setStyleReadyKey] = useState("");
+  const styleKey = `stfl:chart-style:v1:${exchange}:${symbol}`;
+  const styleSeriesRef = useRef<{ candles: ISeriesApi<"Candlestick">; line: ISeriesApi<"Line">; area: ISeriesApi<"Area">; bars: ISeriesApi<"Bar"> } | null>(null);
+  const [drawingContext, setDrawingContext] = useState<{chart:IChartApi;series:ISeriesApi<"Candlestick">;element:HTMLDivElement;candles:ChartCandle[];key:string} | null>(null);
+  const completeRef = useRef(onDrawingComplete);
+  completeRef.current = onDrawingComplete;
+  useEffect(() => {
+    let value: Style = "candles";
+    try { const saved = localStorage.getItem(styleKey); if (["candles", "line", "area", "bars"].includes(saved ?? "")) value = saved as Style; } catch {}
+    setChartStyle(value); setStyleReadyKey(styleKey);
+  }, [styleKey]);
+  useEffect(() => {
+    if (styleReadyKey !== styleKey) return;
+    try { localStorage.setItem(styleKey, chartStyle); } catch {}
+  }, [chartStyle, styleReadyKey, styleKey]);
+  const candlesRef = useRef<ChartCandle[]>([]);
+  const [candleRevision, setCandleRevision] = useState(0);
+  const [latestCandle, setLatestCandle] = useState<ChartCandle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 const [error, setError] = useState("");
 
 const [crosshairData, setCrosshairData] =
   useState<CrosshairData>(null);
 
-  const [fibonacciPoints, setFibonacciPoints] =
+  const [, setFibonacciPoints] =
   useState<FibonacciPoint[]>([]);
 
 const activeDrawingToolRef =
@@ -121,14 +150,16 @@ const activeDrawingToolRef =
 const fibonacciPointsRef =
   useRef<FibonacciPoint[]>([]);
 
-  const drawingPriceLinesRef =
-  useRef<IPriceLine[]>([]);
-
-const clearDrawingsRef =
-  useRef<() => void>(() => {});
-
   useEffect(() => {
     if (!chartRef.current) return;
+
+    let active = true;
+    const controller = new AbortController();
+    candlesRef.current = [];
+    fibonacciPointsRef.current = [];
+    setFibonacciPoints([]);
+    setCrosshairData(null);
+    setLatestCandle(null);
 
     const chart = createChart(chartRef.current, {
   width: chartRef.current.clientWidth,
@@ -141,54 +172,45 @@ const clearDrawingsRef =
 },
   layout: {
   background: {
-    color: "#020817",
+    type: ColorType.Solid,
+    color: "#ffffff",
   },
-  textColor: "#CBD5E1",
+  textColor: "#475569",
   attributionLogo: false,
 },
 
   grid: {
     vertLines: {
-      color: "#1E293B",
+      color: "#edf1f5",
     },
     horzLines: {
-      color: "#1E293B",
+      color: "#edf1f5",
     },
   },
 
   rightPriceScale: {
-    borderColor: "#334155",
+    borderColor: "#e2e8f0",
   },
 
   timeScale: {
-    borderColor: "#334155",
+    borderColor: "#e2e8f0",
   },
 });
 chartInstanceRef.current = chart;
 const candleSeries = chart.addSeries(CandlestickSeries, {
-    upColor: "#22c55e",
-    downColor: "#ef4444",
-    borderVisible: false,
+    upColor: "#36bd93",
+    downColor: "#f87171",
+    borderVisible: true,
+    borderUpColor: "#15803d",
+    borderDownColor: "#dc2626",
     wickUpColor: "#22c55e",
     wickDownColor: "#ef4444",
 });
-clearDrawingsRef.current = () => {
-  drawingPriceLinesRef.current.forEach(
-    (priceLine) => {
-      try {
-        candleSeries.removePriceLine(
-          priceLine
-        );
-      } catch {
-        // The chart may already have been rebuilt.
-      }
-    }
-  );
-
-  drawingPriceLinesRef.current = [];
-  fibonacciPointsRef.current = [];
-  setFibonacciPoints([]);
-};
+candleSeries.priceScale().applyOptions({scaleMargins:{top:0.08,bottom:0.22}});
+const lineStyle = chart.addSeries(LineSeries, {color:"#2563eb",lineWidth:2,visible:false});
+const areaStyle = chart.addSeries(AreaSeries, {lineColor:"#2563eb",topColor:"rgba(37,99,235,.20)",bottomColor:"rgba(37,99,235,0)",visible:false});
+const barStyle = chart.addSeries(BarSeries, {upColor:"#059669",downColor:"#dc2626",visible:false});
+styleSeriesRef.current = {candles:candleSeries,line:lineStyle,area:areaStyle,bars:barStyle};
 const volumeSeries = chart.addSeries(HistogramSeries, {
   priceFormat: {
     type: "volume",
@@ -211,10 +233,18 @@ async function loadCandles() {
     const response = await fetch(
       `/api/upstox/candles?instrumentKey=${encodeURIComponent(
         instrumentKey
-      )}&timeframe=${encodeURIComponent(timeframe)}`
+      )}&timeframe=${encodeURIComponent(timeframe)}`,
+      { signal: controller.signal }
     );
 
+    if (!response.headers.get("content-type")?.includes("application/json")) {
+      throw new Error(`Chart request failed (HTTP ${response.status}). Please retry.`);
+    }
     const data = await response.json();
+    if (!active) return;
+    if (!Array.isArray(data.candles) || data.candles.length === 0) {
+      throw new Error(data?.error ?? "No candles are available for this timeframe.");
+    }
 
     if (!response.ok) {
       throw new Error(
@@ -251,6 +281,49 @@ async function loadCandles() {
     b: { time: number }
   ) => a.time - b.time
 );
+    const formattedVolume =
+  formattedCandles.map(
+  (candle) => ({
+    time: candle.time,
+    value: candle.volume,
+    color:
+      candle.close >= candle.open
+        ? "rgba(34, 197, 94, 0.45)"
+        : "rgba(239, 68, 68, 0.45)",
+  })
+);
+candleSeries.setData(formattedCandles);
+lineStyle.setData(formattedCandles.map(c => ({time:c.time,value:c.close})));
+areaStyle.setData(formattedCandles.map(c => ({time:c.time,value:c.close})));
+barStyle.setData(formattedCandles);
+setDrawingContext({chart,series:candleSeries,element:chartRef.current!,candles:formattedCandles,key:`stfl:drawings:v1:${exchange}:${symbol}:${timeframe}`});
+volumeSeries.setData(formattedVolume);
+candlesRef.current = formattedCandles;
+setLatestCandle(formattedCandles[formattedCandles.length - 1]);
+setCandleRevision((revision) => revision + 1);
+
+chart.subscribeCrosshairMove((param) => {
+  if (!param.time) {
+    setCrosshairData(null);
+    return;
+  }
+
+  const matchingCandle = formattedCandles.find(item => item.time === param.time);
+  setCrosshairData(matchingCandle ?? null);
+});
+    const visibleCandleCount = Math.max(40, Math.min(110, Math.floor((chartRef.current?.clientWidth ?? 900) / 10)));
+
+chart.timeScale().setVisibleLogicalRange({
+  from: Math.max(
+    formattedCandles.length - visibleCandleCount,
+    0
+  ),
+  to: formattedCandles.length + 5,
+});
+
+    setIsLoading(false);
+    void (async () => {
+      try {
 const priceHistory =
   buildPriceHistory(
     formattedCandles
@@ -283,6 +356,7 @@ try {
       {
         method: "GET",
         cache: "no-store",
+        signal: controller.signal,
       }
     );
 
@@ -332,23 +406,88 @@ const research =
     technicalInput
   );
 
-onResearchReady?.(
-  research
+if (active) onResearchReady?.(research);
+
+
+      } catch (researchError) {
+        if (active) console.warn("Technical research unavailable:", researchError);
+      }
+    })();
+
+  } catch (error) {
+    if (!active || controller.signal.aborted) return;
+    console.error("STFL chart error:", error);
+
+    setError(
+      error instanceof Error
+        ? error.message
+        : "Unable to load chart data"
+    );
+  } finally {
+    if (active) setIsLoading(false);
+  }
+}
+
+loadCandles();
+
+chart.timeScale().fitContent();
+
+const chartContainer =
+  chartRef.current;
+
+const resizeObserver =
+  new ResizeObserver((entries) => {
+    const entry = entries[0];
+
+    if (!entry) {
+      return;
+    }
+
+    const width = Math.floor(
+      entry.contentRect.width
+    );
+
+    const height = Math.floor(
+      entry.contentRect.height
+    );
+
+    if (width > 0 && height > 0) {
+      chart.resize(
+        width,
+        height
+      );
+    }
+  });
+
+resizeObserver.observe(
+  chartContainer
 );
 
-    const formattedVolume =
-  formattedCandles.map(
-  (candle) => ({
-    time: candle.time,
-    value: candle.volume,
-    color:
-      candle.close >= candle.open
-        ? "rgba(34, 197, 94, 0.45)"
-        : "rgba(239, 68, 68, 0.45)",
-  })
-);
-candleSeries.setData(formattedCandles);
-volumeSeries.setData(formattedVolume);
+return () => {
+  active = false;
+  setDrawingContext(null);
+  styleSeriesRef.current = null;
+  controller.abort();
+  resizeObserver.disconnect();
+  chartInstanceRef.current = null;
+  chart.remove();
+};
+
+  }, [symbol, exchange, instrumentKey, timeframe]);
+  useEffect(() => {
+    const series = styleSeriesRef.current;
+    if (!series) return;
+    series.candles.applyOptions({visible:chartStyle === "candles"});
+    series.line.applyOptions({visible:chartStyle === "line"});
+    series.area.applyOptions({visible:chartStyle === "area"});
+    series.bars.applyOptions({visible:chartStyle === "bars"});
+  }, [chartStyle, candleRevision]);
+
+  useEffect(() => {
+    const chart = chartInstanceRef.current;
+    const formattedCandles = candlesRef.current;
+    if (!chart || !formattedCandles.length) return;
+    const indicatorSeries: Array<Parameters<typeof chart.removeSeries>[0]> = [];
 const movingAverageConfigs = [
   {
     key: "SMA20",
@@ -423,6 +562,7 @@ movingAverageConfigs.forEach((indicator) => {
       title: indicator.title,
     }
   );
+    indicatorSeries.push(movingAverageSeries);
 
   const movingAverageData =
     indicator.type === "SMA"
@@ -462,6 +602,7 @@ if (activeIndicators.includes("RSI")) {
     },
     rsiPane
   );
+    indicatorSeries.push(rsiSeries);
 
   rsiSeries.setData(rsiData);
 
@@ -478,6 +619,7 @@ if (activeIndicators.includes("RSI")) {
       },
       rsiPane
     );
+    indicatorSeries.push(rsiUpperBand);
 
   rsiUpperBand.setData(
     rsiData.map((point) => ({
@@ -499,6 +641,7 @@ if (activeIndicators.includes("RSI")) {
       },
       rsiPane
     );
+    indicatorSeries.push(rsiLowerBand);
 
   rsiLowerBand.setData(
     rsiData.map((point) => ({
@@ -531,6 +674,7 @@ if (activeIndicators.includes("MACD")) {
     },
     macdPane
   );
+    indicatorSeries.push(macdSeries);
 
   macdSeries.setData(
     macdData.map((point) => ({
@@ -550,6 +694,7 @@ if (activeIndicators.includes("MACD")) {
     },
     macdPane
   );
+    indicatorSeries.push(signalSeries);
 
   signalSeries.setData(
     macdData.map((point) => ({
@@ -568,6 +713,7 @@ if (activeIndicators.includes("MACD")) {
       },
       macdPane
     );
+    indicatorSeries.push(histogramSeries);
 
   histogramSeries.setData(
     macdData.map((point) => ({
@@ -585,247 +731,13 @@ if (activeIndicators.includes("MACD")) {
   );
 }
 
-chart.subscribeCrosshairMove((param) => {
-  if (!param.time) {
-    setCrosshairData(null);
-    return;
-  }
 
-  const candleData = param.seriesData.get(candleSeries);
+    return () => {
+      if (chartInstanceRef.current !== chart) return;
+      for (const series of indicatorSeries) chart.removeSeries(series);
+    };
+  }, [activeIndicators, candleRevision]);
 
-  if (!candleData) {
-    setCrosshairData(null);
-    return;
-  }
-
-  const candle = candleData as {
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-  };
-
-  const matchingCandle = formattedCandles.find(
-  (item: ChartCandle) => item.time === param.time
-);
-
-  setCrosshairData({
-  time: matchingCandle?.time ?? (0 as Time),
-  open: candle.open,
-  high: candle.high,
-  low: candle.low,
-  close: candle.close,
-  volume: matchingCandle?.volume ?? 0,
-});
-});
-chart.subscribeClick((param) => {
-  const selectedDrawingTool =
-    activeDrawingToolRef.current;
-
-  if (
-    selectedDrawingTool !== "fibonacci" &&
-    selectedDrawingTool !== "horizontal-line"
-  ) {
-    return;
-  }
-
-  if (!param.point || !param.time) {
-    return;
-  }
-
-  const clickedPrice =
-    candleSeries.coordinateToPrice(
-      param.point.y
-    );
-
-  if (clickedPrice === null) {
-  return;
-}
-
-if (
-  activeDrawingToolRef.current ===
-  "horizontal-line"
-) {
-  const horizontalLine =
-  candleSeries.createPriceLine({
-    price: clickedPrice,
-    title: `₹${clickedPrice.toFixed(2)}`,
-    color: "#22c55e",
-    lineWidth: 2,
-    lineStyle: 2,
-    axisLabelVisible: true,
-  });
-drawingPriceLinesRef.current.push(
-  horizontalLine
-);
-  return;
-}
-
-const newPoint: FibonacciPoint = {
-    time: Number(param.time),
-    price: clickedPrice,
-  };
-
-  const currentPoints =
-    fibonacciPointsRef.current;
-
-  if (currentPoints.length === 0) {
-    fibonacciPointsRef.current = [
-      newPoint,
-    ];
-
-    setFibonacciPoints([newPoint]);
-
-    return;
-  }
-
-  const completedPoints = [
-    currentPoints[0],
-    newPoint,
-  ];
-
-  fibonacciPointsRef.current =
-    completedPoints;
-
-  setFibonacciPoints(
-    completedPoints
-  );
-
-  const startPrice =
-  completedPoints[0].price;
-
-const endPrice =
-  completedPoints[1].price;
-
-const priceDifference =
-  endPrice - startPrice;
-
-const fibonacciLevels = [
-  {
-    ratio: 0,
-    label: "0%",
-    color: "#14532d",
-  },
-  {
-    ratio: 0.236,
-    label: "23.6%",
-    color: "#166534",
-  },
-  {
-    ratio: 0.382,
-    label: "38.2%",
-    color: "#15803d",
-  },
-  {
-    ratio: 0.5,
-    label: "50%",
-    color: "#22c55e",
-  },
-  {
-    ratio: 0.618,
-    label: "61.8%",
-    color: "#4ade80",
-  },
-  {
-    ratio: 0.786,
-    label: "78.6%",
-    color: "#86efac",
-  },
-  {
-    ratio: 1,
-    label: "100%",
-    color: "#bbf7d0",
-  },
-];
-
-fibonacciLevels.forEach(
-  ({ ratio, label, color }) => {
-    const levelPrice =
-      startPrice +
-      priceDifference * ratio;
-
-    const fibonacciLine =
-  candleSeries.createPriceLine({
-      price: levelPrice,
-      title: `Fib ${label}`,
-      color,
-      lineWidth: 1,
-      lineStyle: 2,
-      axisLabelVisible: true,
-    });
-    drawingPriceLinesRef.current.push(
-  fibonacciLine
-);
-  }
-);
-  
-});
-
-    const visibleCandleCount = 250;
-
-chart.timeScale().setVisibleLogicalRange({
-  from: Math.max(
-    formattedCandles.length - visibleCandleCount,
-    0
-  ),
-  to: formattedCandles.length + 5,
-});
-
-  } catch (error) {
-    console.error("STFL chart error:", error);
-
-    setError(
-      error instanceof Error
-        ? error.message
-        : "Unable to load chart data"
-    );
-  } finally {
-    setIsLoading(false);
-  }
-}
-
-loadCandles();
-
-chart.timeScale().fitContent();
-
-const chartContainer =
-  chartRef.current;
-
-const resizeObserver =
-  new ResizeObserver((entries) => {
-    const entry = entries[0];
-
-    if (!entry) {
-      return;
-    }
-
-    const width = Math.floor(
-      entry.contentRect.width
-    );
-
-    const height = Math.floor(
-      entry.contentRect.height
-    );
-
-    if (width > 0 && height > 0) {
-      chart.resize(
-        width,
-        height
-      );
-    }
-  });
-
-resizeObserver.observe(
-  chartContainer
-);
-
-return () => {
-  resizeObserver.disconnect();
-  chartInstanceRef.current = null;
-  chart.remove();
-};
-
-  }, [symbol, instrumentKey, timeframe, activeIndicators]);
   useEffect(() => {
   if (!chartInstanceRef.current) return;
 
@@ -842,7 +754,7 @@ useEffect(() => {
   activeDrawingToolRef.current =
     activeDrawingTool;
 
-  if (activeDrawingTool !== "fibonacci") {
+  {
     fibonacciPointsRef.current = [];
     setFibonacciPoints([]);
   }
@@ -853,7 +765,21 @@ useEffect(() => {
     chartCommand?.action ===
     "clearDrawings"
   ) {
-    clearDrawingsRef.current();
+    // Drawing history is handled by DrawingWorkspace.
+  } else if (chartCommand?.action === "undoDrawing") {
+    // DrawingWorkspace handles Undo.
+  } else if (chartCommand?.action === "redoDrawing") {
+    // DrawingWorkspace handles Redo.
+  } else if (chartCommand?.action === "moveLeft") {
+    moveChartLeft();
+  } else if (chartCommand?.action === "moveRight") {
+    moveChartRight();
+  } else if (chartCommand?.action === "zoomIn") {
+    zoomChartIn();
+  } else if (chartCommand?.action === "zoomOut") {
+    zoomChartOut();
+  } else if (chartCommand?.action === "reset") {
+    resetChartView();
   }
 }, [chartCommand]);
 
@@ -864,8 +790,6 @@ useEffect(() => {
     if (event.key !== "Escape") {
       return;
     }
-
-    clearDrawingsRef.current();
 
     activeDrawingToolRef.current = null;
     fibonacciPointsRef.current = [];
@@ -962,6 +886,20 @@ function resetChartView() {
 
   chart.timeScale().fitContent();
 }
+function showDateRange(months: number | null) {
+  const chart = chartInstanceRef.current;
+  const candles = candlesRef.current;
+  if (!chart || candles.length < 2) return;
+  if (months === null) { chart.timeScale().fitContent(); return; }
+  const last = Number(candles[candles.length - 1].time);
+  const start = new Date(last * 1000);
+  if (months === 0) start.setUTCMonth(0, 1);
+  else start.setUTCMonth(start.getUTCMonth() - months);
+  const from = Math.max(Number(candles[0].time), Math.floor(start.getTime() / 1000));
+  if (from < last) chart.timeScale().setVisibleRange({ from: from as Time, to: last as Time });
+}
+
+const displayedCandle = crosshairData ?? latestCandle;
 const oscillatorPaneCount =
   Number(
     activeIndicators.includes("RSI")
@@ -973,56 +911,25 @@ const oscillatorPaneCount =
 return (
   <div className="w-full">
 
-    {/* Active Drawing Tool Status */}
-{activeDrawingTool === "horizontal-line" && (
-  <div className="mb-3 flex items-center justify-between rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3">
-    <div>
-      <p className="text-sm font-semibold text-cyan-400">
-        Horizontal Line Mode Active
-      </p>
-
-      <p className="mt-1 text-xs text-slate-400">
-        Click anywhere on the chart to place a
-        horizontal price level.
-      </p>
+    <div className="flex items-center gap-3 border-b border-slate-200 bg-white px-3 py-1 text-xs text-slate-700">
+      <label className="flex items-center gap-2">Chart style
+        <select value={chartStyle} onChange={e => setChartStyle(e.target.value as Style)} className="rounded border border-slate-200 bg-white px-2 py-1.5">
+          <option value="candles">Candles</option><option value="line">Line</option><option value="area">Area</option><option value="bars">OHLC bars</option>
+        </select>
+      </label>
+      <span className="text-slate-500">{activeDrawingTool ? `Drawing: ${activeDrawingTool.replace(/-/g, " ")} · Escape cancels` : "Pointer · select or move a drawing"}</span>
     </div>
-
-    <span className="rounded-lg bg-cyan-500/15 px-3 py-1 text-xs font-medium text-cyan-400">
-      Drawing Mode
-    </span>
-  </div>
-)}
-{activeDrawingTool === "fibonacci" &&
-  fibonacciPoints.length < 2 && (
-  <div className="mb-3 flex items-center justify-between rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3">
-    <div>
-      <p className="text-sm font-semibold text-emerald-400">
-        📐 Fibonacci Retracement Mode Active
-      </p>
-
-      <p className="mt-1 text-xs text-slate-400">
-        {fibonacciPoints.length === 0
-  ? "Click the first point on the chart."
-  : fibonacciPoints.length === 1
-    ? "First point selected. Now click the second point."
-    : "Two Fibonacci points selected successfully."}
-      </p>
-    </div>
-
-    <span className="rounded-lg bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-400">
-      Drawing Mode
-    </span>
-  </div>
-)}
 
     {/* STFL OHLC Information Bar */}
-    <div className="mb-3 flex min-h-[42px] flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-2 text-sm">
+    <div className="flex min-h-[36px] flex-wrap items-center gap-x-3 gap-y-1 border-b border-slate-200 bg-white px-3 py-2 text-xs">
 
-      {crosshairData ? (
+      <span className="font-semibold text-slate-900">{exchange}:{symbol}</span>
+      <span className="text-slate-500">{timeframe}</span>
+      {displayedCandle ? (
         <>
-        <span className="font-semibold text-cyan-400">
+        <span className="font-semibold text-cyan-700">
   {new Date(
-  Number(crosshairData.time) * 1000
+  Number(displayedCandle.time) * 1000
 ).toLocaleString("en-IN", {
     timeZone: "Asia/Kolkata",
     day: "2-digit",
@@ -1046,64 +953,63 @@ return (
 <span className="hidden text-slate-700 sm:inline">
   |
 </span>
-          <span className="text-slate-400">
+          <span className="text-slate-600">
             O{" "}
-            <strong className="text-white">
-              {crosshairData.open.toFixed(2)}
+            <strong className="text-slate-900">
+              {displayedCandle.open.toFixed(2)}
             </strong>
           </span>
 
-          <span className="text-slate-400">
+          <span className="text-slate-600">
             H{" "}
-            <strong className="text-emerald-400">
-              {crosshairData.high.toFixed(2)}
+            <strong className="text-emerald-700">
+              {displayedCandle.high.toFixed(2)}
             </strong>
           </span>
 
-          <span className="text-slate-400">
+          <span className="text-slate-600">
             L{" "}
-            <strong className="text-red-400">
-              {crosshairData.low.toFixed(2)}
+            <strong className="text-red-700">
+              {displayedCandle.low.toFixed(2)}
             </strong>
           </span>
 
-          <span className="text-slate-400">
+          <span className="text-slate-600">
             C{" "}
-            <strong className="text-white">
-              {crosshairData.close.toFixed(2)}
+            <strong className="text-slate-900">
+              {displayedCandle.close.toFixed(2)}
             </strong>
           </span>
 
           <span
             className={
-              crosshairData.close >= crosshairData.open
-                ? "font-semibold text-emerald-400"
-                : "font-semibold text-red-400"
+              displayedCandle.close >= displayedCandle.open
+                ? "font-semibold text-emerald-700"
+                : "font-semibold text-red-700"
             }
           >
-            {crosshairData.close >= crosshairData.open
+            {displayedCandle.close >= displayedCandle.open
               ? "▲"
               : "▼"}{" "}
             {(
-              ((crosshairData.close -
-                crosshairData.open) /
-                crosshairData.open) *
+              ((displayedCandle.close -
+                displayedCandle.open) /
+                displayedCandle.open) *
               100
             ).toFixed(2)}
             %
           </span>
 
-          <span className="text-slate-400">
-            Volume{" "}
-            <strong className="text-blue-400">
-              {formatVolume(crosshairData.volume)}
+          <span className="text-slate-600">
+            Vol{" "}
+            <strong className="text-blue-700">
+              {formatVolume(displayedCandle.volume)}
             </strong>
           </span>
         </>
       ) : (
         <span className="text-slate-500">
-          Move the cursor over the chart to view
-          OHLC and volume data
+          Hover over a candle for OHLC and volume · Scroll to zoom · Drag to pan
         </span>
       )}
 
@@ -1115,12 +1021,12 @@ return (
   ref={chartRef}
   className={
     isFullscreen
-      ? "h-[calc(100vh-190px)] min-h-[540px] w-full rounded-2xl"
+      ? "h-[calc(100vh-190px)] min-h-[400px] w-full"
       : oscillatorPaneCount === 2
-        ? "h-[820px] w-full rounded-2xl"
+        ? "h-[820px] w-full"
         : oscillatorPaneCount === 1
-          ? "h-[680px] w-full rounded-2xl"
-          : "h-[540px] w-full rounded-2xl"
+          ? "h-[680px] w-full"
+          : "h-[540px] w-full"
   }
 />
 {/* Left navigation button */}
@@ -1132,22 +1038,22 @@ return (
     absolute
     left-4
     top-1/2
-    z-[999]
+    z-10
     -translate-y-1/2
     rounded-full
     border
-    border-slate-600
-    bg-slate-950/90
+    border-slate-200
+    bg-white/95
     px-4
     py-3
     text-xl
-    text-white
+    text-slate-900
     opacity-0
     shadow-xl
     transition-all
     duration-200
     hover:border-emerald-500
-    hover:text-emerald-400
+    hover:text-emerald-700
     group-hover:opacity-100
   "
 >
@@ -1159,18 +1065,18 @@ return (
   className="
     absolute
     left-1/2
-    top-4
-    z-[999]
+    bottom-10
+    z-10
     flex
     -translate-x-1/2
     items-center
     gap-1
     rounded-xl
     border
-    border-slate-600
-    bg-slate-950/90
+    border-slate-200
+    bg-white/95
     p-1
-    text-white
+    text-slate-900
     opacity-0
     shadow-xl
     backdrop-blur
@@ -1182,8 +1088,8 @@ return (
   <button
     type="button"
     onClick={zoomChartOut}
-    title="Zoom out"
-    className="rounded-lg px-4 py-2 text-lg hover:bg-slate-800 hover:text-emerald-400"
+    aria-label="Zoom out" title="Zoom out"
+    className="rounded-lg px-4 py-2 text-lg hover:bg-slate-100 hover:text-emerald-700"
   >
     −
   </button>
@@ -1191,8 +1097,8 @@ return (
   <button
     type="button"
     onClick={zoomChartIn}
-    title="Zoom in"
-    className="rounded-lg px-4 py-2 text-lg hover:bg-slate-800 hover:text-emerald-400"
+    aria-label="Zoom in" title="Zoom in"
+    className="rounded-lg px-4 py-2 text-lg hover:bg-slate-100 hover:text-emerald-700"
   >
     +
   </button>
@@ -1201,7 +1107,7 @@ return (
     type="button"
     onClick={resetChartView}
     title="Reset chart view"
-    className="rounded-lg px-3 py-2 text-xs hover:bg-slate-800 hover:text-emerald-400"
+    className="rounded-lg px-3 py-2 text-xs hover:bg-slate-100 hover:text-emerald-700"
   >
     Reset
   </button>
@@ -1216,22 +1122,22 @@ return (
     absolute
     right-4
     top-1/2
-    z-[999]
+    z-10
     -translate-y-1/2
     rounded-full
     border
-    border-slate-600
-    bg-slate-950/90
+    border-slate-200
+    bg-white/95
     px-4
     py-3
     text-xl
-    text-white
+    text-slate-900
     opacity-0
     shadow-xl
     transition-all
     duration-200
     hover:border-emerald-500
-    hover:text-emerald-400
+    hover:text-emerald-700
     group-hover:opacity-100
   "
 >
@@ -1239,6 +1145,15 @@ return (
 </button>
   </div>
 
+  {drawingContext && drawingContext.key === `stfl:drawings:v1:${exchange}:${symbol}:${timeframe}` && (
+    <DrawingWorkspace isChartAlive={() => chartInstanceRef.current === drawingContext.chart} chart={drawingContext.chart} series={drawingContext.series} element={drawingContext.element} candles={drawingContext.candles} storageKey={drawingContext.key} tool={activeDrawingTool} command={chartCommand} onComplete={() => { activeDrawingToolRef.current = null; completeRef.current?.(); }} />
+  )}
+  <div role="group" aria-label="Visible date range" className="flex flex-wrap gap-1 border-t border-slate-200 bg-white px-2 py-1">
+    {([{ label: "1M", months: 1 }, { label: "3M", months: 3 }, { label: "6M", months: 6 }, { label: "YTD", months: 0 }, { label: "1Y", months: 12 }, { label: "5Y", months: 60 }, { label: "Max", months: null }] as const).map((range) => (
+      <button key={range.label} type="button" disabled={!latestCandle} onClick={() => showDateRange(range.months)} className="rounded px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-40">{range.label}</button>
+    ))}
+    <span className="self-center px-2 text-[10px] text-slate-500">Available candles only</span>
+  </div>
   <p className="mt-2 text-right text-[11px] text-slate-500">
     Charts powered by{" "}
     <a
@@ -1252,13 +1167,13 @@ return (
   </p>
 
   {isLoading && (
-      <p className="mt-3 text-sm text-slate-400">
+      <p className="mt-3 text-sm text-slate-600">
         Loading market chart...
       </p>
     )}
 
     {error && (
-      <p className="mt-3 text-sm text-red-400">
+      <p className="mt-3 text-sm text-red-700">
         {error}
       </p>
     )}
