@@ -4,7 +4,7 @@ import DrawingTools from "@/components/charts/DrawingTools";
 import ChartToolbar from "@/components/charts/ChartToolbar";
 import PriceChart from "@/components/charts/PriceChart";
 import CompanySearch from "@/components/search/CompanySearch";
-import InvestmentSummary from "@/components/company/InvestmentSummary";
+import VedhaAnalysisPanel from "@/components/vedha/VedhaAnalysisPanel";
 import MarketSnapshotCard from "@/components/company/MarketSnapshotCard";
 import TechnicalsCard from "@/components/company/TechnicalsCard";
 
@@ -133,6 +133,18 @@ export default function BasicCompanyDashboard({
       if (["1m","5m","15m","30m","1H","4H","D","W","M"].includes(saved?.timeframe)) savedTimeframe = saved.timeframe;
       if (Array.isArray(saved?.indicators)) savedIndicators = [...new Set<string>(saved.indicators.filter((v: unknown): v is string => typeof v === "string" && ["SMA20","SMA50","SMA100","SMA200","EMA20","EMA50","EMA100","EMA200","RSI","MACD"].includes(v)))];
     } catch {}
+    // Resume only an explicit Vedha login request, after reading saved chart settings.
+    const resumeUrl = new URL(window.location.href);
+    if (resumeUrl.searchParams.get("vedha") === "1") {
+      const requestedTimeframe = resumeUrl.searchParams.get("vedhaTimeframe");
+      if (requestedTimeframe && ["1m","5m","15m","30m","1H","4H","D","W","M"].includes(requestedTimeframe)) {
+        savedTimeframe = requestedTimeframe;
+      }
+      setIsSummaryOpen(true);
+      resumeUrl.searchParams.delete("vedha");
+      resumeUrl.searchParams.delete("vedhaTimeframe");
+      window.history.replaceState(window.history.state, "", resumeUrl.pathname + resumeUrl.search + resumeUrl.hash);
+    }
     setTimeframe(savedTimeframe); setActiveIndicators(savedIndicators); setSettingsReadyKey(settingsKey);
     setActiveDrawingTool(null);
   }, [settingsKey]);
@@ -521,6 +533,7 @@ export default function BasicCompanyDashboard({
       : "min-w-0"
   }
 >
+                <div className={isSummaryOpen ? "grid min-w-0 grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_390px]" : "min-w-0"}>
                 <div className="flex min-w-0 flex-col items-stretch gap-0 md:flex-row">
   <DrawingTools activeTool={activeDrawingTool} onSelect={setActiveDrawingTool} />
 
@@ -557,14 +570,14 @@ export default function BasicCompanyDashboard({
 
               {/* Collapsible research below the chart */}
 {isSummaryOpen && (
-  <aside id="stfl-chart-summary" className="min-w-0">
+  <aside id="stfl-chart-summary" className="min-w-0 xl:sticky xl:top-3">
     <div className="rounded-xl border border-slate-200">
-      <InvestmentSummary
-        research={research}
-      />
+      <VedhaAnalysisPanel research={research} symbol={symbol} exchange={exchange} timeframe={timeframe} />
     </div>
   </aside>
 )}
+
+                </div>
 
                 {/* Market Snapshot now follows the chart */}
                 <div className="mt-6">

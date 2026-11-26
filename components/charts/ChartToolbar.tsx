@@ -73,7 +73,7 @@ export default function ChartToolbar(props: ChartToolbarProps) {
           <button type="button" className={buttonClass} title="Undo last drawing" aria-label="Undo last drawing" onClick={() => props.onChartCommand("undoDrawing")}><Undo2 size={16} /></button>
           <button type="button" className={buttonClass} title="Redo drawing" aria-label="Redo drawing" onClick={() => props.onChartCommand("redoDrawing")}><Redo2 size={16} /></button>
         </div>
-        {props.onAnalyse && <button type="button" onClick={props.onAnalyse} aria-expanded={props.isSummaryOpen} aria-controls="stfl-chart-summary" className={`${buttonClass} ml-auto border border-orange-400 bg-orange-50 text-slate-900 hover:bg-orange-100`}><Sparkles size={14} />{props.isSummaryOpen ? "Hide analysis" : "Analyse chart"}</button>}
+        {props.onAnalyse && <button type="button" onClick={props.onAnalyse} aria-expanded={props.isSummaryOpen} aria-controls="stfl-chart-summary" className={`${buttonClass} ml-auto border border-orange-400 bg-orange-50 text-slate-900 hover:bg-orange-100`}><Sparkles size={14} />{props.isSummaryOpen ? "Hide analysis" : "Analyse with Vedha"}</button>}
         <button type="button" className={buttonClass} onClick={props.onFullscreenToggle}
           title={props.isChartFullscreen ? "Exit fullscreen" : "Fullscreen"} aria-label={props.isChartFullscreen ? "Exit fullscreen" : "Fullscreen"}>
           {props.isChartFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}

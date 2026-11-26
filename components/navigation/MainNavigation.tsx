@@ -82,7 +82,7 @@ const navigationGroups: NavigationGroup[] = [
     label: "Tools",
     items: [
       {
-        label: "AI Research Assistant",
+        label: "Ask Vedha",
         href: "/ai-research-assistant",
       },
       {

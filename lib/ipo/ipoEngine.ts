@@ -4,8 +4,8 @@
  * File: ipoEngine.ts
  *
  * Purpose:
- * Combine official NSE IPO information with additional
- * IPO intelligence providers such as GMP.
+ * Combine NSE IPO information with offer-detail enrichment.
+ * GMP collection and GMP-derived estimates are disabled.
  * ================================================================
  */
 
@@ -16,10 +16,6 @@ import {
 import {
   enrichIPOOfferDetails,
 } from "./providers/ipoOfferDetails";
-
-import type {
-  GMPRecord,
-} from "./providers/gmp";
 
 import {
   normalizeNSEIPOData,
@@ -69,217 +65,22 @@ export interface IPOEngineResult {
 }
 
 
-/**
- * ================================================================
- * NORMALIZE COMPANY NAME
- *
- * Used to match:
- *
- * Augmont Enterprises Limited
- * Augmont Enterprises Ltd
- * AUGMONT ENTERPRISES
- *
- * ================================================================
- */
-
-function normalizeCompanyName(
-  value: string
-): string {
-
-  return value
-    .toLowerCase()
-
-    .replace(/&/g, "and")
-
-    .replace(
-      /\b(limited|ltd|private|pvt|india)\b/g,
-      ""
-    )
-
-    .replace(
-      /[^a-z0-9]/g,
-      ""
-    )
-
-    .trim();
-}
-
-
-/**
- * ================================================================
- * FIND GMP RECORD
- * ================================================================
- */
-
-function findGMPRecord(
-  ipo: IPORecord,
-  gmpRecords: GMPRecord[]
-):
-  | GMPRecord
-  | undefined {
-
-  const ipoName =
-    normalizeCompanyName(
-      ipo.companyName
-    );
-
-
-  /**
-   * First attempt:
-   * Exact normalized match
-   */
-
-  const exactMatch =
-    gmpRecords.find(
-      (record) =>
-        normalizeCompanyName(
-          record.companyName
-        ) === ipoName
-    );
-
-
-  if (exactMatch) {
-    return exactMatch;
-  }
-
-
-  /**
-   * Second attempt:
-   * Controlled partial match
-   *
-   * Useful when one provider includes words
-   * such as Industries / India / Limited.
-   */
-
-  return gmpRecords.find(
-    (record) => {
-
-      const gmpName =
-        normalizeCompanyName(
-          record.companyName
-        );
-
-
-      if (
-        ipoName.length < 5 ||
-        gmpName.length < 5
-      ) {
-        return false;
-      }
-
-
-      return (
-        ipoName.includes(gmpName) ||
-        gmpName.includes(ipoName)
-      );
+/** Remove legacy premium fields even if an upstream normalizer retains them. */
+function removeLegacyPremiumFields(ipo: IPORecord): IPORecord {
+  const cleaned = { ...ipo };
+  for (const key of Object.keys(cleaned)) {
+    const name = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (name.includes("gmp") || name.includes("greymarket") ||
+        name.includes("graymarket") || name.includes("prelistingpremium") ||
+        name.includes("kostak") || name.includes("subjecttosauda") ||
+        ["estimatedlistingprice", "expectedlistingprice", "indicativelistingprice",
+         "estimatedlistinggain", "expectedlistinggain", "estimatedlistinggainpercent",
+         "expectedlistinggainpercent", "estimatedlistinggainpct", "expectedlistinggainpct"].includes(name)) {
+      delete (cleaned as unknown as Record<string, unknown>)[key];
     }
-  );
-}
-
-
-/**
- * ================================================================
- * MERGE GMP INTO IPO RECORD
- * ================================================================
- */
-
-function enrichWithGMP(
-  ipo: IPORecord,
-  gmpRecords: GMPRecord[]
-): IPORecord {
-
-  const gmpRecord =
-    findGMPRecord(
-      ipo,
-      gmpRecords
-    );
-
-
-  if (!gmpRecord) {
-    return ipo;
   }
-
-
-  let gmp =
-    gmpRecord.gmp;
-
-
-  let gmpPercent =
-    gmpRecord.gmpPercent;
-
-
-  /**
-   * ------------------------------------------------
-   * Calculate GMP %
-   *
-   * If provider gives GMP but not percentage.
-   * ------------------------------------------------
-   */
-
-  if (
-    gmpPercent === undefined &&
-    gmp !== undefined &&
-    ipo.priceBandHigh !== undefined &&
-    ipo.priceBandHigh > 0
-  ) {
-
-    gmpPercent =
-      Number(
-        (
-          (
-            gmp /
-            ipo.priceBandHigh
-          ) *
-          100
-        ).toFixed(2)
-      );
-  }
-
-
-  /**
-   * ------------------------------------------------
-   * Estimated listing price
-   *
-   * Upper price band + GMP
-   * ------------------------------------------------
-   */
-
-  const estimatedListingPrice =
-    gmp !== undefined &&
-    ipo.priceBandHigh !== undefined
-      ? Number(
-          (
-            ipo.priceBandHigh +
-            gmp
-          ).toFixed(2)
-        )
-      : undefined;
-
-
-  return {
-
-    ...ipo,
-
-    gmp,
-
-    gmpPercent,
-
-    estimatedListingPrice,
-
-
-    /**
-     * GMP provider may occasionally contain
-     * useful fallback lot-size information.
-     *
-     * NSE remains primary source.
-     */
-
-    lotSize:
-      ipo.lotSize ??
-      gmpRecord.lotSize,
-  };
+  return cleaned;
 }
-
 
 /**
  * ================================================================
@@ -426,261 +227,32 @@ function buildSummary(
  * ================================================================
  */
 
-export async function runIPOEngine():
-Promise<IPOEngineResult> {
-
+export async function runIPOEngine(): Promise<IPOEngineResult> {
   try {
-
-    /**
-     * ------------------------------------------------
-     * STEP 1
-     *
-     * Fetch NSE + GMP simultaneously.
-     *
-     * GMP failure must NOT break NSE.
-     * ------------------------------------------------
-     */
-
-    const [nseResult] =
-  await Promise.allSettled([
-    fetchNSEIPOData(),
-  ]);
-
-
-    /**
-     * ------------------------------------------------
-     * NSE result
-     * ------------------------------------------------
-     */
-
-    const rawNSEData =
-      nseResult.status ===
-      "fulfilled"
-        ? nseResult.value
-        : [];
-
-
-    /**
-     * ------------------------------------------------
-     * GMP result
-     * ------------------------------------------------
-     */
-
-    // GMP is synchronized independently by the backend IPO Guru service.
-// Keeping this empty prevents frontend providers from overwriting
-// the authoritative GMP values stored in Neon.
-const gmpRecords: GMPRecord[] = [];
-
-
-    if (
-      nseResult.status ===
-      "rejected"
-    ) {
-
-      console.error(
-        "NSE IPO provider failed:",
-        nseResult.reason
-      );
-    }
-
-        console.log(
-      "===== STFL IPO ENGINE ====="
-    );
-
-
-    console.log(
-      "Raw NSE IPO records:",
-      rawNSEData.length
-    );
-
-
-    console.log(
-      "GMP records:",
-      gmpRecords.length
-    );
-
-
-    /**
-     * ------------------------------------------------
-     * STEP 2
-     *
-     * Normalize NSE data
-     * ------------------------------------------------
-     */
-
-    const normalizedIPOs =
-  normalizeNSEIPOData(
-    rawNSEData
-  );
-
-console.log(
-  "Normalized IPO records:",
-  normalizedIPOs.length
-);
-
-
-/**
- * ------------------------------------------------
- * STEP 3
- *
- * Fill missing price band, lot size
- * and issue size.
- *
- * NSE values remain primary and are
- * never overwritten.
- * ------------------------------------------------
- */
-
-const offerDetailsResult =
-  await enrichIPOOfferDetails(
-    normalizedIPOs
-  );
-
-console.log(
-  "Offer-detail records enriched:",
-  offerDetailsResult
-    .enrichedCount
-);
-
-
-/**
- * ------------------------------------------------
- * STEP 4
- *
- * Merge optional GMP data after the
- * price band has been completed.
- *
- * This allows GMP percentage and
- * estimated listing price to use the
- * completed upper price band.
- * ------------------------------------------------
- */
-
-const enrichedIPOs =
-  offerDetailsResult.ipos.map(
-    (ipo) =>
-      enrichWithGMP(
-        ipo,
-        gmpRecords
-      )
-  );
-
-
-    /**
-     * ------------------------------------------------
-     * STEP 4
-     *
-     * Sort
-     * ------------------------------------------------
-     */
-
-    const ipos =
-      sortIPOs(
-        enrichedIPOs
-      );
-
-
-    /**
-     * ------------------------------------------------
-     * STEP 5
-     *
-     * Summary
-     * ------------------------------------------------
-     */
-
-    const summary =
-      buildSummary(
-        ipos
-      );
-
-
-    console.log(
-      "IPO Summary:",
-      summary
-    );
-
-
-    console.log(
-      "GMP enriched:",
-      ipos.filter(
-        (ipo) =>
-          ipo.gmp !==
-          undefined
-      ).length
-    );
-
-
-    /**
-     * ------------------------------------------------
-     * STEP 6
-     *
-     * Return final engine
-     * ------------------------------------------------
-     */
-
+    const [nseResult] = await Promise.allSettled([fetchNSEIPOData()]);
+    const rawNSEData = nseResult.status === "fulfilled" ? nseResult.value : [];
+    if (nseResult.status === "rejected") console.error("NSE IPO provider failed.");
+    const normalizedIPOs = normalizeNSEIPOData(rawNSEData).map(removeLegacyPremiumFields);
+    const offerDetailsResult = await enrichIPOOfferDetails(normalizedIPOs);
+    const ipos = sortIPOs(offerDetailsResult.ipos.map(removeLegacyPremiumFields));
     return {
-
       ipos,
-
-      summary,
-
+      summary: buildSummary(ipos),
       providers: {
-  nse:
-    rawNSEData.length > 0,
-
-  offerDetails:
-    offerDetailsResult
-      .providerAvailable,
-
-  gmp:
-    gmpRecords.length > 0,
-},
-
-      lastUpdated:
-        new Date()
-          .toISOString(),
-    };
-
-  } catch (error) {
-
-    console.error(
-      "STFL IPO Engine Error:",
-      error
-    );
-
-
-    return {
-
-      ipos: [],
-
-      summary: {
-
-        total: 0,
-
-        open: 0,
-
-        upcoming: 0,
-
-        closed: 0,
-
-        allotment: 0,
-
-        listed: 0,
-
-        mainboard: 0,
-
-        sme: 0,
+        nse: rawNSEData.length > 0,
+        offerDetails: offerDetailsResult.providerAvailable,
+        // Compatibility flag only; no GMP fetch, matching or calculations run.
+        gmp: false,
       },
-
-      providers: {
-  nse: false,
-  offerDetails: false,
-  gmp: false,
-},
-
-      lastUpdated:
-        new Date()
-          .toISOString(),
+      lastUpdated: new Date().toISOString(),
+    };
+  } catch {
+    console.error("STFL IPO engine failed.");
+    return {
+      ipos: [],
+      summary: buildSummary([]),
+      providers: { nse: false, offerDetails: false, gmp: false },
+      lastUpdated: new Date().toISOString(),
     };
   }
 }

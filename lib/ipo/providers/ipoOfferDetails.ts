@@ -180,21 +180,13 @@ function parsePositiveNumber(
  * ------------------------------------------------
  */
 
-function needsOfferDetails(
-  ipo: IPORecord
-): boolean {
-  return (
-    ipo.priceBandLow ===
-      undefined ||
-    ipo.priceBandHigh ===
-      undefined ||
-    ipo.lotSize ===
-      undefined ||
-    ipo.issueSizeCr ===
-      undefined
-  );
+function isPositive(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
 }
-
+function needsOfferDetails(ipo: IPORecord): boolean {
+  return !isPositive(ipo.priceBandLow) || !isPositive(ipo.priceBandHigh) ||
+    !isPositive(ipo.lotSize) || !isPositive(ipo.issueSizeCr);
+}
 
 /**
  * ------------------------------------------------
@@ -206,11 +198,15 @@ async function fetchHtml(
   url: string
 ): Promise<string | null> {
   try {
+    const target = new URL(url);
+    if(target.protocol !== "https:" || target.hostname !== "zerodha.com" || target.username || target.password) return null;
     const response =
       await fetch(
-        url,
+        target.toString(),
         {
           method: "GET",
+          redirect: "error",
+          signal: AbortSignal.timeout(15000),
 
           headers: {
             Accept:
@@ -390,53 +386,28 @@ function findDetailLink(
  * ------------------------------------------------
  */
 
-function parsePriceBand(
-  text: string
-): {
-  low?: number;
-  high?: number;
-} {
-  const match =
-    text.match(
-      /(?:price\s*(?:range|band)|issue\s*price)[^\d]{0,30}₹?\s*([\d,]+(?:\.\d+)?)\s*(?:-|–|—|to)\s*₹?\s*([\d,]+(?:\.\d+)?)/i
-    );
-
-  if (!match) {
-    return {};
+function parsePriceBand(text: string): {low?: number; high?: number} {
+  const amount = "([\\d,]+(?:\\.\\d+)?)";
+  const currency = "(?:(?:₹|Rs\\.?|INR)\\s*)?";
+  const label = "(?:price\\s*(?:range|band)|issue\\s*price)";
+  const range = text.match(new RegExp(
+    label + "\\s*[:–—-]?\\s*" + currency + amount +
+    "\\s*(?:-|–|—|to)\\s*" + currency + amount + "(?![\\d.])", "i"));
+  if (range) {
+    const low = parsePositiveNumber(range[1]);
+    const high = parsePositiveNumber(range[2]);
+    return low !== undefined && high !== undefined && low <= high ? {low, high} : {};
   }
-
-  const first =
-    parsePositiveNumber(
-      match[1]
-    );
-
-  const second =
-    parsePositiveNumber(
-      match[2]
-    );
-
-  if (
-    first === undefined ||
-    second === undefined
-  ) {
-    return {};
+  // Only explicit fixed-price wording establishes identical endpoints.
+  const fixed = text.match(new RegExp(
+    "(?:fixed[- ]price(?:\\s+(?:issue|offer))?(?:\\s*price)?|issue\\s*price\\s*\\(fixed\\))" +
+    "\\s*[:–—-]?\\s*" + currency + amount + "(?![\\d.])", "i"));
+  if (fixed) {
+    const price = parsePositiveNumber(fixed[1]);
+    if(price !== undefined) return {low: price, high: price};
   }
-
-  return {
-    low:
-      Math.min(
-        first,
-        second
-      ),
-
-    high:
-      Math.max(
-        first,
-        second
-      ),
-  };
+  return {};
 }
-
 
 /**
  * ------------------------------------------------
@@ -664,7 +635,8 @@ async function fetchOneOfferDetail(
  * ENRICH IPO OFFER DETAILS
  *
  * NSE values remain authoritative.
- * Fallback values only fill undefined properties.
+ * Fallback values fill missing, null or invalid non-positive values.
+ * Existing valid positive values remain authoritative.
  * ================================================================
  */
 
@@ -774,28 +746,25 @@ export async function enrichIPOOfferDetails(
           return ipo;
         }
 
+        let low = isPositive(ipo.priceBandLow) ? ipo.priceBandLow : details.priceBandLow;
+        let high = isPositive(ipo.priceBandHigh) ? ipo.priceBandHigh : details.priceBandHigh;
+        if(isPositive(low) && isPositive(high) && low > high) {
+          // Conflicting fallback details cannot override or contradict primary values.
+          low = isPositive(ipo.priceBandLow) ? ipo.priceBandLow : undefined;
+          high = isPositive(ipo.priceBandHigh) ? ipo.priceBandHigh : undefined;
+        }
+        const fixedPrice = details.priceBandLow !== undefined &&
+          details.priceBandLow === details.priceBandHigh &&
+          low === details.priceBandLow && high === details.priceBandHigh
+          ? details.priceBandLow : undefined;
         const enriched: IPORecord = {
           ...ipo,
 
-          priceBandLow:
-            ipo.priceBandLow ??
-            details.priceBandLow,
-
-          priceBandHigh:
-            ipo.priceBandHigh ??
-            details.priceBandHigh,
-
-          issuePrice:
-            ipo.issuePrice ??
-            details.priceBandHigh,
-
-          lotSize:
-            ipo.lotSize ??
-            details.lotSize,
-
-          issueSizeCr:
-            ipo.issueSizeCr ??
-            details.issueSizeCr,
+          priceBandLow: low,
+          priceBandHigh: high,
+          issuePrice: isPositive(ipo.issuePrice) ? ipo.issuePrice : fixedPrice,
+          lotSize: isPositive(ipo.lotSize) ? ipo.lotSize : details.lotSize,
+          issueSizeCr: isPositive(ipo.issueSizeCr) ? ipo.issueSizeCr : details.issueSizeCr,
 
             subscription:
   details.subscription
@@ -822,6 +791,7 @@ export async function enrichIPOOfferDetails(
         };
 
         const changed =
+          enriched.issuePrice !== ipo.issuePrice ||
           enriched.priceBandLow !==
             ipo.priceBandLow ||
           enriched.priceBandHigh !==

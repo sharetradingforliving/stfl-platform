@@ -127,8 +127,8 @@ interface NSECategoryResponse {
  */
 
 interface NSEIPODetailItem {
-  title?: string;
-  value?: string;
+  title?: string | null;
+  value?: string | number | null;
 }
 
 
@@ -194,38 +194,30 @@ function parseNSENumber(
  * ================================================================
  */
 
-function extractFirstNumber(
-  value?: string
-): number | undefined {
-
-  if (!value) {
-    return undefined;
-  }
-
-
-  const match =
-    value.match(
-      /\d[\d,]*/
-    );
-
-
-  if (!match) {
-    return undefined;
-  }
-
-
-  const parsed =
-    Number(
-      match[0]
-        .replace(/,/g, "")
-    );
-
-
-  return Number.isFinite(parsed)
-    ? parsed
-    : undefined;
+function parseLotQuantity(value: unknown): number | undefined {
+  if(typeof value === "number")return Number.isSafeInteger(value) && value > 0 ? value : undefined;
+  if(typeof value !== "string")return undefined;
+  const text=value.replace(/<[^>]*>/g," ").replace(/&nbsp;/gi," ").trim();
+  // Only a leading whole share quantity or a standalone whole number is valid.
+  const match=text.match(/^[\s"']*(\d+(?:,\d{2,3})*)(?:\s+(?:equity\s+)?shares?\b|\s*["']?\s*$)/i);
+  if(!match)return undefined;
+  const number=Number(match[1].replace(/,/g,""));
+  return Number.isSafeInteger(number) && number > 0 ? number : undefined;
 }
-
+function findLotSize(items:NSEIPODetailItem[]):number|undefined {
+  const labels=["bid lot","lot size","market lot","minimum order quantity"];
+  for(const label of labels){
+    for(const item of items){
+      if(typeof item.title!=="string")continue;
+      const title=item.title.replace(/<[^>]*>/g," ").replace(/&nbsp;/gi," ")
+        .toLowerCase().replace(/\s+/g," ").trim().replace(/[:.]$/,"").trim();
+      if(title!==label)continue;
+      const value=parseLotQuantity(item.value);
+      if(value!==undefined)return value;
+    }
+  }
+  return undefined;
+}
 
 /**
  * ================================================================
@@ -734,49 +726,8 @@ export async function fetchNSEIPODetail(
       );
 
 
-    console.log(
-      `IPO DETAIL ITEMS ${symbol}:`,
-      items
-    );
-
-
-    const bidLotRow =
-      items.find(
-        (item) => {
-
-          const title =
-            item.title
-              ?.trim()
-              .toLowerCase();
-
-
-          return (
-            title === "bid lot" ||
-            title?.includes(
-              "bid lot"
-            )
-          );
-        }
-      );
-
-
-    console.log(
-      `BID LOT ROW ${symbol}:`,
-      bidLotRow
-    );
-
-
-    const lotSize =
-      extractFirstNumber(
-        bidLotRow?.value
-      );
-
-
-    console.log(
-      `LOT SIZE ${symbol}:`,
-      lotSize
-    );
-
+    const lotSize = findLotSize(items);
+    console.log("NSE IPO lot detail", { symbol, lotSize: lotSize ?? null });
 
     return {
       lotSize,

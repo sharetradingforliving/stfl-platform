@@ -21,6 +21,7 @@ import {
 } from "lightweight-charts";
 
 import DrawingWorkspace from "./DrawingWorkspace";
+import TechnicalStudies from "./TechnicalStudies";
 
 import { buildPriceHistory } from "@/lib/technical/builders/buildPriceHistory";
 import { buildTechnicalInput } from "@/lib/technical/builders/technicalInputBuilder";
@@ -120,7 +121,7 @@ export default function PriceChart({
   const [styleReadyKey, setStyleReadyKey] = useState("");
   const styleKey = `stfl:chart-style:v1:${exchange}:${symbol}`;
   const styleSeriesRef = useRef<{ candles: ISeriesApi<"Candlestick">; line: ISeriesApi<"Line">; area: ISeriesApi<"Area">; bars: ISeriesApi<"Bar"> } | null>(null);
-  const [drawingContext, setDrawingContext] = useState<{chart:IChartApi;series:ISeriesApi<"Candlestick">;element:HTMLDivElement;candles:ChartCandle[];key:string} | null>(null);
+  const [drawingContext, setDrawingContext] = useState<{chart:IChartApi;series:ISeriesApi<"Candlestick">;element:HTMLDivElement;candles:ChartCandle[];key:string;asOf:number} | null>(null);
   const completeRef = useRef(onDrawingComplete);
   completeRef.current = onDrawingComplete;
   useEffect(() => {
@@ -296,7 +297,7 @@ candleSeries.setData(formattedCandles);
 lineStyle.setData(formattedCandles.map(c => ({time:c.time,value:c.close})));
 areaStyle.setData(formattedCandles.map(c => ({time:c.time,value:c.close})));
 barStyle.setData(formattedCandles);
-setDrawingContext({chart,series:candleSeries,element:chartRef.current!,candles:formattedCandles,key:`stfl:drawings:v1:${exchange}:${symbol}:${timeframe}`});
+setDrawingContext({chart,series:candleSeries,element:chartRef.current!,candles:formattedCandles,key:`stfl:drawings:v1:${exchange}:${symbol}:${timeframe}`,asOf:Number.isFinite(Date.parse(data.asOf))?Math.min(Date.parse(data.asOf),Date.now()):Date.now()});
 volumeSeries.setData(formattedVolume);
 candlesRef.current = formattedCandles;
 setLatestCandle(formattedCandles[formattedCandles.length - 1]);
@@ -919,6 +920,10 @@ return (
       </label>
       <span className="text-slate-500">{activeDrawingTool ? `Drawing: ${activeDrawingTool.replace(/-/g, " ")} · Escape cancels` : "Pointer · select or move a drawing"}</span>
     </div>
+
+    {drawingContext && drawingContext.key === `stfl:drawings:v1:${exchange}:${symbol}:${timeframe}` && (
+      <TechnicalStudies chart={drawingContext.chart} series={drawingContext.series} candles={drawingContext.candles} symbol={symbol} exchange={exchange} instrumentKey={instrumentKey} timeframe={timeframe} asOf={drawingContext.asOf} chartStyle={chartStyle} isChartAlive={() => chartInstanceRef.current === drawingContext.chart} />
+    )}
 
     {/* STFL OHLC Information Bar */}
     <div className="flex min-h-[36px] flex-wrap items-center gap-x-3 gap-y-1 border-b border-slate-200 bg-white px-3 py-2 text-xs">
