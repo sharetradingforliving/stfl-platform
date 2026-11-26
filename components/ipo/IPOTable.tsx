@@ -26,13 +26,8 @@ type IPOEngineResult = {
   providers?: {
     nse?: boolean;
     offerDetails?: boolean;
-    gmp?: boolean;
-    gmpSource?: string;
-    gmpLastFetchedAt?: string;
-    gmpLastUpdatedAt?: string;
     persistentDatabase?: boolean;
   };
-  gmpDisclaimer?: string;
   lastUpdated: string;
 };
 type StatusFilter =
@@ -136,15 +131,15 @@ function formatMultiple(value?: number) {
 function statusClasses(status: IPOStatus) {
   switch (status) {
     case "Open":
-      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-400";
+      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400";
     case "Upcoming":
-      return "border-cyan-500/30 bg-cyan-500/10 text-cyan-400";
+      return "border-cyan-500/30 bg-cyan-500/10 text-cyan-800 dark:text-cyan-400";
     case "Closed":
-      return "border-amber-500/30 bg-amber-500/10 text-amber-400";
+      return "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-400";
     case "Allotment":
-      return "border-violet-500/30 bg-violet-500/10 text-violet-400";
+      return "border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-400";
     case "Listed":
-      return "border-slate-600 bg-slate-800 text-slate-300";
+      return "border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
   }
 }
 export default function IPOTable() {
@@ -298,12 +293,12 @@ export default function IPOTable() {
   );
   if (loading) {
     return (
-      <section className="rounded-2xl border border-slate-800 bg-[#07111f] p-10 text-center">
+      <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#07111f] p-10 text-center">
         <RefreshCw
           size={22}
-          className="mx-auto animate-spin text-emerald-400"
+          className="mx-auto animate-spin text-emerald-700 dark:text-emerald-400"
         />
-        <p className="mt-4 text-sm text-slate-400">
+        <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
           Loading live IPO data...
         </p>
       </section>
@@ -312,13 +307,13 @@ export default function IPOTable() {
   if (error || !data) {
     return (
       <section className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
-        <p className="text-sm text-red-400">
+        <p className="text-sm text-red-700 dark:text-red-400">
           {error ||
             "Unable to load IPO data."}
         </p>
         <button
           onClick={loadIPOData}
-          className="mt-4 rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-300 transition hover:bg-red-500/10"
+          className="mt-4 rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-700 dark:text-red-300 transition hover:bg-red-500/10"
         >
           Try Again
         </button>
@@ -328,7 +323,7 @@ export default function IPOTable() {
   return (
     <section className="space-y-6">
       {/* Controls */}
-      <div className="rounded-2xl border border-slate-800 bg-[#07111f] p-4">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#07111f] p-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap gap-2">
             {typeFilters.map((filter) => (
@@ -340,8 +335,8 @@ export default function IPOTable() {
                 }}
                 className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
                   typeFilter === filter
-                    ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                    : "border-slate-700 bg-[#0a1424] text-slate-400 hover:border-slate-600 hover:text-white"
+                    ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                    : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-[#0a1424] text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 {filter}
@@ -351,7 +346,7 @@ export default function IPOTable() {
           <div className="relative w-full xl:w-80">
             <Search
               size={17}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 dark:text-slate-400"
             />
             <input
               value={search}
@@ -362,7 +357,7 @@ export default function IPOTable() {
                 setPage(1);
               }}
               placeholder="Search IPO or symbol..."
-              className="w-full rounded-xl border border-slate-700 bg-[#0a1424] py-2.5 pl-10 pr-4 text-sm text-white outline-none placeholder:text-slate-600 focus:border-emerald-500/50"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-[#0a1424] py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white outline-none placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-emerald-500/50"
             />
           </div>
         </div>
@@ -377,15 +372,15 @@ export default function IPOTable() {
               }}
               className={`rounded-lg border px-3.5 py-2 text-xs font-semibold transition ${
                 statusFilter === filter
-                  ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-400"
-                  : "border-slate-700 bg-[#0a1424] text-slate-500 hover:border-slate-600 hover:text-slate-300"
+                  ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-800 dark:text-cyan-400"
+                  : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-[#0a1424] text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-slate-300"
               }`}
             >
               {filter}
             </button>
           ))}
           </div>
-          <label className="flex items-center gap-2 text-xs text-slate-500">
+          <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
             Rows per page
             <select
               value={pageSize}
@@ -397,7 +392,7 @@ export default function IPOTable() {
                 );
                 setPage(1);
               }}
-              className="rounded-lg border border-slate-700 bg-[#0a1424] px-3 py-2 text-sm text-white outline-none focus:border-emerald-500/50"
+              className="rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-[#0a1424] px-3 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-emerald-500/50"
             >
               <option value={10}>10</option>
               <option value={20}>20</option>
@@ -406,9 +401,9 @@ export default function IPOTable() {
         </div>
       </div>
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#07111f]">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#07111f]">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1380px] table-fixed text-left">
+          <table className="w-full min-w-[1240px] table-fixed text-left">
             <colgroup>
   <col className="w-[210px]" />
   <col className="w-[95px]" />
@@ -418,16 +413,14 @@ export default function IPOTable() {
   <col className="w-[120px]" />
   <col className="w-[60px]" />
   <col className="w-[110px]" />
-  <col className="w-[70px]" />
-  <col className="w-[70px]" />
   <col className="w-[75px]" />
   <col className="w-[75px]" />
   <col className="w-[80px]" />
   <col className="w-[80px]" />
   <col className="w-[125px]" />
 </colgroup>
-            <thead className="border-b border-slate-800 bg-[#0b1628]">
-              <tr className="text-xs uppercase tracking-wider text-slate-500">
+            <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-[#0b1628]">
+              <tr className="text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400">
                 <th className="px-5 py-4">
                   Company
                 </th>
@@ -452,13 +445,7 @@ export default function IPOTable() {
                 <th className="px-3 py-4">
                   Issue Size
                 </th>
-                <th className="px-3 py-4">
-                  GMP
-                </th>
-                <th className="px-3 py-4">
-                  GMP %
-                </th>
-                <th className="border-l border-slate-800 px-3 py-4 text-center">
+                <th className="border-l border-slate-200 dark:border-slate-800 px-3 py-4 text-center">
                   QIB
                 </th>
                 <th className="px-3 py-4 text-center">
@@ -475,28 +462,28 @@ export default function IPOTable() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {paginatedIPOs.map((ipo) => (
                 <tr
                   key={ipo.id}
-                  className="bg-[#07111f] transition hover:bg-[#0b1628]"
+                  className="bg-white dark:bg-[#07111f] transition hover:bg-slate-50 dark:hover:bg-[#0b1628]"
                 >
                   {/* Company */}
                   <td className="px-5 py-5 align-top">
                     <Link
                       href={`/ipo/${ipo.slug}`}
-                      className="text-sm font-semibold leading-5 text-white"
+                      className="text-sm font-semibold leading-5 text-slate-900 dark:text-white"
                     >
                       {ipo.companyName}
                     </Link>
                     {ipo.symbol && (
-                      <div className="mt-1 text-xs text-slate-500">
+                      <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                         {ipo.symbol}
                       </div>
                     )}
                   </td>
                   {/* Type */}
-                  <td className="px-3 py-5 text-sm text-slate-300">
+                  <td className="px-3 py-5 text-sm text-slate-700 dark:text-slate-300">
                     {ipo.type}
                   </td>
                   {/* Status */}
@@ -510,26 +497,26 @@ export default function IPOTable() {
                     </span>
                   </td>
                   {/* Dates */}
-                  <td className="whitespace-nowrap px-3 py-5 text-sm text-slate-300">
+                  <td className="whitespace-nowrap px-3 py-5 text-sm text-slate-700 dark:text-slate-300">
                     {formatDate(
                       ipo.openDate
                     )}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-5 text-sm text-slate-300">
+                  <td className="whitespace-nowrap px-3 py-5 text-sm text-slate-700 dark:text-slate-300">
                     {formatDate(
                       ipo.closeDate
                     )}
                   </td>
                   {/* Price */}
-                  <td className="whitespace-nowrap px-3 py-5 text-sm font-medium text-white">
+                  <td className="whitespace-nowrap px-3 py-5 text-sm font-medium text-slate-900 dark:text-white">
                     {formatPriceBand(ipo)}
                   </td>
                   {/* Lot */}
-                  <td className="px-3 py-5 text-sm text-slate-300">
+                  <td className="px-3 py-5 text-sm text-slate-700 dark:text-slate-300">
                     {ipo.lotSize ?? "—"}
                   </td>
                   {/* Issue size */}
-                  <td className="whitespace-nowrap px-3 py-5 text-sm text-slate-300">
+                  <td className="whitespace-nowrap px-3 py-5 text-sm text-slate-700 dark:text-slate-300">
                     {ipo.issueSizeCr !== undefined
                       ? formatCurrency(
                           ipo.issueSizeCr,
@@ -537,72 +524,23 @@ export default function IPOTable() {
                         )
                       : "—"}
                   </td>
-                  {/* GMP */}
-                  <td className="px-3 py-5 align-middle">
-  {typeof ipo.gmp === "number" &&
-  Number.isFinite(ipo.gmp) ? (
-    <div className="relative">
-      <span
-        className={`block whitespace-nowrap text-sm font-medium leading-5 ${
-          ipo.gmp >= 0
-            ? "text-emerald-400"
-            : "text-rose-400"
-        }`}
-      >
-        {ipo.gmp >= 0 ? "+" : ""}
-        {formatCurrency(ipo.gmp)}
-      </span>
-      {typeof ipo.estimatedListingPrice === "number" &&
-        Number.isFinite(ipo.estimatedListingPrice) && (
-          <span className="absolute left-0 top-full mt-1 block whitespace-nowrap text-[11px] text-slate-500">
-            Est. listing:{" "}
-            {formatCurrency(
-              ipo.estimatedListingPrice
-            )}
-          </span>
-        )}
-    </div>
-  ) : (
-    <span className="text-slate-600">
-      —
-    </span>
-  )}
-</td>
-                  {/* GMP % */}
-<td className="px-3 py-5 align-middle">
-  {typeof ipo.gmpPercent === "number" &&
-  Number.isFinite(ipo.gmpPercent) ? (
-    <span
-      className={`block whitespace-nowrap text-sm font-medium leading-5 ${
-        ipo.gmpPercent >= 0
-          ? "text-emerald-400"
-          : "text-rose-400"
-      }`}
-    >
-      {ipo.gmpPercent >= 0 ? "+" : ""}
-      {ipo.gmpPercent.toFixed(1)}%
-    </span>
-  ) : (
-    <span className="text-slate-500">—</span>
-  )}
-</td>
                   {/* Subscription block */}
-                  <td className="border-l border-slate-800 px-3 py-5 text-center text-sm text-slate-300">
+                  <td className="border-l border-slate-200 dark:border-slate-800 px-3 py-5 text-center text-sm text-slate-700 dark:text-slate-300">
                     {formatMultiple(
                       ipo.subscription?.qib
                     )}
                   </td>
-                  <td className="px-3 py-5 text-center text-sm text-slate-300">
+                  <td className="px-3 py-5 text-center text-sm text-slate-700 dark:text-slate-300">
                     {formatMultiple(
                       ipo.subscription?.nii
                     )}
                   </td>
-                  <td className="px-3 py-5 text-center text-sm text-slate-300">
+                  <td className="px-3 py-5 text-center text-sm text-slate-700 dark:text-slate-300">
                     {formatMultiple(
                       ipo.subscription?.retail
                     )}
                   </td>
-                  <td className="px-3 py-5 text-center text-sm font-semibold text-white">
+                  <td className="px-3 py-5 text-center text-sm font-semibold text-slate-900 dark:text-white">
                     {formatMultiple(
                       ipo.subscription?.total
                     )}
@@ -611,7 +549,7 @@ export default function IPOTable() {
                   <td className="px-4 py-5 pr-6">
                     <Link
                       href={`/ipo/${ipo.slug}`}
-                      className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-emerald-400 transition hover:text-emerald-300"
+                      className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-emerald-700 dark:text-emerald-400 transition hover:text-emerald-800 dark:hover:text-emerald-300"
                     >
                       View Analysis
                       <ArrowUpRight
@@ -626,13 +564,13 @@ export default function IPOTable() {
         </div>
         {filteredIPOs.length === 0 && (
           <div className="px-6 py-16 text-center">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               No IPOs found for the selected filters.
             </p>
           </div>
         )}
         {filteredIPOs.length > 0 && (
-          <div className="flex flex-col gap-3 border-t border-slate-800 px-5 py-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 border-t border-slate-200 dark:border-slate-800 px-5 py-4 text-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="text-slate-500">
               Showing {firstVisibleRecord}–{lastVisibleRecord} of {filteredIPOs.length} IPOs
             </p>
@@ -648,7 +586,7 @@ export default function IPOTable() {
                     )
                   )
                 }
-                className="rounded-lg border border-slate-700 px-3 py-2 text-slate-300 transition hover:border-slate-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-2 text-slate-700 dark:text-slate-300 transition hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
               </button>
@@ -667,8 +605,8 @@ export default function IPOTable() {
                     }
                     className={`min-w-10 rounded-lg border px-3 py-2 transition ${
                       pageNumber === currentPage
-                        ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                        : "border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white"
+                        ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                        : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     {pageNumber}
@@ -688,7 +626,7 @@ export default function IPOTable() {
                     )
                   )
                 }
-                className="rounded-lg border border-slate-700 px-3 py-2 text-slate-300 transition hover:border-slate-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-2 text-slate-700 dark:text-slate-300 transition hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
               </button>
@@ -697,8 +635,8 @@ export default function IPOTable() {
         )}
       </div>
       {/* Footer */}
-      <div className="space-y-3 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-4">
-  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+      <div className="space-y-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 px-4 py-4">
+  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-400">
     <span>
       IPO data: NSE and STFL IPO Engine
     </span>
@@ -707,29 +645,7 @@ export default function IPOTable() {
       {formatDateTime(data.lastUpdated)}
     </span>
   </div>
-  {data.providers?.gmp && (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 pt-3 text-xs text-slate-500">
-      <span>
-        GMP source:{" "}
-        <span className="font-medium text-slate-300">
-          {data.providers.gmpSource ??
-            "IPO Guru"}
-        </span>
-      </span>
-      <span>
-        GMP updated:{" "}
-        {formatDateTime(
-          data.providers.gmpLastUpdatedAt ??
-            data.providers.gmpLastFetchedAt
-        )}
-      </span>
-    </div>
-  )}
-  {data.gmpDisclaimer && (
-    <p className="border-t border-slate-800 pt-3 text-xs leading-5 text-amber-200/70">
-      {data.gmpDisclaimer}
-    </p>
-  )}
+
 </div>
     </section>
   );
